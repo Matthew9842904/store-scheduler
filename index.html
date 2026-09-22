@@ -15,9 +15,8 @@
         <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
           <span>🗓️</span> 매장 주간 스케줄러
         </h1>
-        <p class="text-xs text-gray-500 mt-1">iPad Safari / Chrome 최적화 모드 (일요일 시작)</p>
+        <p class="text-xs text-gray-500 mt-1">iPad Safari / Chrome 최적화 (일요일 시작 · 중복선택 방지 · 15분 단위 시간 설정)</p>
       </div>
-      <!-- 탭 메뉴 -->
       <nav class="flex bg-gray-100 p-1 rounded-lg text-sm font-medium">
         <button onclick="switchTab('scheduler')" id="tab-scheduler" class="px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold">주간 스케줄러</button>
         <button onclick="switchTab('employees')" id="tab-employees" class="px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">직원 관리</button>
@@ -38,74 +37,23 @@
         </button>
       </div>
 
-      <!-- 7일 Grid View Table (일요일 시작) -->
+      <!-- 7일 Grid View Table -->
       <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[800px]">
+        <table class="w-full text-left border-collapse min-w-[1100px]">
           <thead>
             <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-              <th class="p-3 w-28 border-r">시프트 / 요일</th>
-              <th class="p-3 border-r text-center text-red-600">일 (09/20)</th>
-              <th class="p-3 border-r text-center">월 (09/21)</th>
-              <th class="p-3 border-r text-center">화 (09/22)</th>
-              <th class="p-3 border-r text-center">수 (09/23)</th>
-              <th class="p-3 border-r text-center">목 (09/24)</th>
-              <th class="p-3 border-r text-center">금 (09/25)</th>
-              <th class="p-3 text-center text-blue-600">토 (09/26)</th>
+              <th class="p-3 w-32 border-r">시프트 / 요일</th>
+              <th class="p-3 border-r text-center text-red-600 w-36">일 (09/20)</th>
+              <th class="p-3 border-r text-center w-36">월 (09/21)</th>
+              <th class="p-3 border-r text-center w-36">화 (09/22)</th>
+              <th class="p-3 border-r text-center w-36">수 (09/23)</th>
+              <th class="p-3 border-r text-center w-36">목 (09/24)</th>
+              <th class="p-3 border-r text-center w-36">금 (09/25)</th>
+              <th class="p-3 text-center text-blue-600 w-36">토 (09/26)</th>
             </tr>
           </thead>
-          <tbody class="divide-y text-sm">
-            <!-- Open Row -->
-            <tr>
-              <td class="p-3 font-semibold bg-emerald-50 text-emerald-800 border-r">
-                Open<br><span class="text-xs font-normal text-emerald-600">1명</span>
-              </td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-            </tr>
-            <!-- Day Row -->
-            <tr>
-              <td class="p-3 font-semibold bg-blue-50 text-blue-800 border-r">
-                Day<br><span class="text-xs font-normal text-blue-600">1명</span>
-              </td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-            </tr>
-            <!-- Closing Row 1 -->
-            <tr>
-              <td class="p-3 font-semibold bg-purple-50 text-purple-800 border-r">
-                Closing 1<br><span class="text-xs font-normal text-purple-600">Night</span>
-              </td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-            </tr>
-            <!-- Closing Row 2 -->
-            <tr>
-              <td class="p-3 font-semibold bg-purple-50 text-purple-800 border-r">
-                Closing 2<br><span class="text-xs font-normal text-purple-600">Night</span>
-              </td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
-            </tr>
+          <tbody id="schedule-tbody" class="divide-y text-sm">
+            <!-- 자바스크립트로 동적 생성 -->
           </tbody>
         </table>
       </div>
@@ -116,10 +64,10 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <h2 class="text-lg font-bold mb-4">직원 신규 등록</h2>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input type="text" placeholder="이름" class="p-2 border rounded-lg">
-          <input type="email" placeholder="이메일" class="p-2 border rounded-lg">
-          <input type="tel" placeholder="전화번호" class="p-2 border rounded-lg">
-          <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium p-2 rounded-lg">직원 추가</button>
+          <input type="text" id="emp-name" placeholder="이름" class="p-2 border rounded-lg">
+          <input type="email" id="emp-email" placeholder="이메일" class="p-2 border rounded-lg">
+          <input type="tel" id="emp-phone" placeholder="전화번호" class="p-2 border rounded-lg">
+          <button onclick="addEmployee()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium p-2 rounded-lg">직원 추가</button>
         </div>
       </div>
     </main>
@@ -135,16 +83,10 @@
               <th class="p-3">직원명</th>
               <th class="p-3">예정 총 시간</th>
               <th class="p-3">실제 총 시간 (Total Hours)</th>
-              <th class="p-3">비고</th>
             </tr>
           </thead>
-          <tbody class="divide-y text-sm">
-            <tr>
-              <td class="p-3 font-medium">등록된 직원이 없습니다</td>
-              <td class="p-3">-</td>
-              <td class="p-3 font-bold text-blue-600">-</td>
-              <td class="p-3 text-gray-400">데이터 없음</td>
-            </tr>
+          <tbody id="adp-tbody" class="divide-y text-sm">
+            <!-- 동적 반영 -->
           </tbody>
         </table>
       </div>
@@ -152,6 +94,107 @@
   </div>
 
   <script>
+    // 임시 직원 데이터 (Supabase 연동 연동 준비)
+    let employees = ["김철수", "이영희", "박지민", "최동현", "정수진", "강민호"];
+
+    const shifts = [
+      { key: "open", name: "Open", count: "1명", bg: "bg-emerald-50", text: "text-emerald-800" },
+      { key: "day", name: "Day", count: "1명", bg: "bg-blue-50", text: "text-blue-800" },
+      { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800" },
+      { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800" },
+      { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800" }
+    ];
+
+    const days = [0, 1, 2, 3, 4, 5, 6]; // 일~토
+
+    // 15분 단위 시간 옵션 생성 (00:00 ~ 23:45)
+    function generateTimeOptions() {
+      let options = `<option value="">시간</option>`;
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 15) {
+          const hh = String(h).padStart(2, '0');
+          const mm = String(m).padStart(2, '0');
+          options += `<option value="${hh}:${mm}">${hh}:${mm}</option>`;
+        }
+      }
+      return options;
+    }
+
+    const timeOptionsHtml = generateTimeOptions();
+
+    // 스케줄러 표 그리기
+    function renderScheduler() {
+      const tbody = document.getElementById('schedule-tbody');
+      tbody.innerHTML = '';
+
+      shifts.forEach(shift => {
+        const tr = document.createElement('tr');
+        
+        // 시프트 제목 셀
+        let html = `
+          <td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">
+            ${shift.name}<br><span class="text-xs font-normal">${shift.count}</span>
+          </td>
+        `;
+
+        // 요일별 셀
+        days.forEach(day => {
+          html += `
+            <td class="p-2 border-r" data-day="${day}">
+              <div class="space-y-1">
+                <select class="emp-select w-full p-1 text-xs border rounded bg-white" onchange="updateDropdowns(${day})">
+                  <option value="">직원 선택</option>
+                  ${employees.map(e => `<option value="${e}">${e}</option>`).join('')}
+                </select>
+                <div class="flex items-center gap-1 text-[11px]">
+                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50">${timeOptionsHtml}</select>
+                  <span>~</span>
+                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50">${timeOptionsHtml}</select>
+                </div>
+              </div>
+            </td>
+          `;
+        });
+
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 같은 요일 내 중복 직원 선택 방지 로직
+    function updateDropdowns(dayIndex) {
+      // 해당 요일(col)의 모든 직원 선택 드롭다운 추출
+      const cells = document.querySelectorAll(`td[data-day="${dayIndex}"]`);
+      const selects = [];
+      const selectedValues = [];
+
+      cells.forEach(cell => {
+        const select = cell.querySelector('.emp-select');
+        if (select) {
+          selects.push(select);
+          if (select.value) {
+            selectedValues.push(select.value);
+          }
+        }
+      });
+
+      // 각 드롭다운의 옵션 활성화/비활성화 처리
+      selects.forEach(select => {
+        const currentValue = select.value;
+        Array.from(select.options).forEach(option => {
+          if (!option.value) return; // '직원 선택' 기본 옵션은 통과
+          // 현재 내 드롭다운에서 선택된 값이 아니고, 다른 드롭다운에서 이미 선택된 이름이라면 비활성화
+          if (option.value !== currentValue && selectedValues.includes(option.value)) {
+            option.disabled = true;
+            option.textContent = `${option.value} (선택됨)`;
+          } else {
+            option.disabled = false;
+            option.textContent = option.value;
+          }
+        });
+      });
+    }
+
     function switchTab(tabName) {
       ['scheduler', 'employees', 'actuals'].forEach(t => {
         document.getElementById(`view-${t}`).classList.add('hidden');
@@ -160,9 +203,23 @@
       document.getElementById(`view-${tabName}`).classList.remove('hidden');
       document.getElementById(`tab-${tabName}`).className = 'px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold';
     }
+
     function generateSmsText() {
       alert("주간 스케줄 안내 문자가 클립보드에 복사되었습니다!");
     }
+
+    function addEmployee() {
+      const nameInput = document.getElementById('emp-name');
+      if (nameInput.value.trim()) {
+        employees.push(nameInput.value.trim());
+        nameInput.value = '';
+        renderScheduler();
+        alert('직원이 추가되었습니다!');
+      }
+    }
+
+    // 초기화 실행
+    renderScheduler();
   </script>
 </body>
 </html>
