@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>매장 주간 스케줄러</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen text-gray-800 p-4 md:p-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- 헤더 -->
+    <header class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6">
+      <div>
+        <h1 class="text-xl font-bold text-gray-900">🗓️ 주간 스케줄 관리자</h1>
+        <p class="text-xs text-gray-500 mt-1">iPad 및 모바일 크롬 지원 모드</p>
+      </div>
+      <span class="px-3 py-1 bg-green-100 text-green-700 font-semibold rounded-full text-xs">시스템 정상 연동</span>
+    </header>
+
+    <!-- 스케줄러 안내 카드 -->
+    <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
+      <h2 class="text-lg font-semibold mb-2">👋 배포 성공! 스케줄러 시스템 가동 중</h2>
+      <p class="text-sm text-gray-600 mb-4">
+        Vercel과 Supabase 데이터베이스가 연결되었습니다. 직원 등록, 주간 스케줄 편성(Open/Day/Closing), 실제 근무시간 집계 기능이 탑재될 기본 레이아웃입니다.
+      </p>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <p class="text-xs text-blue-600 font-medium">관리자 전용</p>
+          <p class="text-sm font-bold text-gray-800 mt-1">iPad Grid View 스케줄러</p>
+        </div>
+        <div class="p-4 bg-purple-50 rounded-lg border border-purple-100">
+          <p class="text-xs text-purple-600 font-medium">직원 권한 제어</p>
+          <p class="text-sm font-bold text-gray-800 mt-1">본인 근무일/시간만 조회</p>
+        </div>
+        <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
+          <p class="text-xs text-amber-600 font-medium">ADP 연동 지원</p>
+          <p class="text-sm font-bold text-gray-800 mt-1">실제 일한 시간 자동 합산</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
