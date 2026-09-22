@@ -1,74 +1,105 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chatime 매장 주간 스케줄러</title>
+  <title>Chatime Store Weekly Scheduler</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
-  <div id="app" class="max-w-7xl mx-auto p-4 md:p-6">
-    <!-- 상단 헤더 -->
+
+  <!-- ================= 1. Login Screen ================= -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-lg border w-full max-w-md">
+      <div class="text-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-900">🧋 Chatime Scheduler</h1>
+        <p class="text-xs text-gray-500 mt-1">Select your name and enter your PIN to log in.</p>
+      </div>
+      <form onsubmit="handleLogin(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Select Staff</label>
+          <select id="login-user" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white" required>
+            <option value="">Loading staff...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">PIN / Password (Default: 1234, Master: 0000)</label>
+          <input type="password" id="login-pin" placeholder="Enter PIN" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white" required>
+        </div>
+        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-md transition">
+          Log In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= 2. Main Dashboard ================= -->
+  <div id="app" class="hidden max-w-7xl mx-auto p-4 md:p-6">
+    <!-- Header -->
     <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <span>🗓️</span> 매장 주간 스케줄러
+          <span>🗓️</span> Store Weekly Scheduler
         </h1>
-        <p class="text-xs text-gray-500 mt-1">iPad Safari / Chrome 최적화 (직원 통합 테이블 관리)</p>
+        <div class="flex items-center gap-2 mt-1">
+          <span id="current-user-badge" class="px-2 py-0.5 text-xs font-bold rounded-full bg-indigo-100 text-indigo-800"></span>
+          <span id="current-user-name" class="text-xs font-semibold text-gray-700"></span>
+        </div>
       </div>
-      <nav class="flex bg-gray-100 p-1 rounded-lg text-sm font-medium">
-        <button onclick="switchTab('scheduler')" id="tab-scheduler" class="px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold">주간 스케줄러</button>
-        <button onclick="switchTab('employees')" id="tab-employees" class="px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">직원 관리</button>
-        <button onclick="switchTab('actuals')" id="tab-actuals" class="px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">실제 근무시간 (ADP)</button>
+      <nav class="flex bg-gray-100 p-1 rounded-lg text-sm font-medium items-center gap-1">
+        <button onclick="switchTab('scheduler')" id="tab-scheduler" class="px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold">Weekly Scheduler</button>
+        <button onclick="switchTab('employees')" id="tab-employees" class="role-manager-or-admin px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">Employee Management</button>
+        <button onclick="switchTab('actuals')" id="tab-admin-only" class="role-admin-only px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">Actual Hours (ADP)</button>
+        <button onclick="handleLogout()" class="px-3 py-2 rounded-md text-red-600 hover:bg-red-50 text-xs ml-2">Log Out</button>
       </nav>
     </header>
 
-    <!-- 1. 주간 스케줄러 탭 -->
+    <!-- 1. Weekly Scheduler Tab -->
     <main id="view-scheduler" class="space-y-6">
       <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
         <div class="flex items-center gap-3">
-          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">&lt; 지난주</button>
-          <span class="font-bold text-lg">2026년 9월 4주차 (09.20 일 ~ 09.26 토)</span>
-          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">다음주 &gt;</button>
+          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">&lt; Prev Week</button>
+          <span class="font-bold text-lg">Week 4, Sept 2026 (Sep 20 Sun ~ Sep 26 Sat)</span>
+          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">Next Week &gt;</button>
         </div>
-        <button onclick="generateSmsText()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-2">
-          💬 스케줄 안내 문자 복사
+        <button onclick="generateSmsText()" class="role-admin-only px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-2">
+          💬 Copy Schedule Text
         </button>
       </div>
 
-      <!-- 7일 Grid View Table -->
+      <!-- 7-Day Grid View Table -->
       <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[1100px]">
           <thead>
             <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-              <th class="p-3 w-32 border-r">시프트 / 요일</th>
-              <th class="p-3 border-r text-center text-red-600 w-36">일 (09/20)</th>
-              <th class="p-3 border-r text-center w-36">월 (09/21)</th>
-              <th class="p-3 border-r text-center w-36">화 (09/22)</th>
-              <th class="p-3 border-r text-center w-36">수 (09/23)</th>
-              <th class="p-3 border-r text-center w-36">목 (09/24)</th>
-              <th class="p-3 border-r text-center w-36">금 (09/25)</th>
-              <th class="p-3 text-center text-blue-600 w-36">토 (09/26)</th>
+              <th class="p-3 w-32 border-r">Shift / Day</th>
+              <th class="p-3 border-r text-center text-red-600 w-36">Sun (09/20)</th>
+              <th class="p-3 border-r text-center w-36">Mon (09/21)</th>
+              <th class="p-3 border-r text-center w-36">Tue (09/22)</th>
+              <th class="p-3 border-r text-center w-36">Wed (09/23)</th>
+              <th class="p-3 border-r text-center w-36">Thu (09/24)</th>
+              <th class="p-3 border-r text-center w-36">Fri (09/25)</th>
+              <th class="p-3 text-center text-blue-600 w-36">Sat (09/26)</th>
             </tr>
           </thead>
           <tbody id="schedule-tbody" class="divide-y text-sm">
-            <!-- 자바스크립트로 동적 생성 -->
+            <!-- Dynamic Content -->
           </tbody>
         </table>
       </div>
     </main>
 
-    <!-- 2. 직원 관리 탭 (테이블 통합형) -->
+    <!-- 2. Employee Management Tab -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-lg font-bold">전체 직원 관리</h2>
-            <p class="text-xs text-gray-500 mt-0.5">테이블에서 직접 직원 정보를 수정하거나 삭제/추가할 수 있습니다.</p>
+            <h2 class="text-lg font-bold">Staff Roster & Permissions</h2>
+            <p id="employee-tab-desc" class="text-xs text-gray-500 mt-0.5"></p>
           </div>
-          <button onclick="addNewRow()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm flex items-center gap-1">
-            ➕ 신규 직원 추가
+          <button id="add-emp-btn" onclick="addNewRow()" class="role-admin-only px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm flex items-center gap-1">
+            ➕ Add New Staff
           </button>
         </div>
 
@@ -76,37 +107,39 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-                <th class="p-3 w-12 text-center">No</th>
-                <th class="p-3 w-40">이름</th>
-                <th class="p-3">이메일</th>
-                <th class="p-3 w-44">전화번호</th>
-                <th class="p-3 w-28 text-center">상태</th>
-                <th class="p-3 w-36 text-center">관리</th>
+                <th class="p-3 w-10 text-center">No</th>
+                <th class="p-3 w-32">Name</th>
+                <th class="p-3 w-32">Role</th>
+                <th class="p-3 role-admin-only w-24">PIN</th>
+                <th class="p-3">Email</th>
+                <th class="p-3 w-36">Phone</th>
+                <th class="p-3 w-24 text-center">Status</th>
+                <th class="p-3 role-admin-only w-32 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="employee-table-body" class="divide-y text-sm">
-              <!-- 동적 생성이 되는 직원 목록 테이블 -->
+              <!-- Dynamic Content -->
             </tbody>
           </table>
         </div>
       </div>
     </main>
 
-    <!-- 3. 실제 근무시간 (ADP) 탭 -->
+    <!-- 3. Actual Hours (ADP) Tab -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
-        <h2 class="text-lg font-bold mb-2">ADP 제출용 주간 근무시간 합계</h2>
-        <p class="text-sm text-gray-500 mb-4">직원별 실제 일한 시간을 합산하여 ADP에 바로 입력할 수 있습니다.</p>
+        <h2 class="text-lg font-bold mb-2">ADP Payroll - Weekly Actual Hours</h2>
+        <p class="text-sm text-gray-500 mb-4">Sum of actual worked hours per employee ready for ADP entry.</p>
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-              <th class="p-3">직원명</th>
-              <th class="p-3">예정 총 시간</th>
-              <th class="p-3">실제 총 시간 (Total Hours)</th>
+              <th class="p-3">Staff Name</th>
+              <th class="p-3">Scheduled Hours</th>
+              <th class="p-3">Actual Worked Hours (Total)</th>
             </tr>
           </thead>
           <tbody id="adp-tbody" class="divide-y text-sm">
-            <!-- 동적 반영 -->
+            <!-- Dynamic Content -->
           </tbody>
         </table>
       </div>
@@ -114,22 +147,21 @@
   </div>
 
   <script>
-    // Supabase 연동 설정
     let _supabase = null;
     if (typeof supabase !== 'undefined' && window.process?.env?.NEXT_PUBLIC_SUPABASE_URL) {
       _supabase = supabase.createClient(window.process.env.NEXT_PUBLIC_SUPABASE_URL, window.process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
     }
 
-    // 기본 직원 데이터 (DB 연동 전 또는 테스트용)
+    let currentUser = null;
     let dbEmployees = [
-      { id: '1', name: '김철수', email: 'chulsoo@example.com', phone: '604-123-4567', status: 'active' },
-      { id: '2', name: '이영희', email: 'younghee@example.com', phone: '604-987-6543', status: 'active' },
-      { id: '3', name: '박지민', email: 'jimin@example.com', phone: '778-555-0192', status: 'active' }
+      { id: '1', name: 'Master Admin', role: 'admin', pin_code: '0000', email: 'admin@chatime.com', phone: '604-000-0000', status: 'active' },
+      { id: '2', name: 'John Doe', role: 'manager', pin_code: '1234', email: 'john@example.com', phone: '604-123-4567', status: 'active' },
+      { id: '3', name: 'Jane Smith', role: 'employee', pin_code: '1234', email: 'jane@example.com', phone: '604-987-6543', status: 'active' }
     ];
 
     const shifts = [
-      { key: "open", name: "Open", count: "1명", bg: "bg-emerald-50", text: "text-emerald-800" },
-      { key: "day", name: "Day", count: "1명", bg: "bg-blue-50", text: "text-blue-800" },
+      { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800" },
+      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800" },
       { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800" },
       { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800" },
       { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800" }
@@ -138,7 +170,7 @@
     const days = [0, 1, 2, 3, 4, 5, 6];
 
     function generateTimeOptions() {
-      let options = `<option value="">시간</option>`;
+      let options = `<option value="">Time</option>`;
       for (let h = 0; h < 24; h++) {
         for (let m = 0; m < 60; m += 15) {
           const hh = String(h).padStart(2, '0');
@@ -151,46 +183,107 @@
 
     const timeOptionsHtml = generateTimeOptions();
 
-    // 직원 데이터 읽어오기
-    async function fetchEmployees() {
+    async function initApp() {
       if (_supabase) {
-        const { data, error } = await _supabase.from('employees').select('*').order('created_at', { ascending: true });
-        if (!error && data && data.length > 0) {
-          dbEmployees = data;
-        }
+        const { data } = await _supabase.from('employees').select('*').order('name');
+        if (data && data.length > 0) dbEmployees = data;
       }
-      renderEmployeeTable();
-      renderScheduler();
+      populateLoginSelect();
     }
 
-    // [직원 관리] 테이블 그리기
+    function populateLoginSelect() {
+      const select = document.getElementById('login-user');
+      select.innerHTML = '<option value="">Select your name</option>' + 
+        dbEmployees.filter(e => e.status !== 'inactive').map(e => `<option value="${e.id}">${e.name} (${getRoleLabel(e.role)})</option>`).join('');
+    }
+
+    function getRoleLabel(role) {
+      if (role === 'admin') return 'Master';
+      if (role === 'manager') return 'Manager';
+      return 'Staff';
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const empId = document.getElementById('login-user').value;
+      const pin = document.getElementById('login-pin').value;
+
+      const user = dbEmployees.find(e => e.id === empId);
+      if (!user) return alert('Please select a staff member.');
+      if (user.pin_code && user.pin_code !== pin) return alert('Incorrect PIN/Password.');
+
+      currentUser = user;
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+
+      document.getElementById('current-user-name').textContent = currentUser.name;
+      document.getElementById('current-user-badge').textContent = getRoleLabel(currentUser.role);
+
+      applyRolePermissions();
+      renderScheduler();
+      renderEmployeeTable();
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-pin').value = '';
+    }
+
+    function applyRolePermissions() {
+      const isAdmin = currentUser.role === 'admin';
+      const isManager = currentUser.role === 'manager';
+
+      document.querySelectorAll('.role-admin-only').forEach(el => {
+        if (isAdmin) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      });
+
+      document.querySelectorAll('.role-manager-or-admin').forEach(el => {
+        if (isAdmin || isManager) el.classList.remove('hidden');
+        else el.classList.add('hidden');
+      });
+
+      const descEl = document.getElementById('employee-tab-desc');
+      if (isAdmin) {
+        descEl.textContent = 'Manage staff information, PIN codes, and permissions (Master / Manager / Staff).';
+      } else if (isManager) {
+        descEl.textContent = 'View contact information (Phone and Email) for all active staff members.';
+      }
+    }
+
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
-      if (dbEmployees.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-500">등록된 직원이 없습니다. 상단의 '신규 직원 추가' 버튼을 눌러주세요.</td></tr>`;
-        return;
-      }
+      const isAdmin = currentUser.role === 'admin';
 
       tbody.innerHTML = dbEmployees.map((emp, index) => `
         <tr id="emp-row-${emp.id}" class="hover:bg-gray-50">
           <td class="p-3 text-center text-gray-400 text-xs">${index + 1}</td>
           <td class="p-3 font-semibold text-gray-800" id="name-${emp.id}">${emp.name}</td>
-          <td class="p-3 text-gray-600" id="email-${emp.id}">${emp.email || '-'}</td>
-          <td class="p-3 text-gray-600" id="phone-${emp.id}">${emp.phone || '-'}</td>
-          <td class="p-3 text-center" id="status-${emp.id}">
-            <span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.status === 'inactive' ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-emerald-800'}">
-              ${emp.status === 'inactive' ? '퇴사' : '재직중'}
+          <td class="p-3" id="role-${emp.id}">
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role === 'admin' ? 'bg-purple-100 text-purple-800' : emp.role === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}">
+              ${getRoleLabel(emp.role)}
             </span>
           </td>
-          <td class="p-3 text-center space-x-1" id="action-${emp.id}">
-            <button onclick="enableEdit('${emp.id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border">수정</button>
-            <button onclick="deleteEmployee('${emp.id}')" class="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded border border-red-200">삭제</button>
+          ${isAdmin ? `<td class="p-3 text-gray-500 font-mono text-xs" id="pin-${emp.id}">${emp.pin_code || '1234'}</td>` : ''}
+          <td class="p-3 text-gray-600" id="email-${emp.id}">${emp.email || '-'}</td>
+          <td class="p-3 text-gray-600 font-medium" id="phone-${emp.id}">${emp.phone || '-'}</td>
+          <td class="p-3 text-center" id="status-${emp.id}">
+            <span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.status === 'inactive' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}">
+              ${emp.status === 'inactive' ? 'Terminated' : 'Active'}
+            </span>
           </td>
+          ${isAdmin ? `
+            <td class="p-3 text-center space-x-1" id="action-${emp.id}">
+              <button onclick="enableEdit('${emp.id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border">Edit</button>
+              <button onclick="deleteEmployee('${emp.id}')" class="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded border border-red-200">Delete</button>
+            </td>
+          ` : ''}
         </tr>
       `).join('');
     }
 
-    // 신규 직원 추가 행(Row) 생성
     function addNewRow() {
       const tbody = document.getElementById('employee-table-body');
       const tempId = 'new_' + Date.now();
@@ -200,142 +293,122 @@
 
       newTr.innerHTML = `
         <td class="p-3 text-center text-blue-500 text-xs font-bold">NEW</td>
-        <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="이름" class="w-full p-1 text-xs border rounded bg-white"></td>
-        <td class="p-2"><input type="email" id="input-email-${tempId}" placeholder="이메일" class="w-full p-1 text-xs border rounded bg-white"></td>
-        <td class="p-2"><input type="tel" id="input-phone-${tempId}" placeholder="전화번호" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="Name" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2">
+          <select id="input-role-${tempId}" class="w-full p-1 text-xs border rounded bg-white">
+            <option value="employee">Staff</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Master Admin</option>
+          </select>
+        </td>
+        <td class="p-2"><input type="text" id="input-pin-${tempId}" value="1234" placeholder="PIN" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="email" id="input-email-${tempId}" placeholder="Email" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="tel" id="input-phone-${tempId}" placeholder="Phone" class="w-full p-1 text-xs border rounded bg-white"></td>
         <td class="p-2 text-center">
           <select id="input-status-${tempId}" class="p-1 text-xs border rounded bg-white">
-            <option value="active">재직중</option>
-            <option value="inactive">퇴사</option>
+            <option value="active">Active</option>
+            <option value="inactive">Terminated</option>
           </select>
         </td>
         <td class="p-2 text-center space-x-1">
-          <button onclick="saveNewEmployee('${tempId}')" class="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium rounded shadow-sm">저장</button>
-          <button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded">취소</button>
+          <button onclick="saveNewEmployee('${tempId}')" class="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium rounded shadow-sm">Save</button>
+          <button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded">Cancel</button>
         </td>
       `;
-      
-      // 테이블 맨 위에 삽입
       tbody.insertBefore(newTr, tbody.firstChild);
     }
 
-    // 신규 저장
     async function saveNewEmployee(tempId) {
       const name = document.getElementById(`input-name-${tempId}`).value.trim();
+      const role = document.getElementById(`input-role-${tempId}`).value;
+      const pin_code = document.getElementById(`input-pin-${tempId}`).value.trim() || '1234';
       const email = document.getElementById(`input-email-${tempId}`).value.trim();
       const phone = document.getElementById(`input-phone-${tempId}`).value.trim();
       const status = document.getElementById(`input-status-${tempId}`).value;
 
-      if (!name) {
-        alert('이름을 입력해 주세요.');
-        return;
-      }
+      if (!name) return alert('Please enter a name.');
 
       if (_supabase) {
-        const { data, error } = await _supabase.from('employees').insert([{ name, email, phone, status }]).select();
-        if (error) {
-          alert('저장 실패: ' + error.message);
-          return;
-        }
+        await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
       } else {
-        dbEmployees.unshift({ id: String(Date.now()), name, email, phone, status });
+        dbEmployees.unshift({ id: String(Date.now()), name, role, pin_code, email, phone, status });
       }
 
-      await fetchEmployees();
+      await initApp();
+      renderEmployeeTable();
     }
 
-    // 기존 직원 수정 모드 전환
     function enableEdit(id) {
       const emp = dbEmployees.find(e => e.id === id);
       if (!emp) return;
 
       document.getElementById(`name-${id}`).innerHTML = `<input type="text" id="edit-name-${id}" value="${emp.name}" class="w-full p-1 text-xs border rounded bg-white">`;
+      document.getElementById(`role-${id}`).innerHTML = `
+        <select id="edit-role-${id}" class="w-full p-1 text-xs border rounded bg-white">
+          <option value="employee" ${emp.role === 'employee' ? 'selected' : ''}>Staff</option>
+          <option value="manager" ${emp.role === 'manager' ? 'selected' : ''}>Manager</option>
+          <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>Master</option>
+        </select>`;
+      document.getElementById(`pin-${id}`).innerHTML = `<input type="text" id="edit-pin-${id}" value="${emp.pin_code || '1234'}" class="w-full p-1 text-xs border rounded bg-white">`;
       document.getElementById(`email-${id}`).innerHTML = `<input type="email" id="edit-email-${id}" value="${emp.email || ''}" class="w-full p-1 text-xs border rounded bg-white">`;
       document.getElementById(`phone-${id}`).innerHTML = `<input type="tel" id="edit-phone-${id}" value="${emp.phone || ''}" class="w-full p-1 text-xs border rounded bg-white">`;
-      document.getElementById(`status-${id}`).innerHTML = `
-        <select id="edit-status-${id}" class="p-1 text-xs border rounded bg-white">
-          <option value="active" ${emp.status !== 'inactive' ? 'selected' : ''}>재직중</option>
-          <option value="inactive" ${emp.status === 'inactive' ? 'selected' : ''}>퇴사</option>
-        </select>
-      `;
       document.getElementById(`action-${id}`).innerHTML = `
-        <button onclick="saveEdit('${id}')" class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded">완료</button>
-        <button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">취소</button>
+        <button onclick="saveEdit('${id}')" class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded">Done</button>
+        <button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">Cancel</button>
       `;
     }
 
-    // 수정 완료 저장
     async function saveEdit(id) {
       const name = document.getElementById(`edit-name-${id}`).value.trim();
+      const role = document.getElementById(`edit-role-${id}`).value;
+      const pin_code = document.getElementById(`edit-pin-${id}`).value.trim();
       const email = document.getElementById(`edit-email-${id}`).value.trim();
       const phone = document.getElementById(`edit-phone-${id}`).value.trim();
-      const status = document.getElementById(`edit-status-${id}`).value;
 
-      if (!name) {
-        alert('이름을 입력해 주세요.');
-        return;
-      }
+      if (!name) return alert('Please enter a name.');
 
       if (_supabase) {
-        const { error } = await _supabase.from('employees').update({ name, email, phone, status }).eq('id', id);
-        if (error) {
-          alert('수정 실패: ' + error.message);
-          return;
-        }
+        await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
       } else {
         const emp = dbEmployees.find(e => e.id === id);
-        if (emp) {
-          emp.name = name;
-          emp.email = email;
-          emp.phone = phone;
-          emp.status = status;
-        }
+        if (emp) Object.assign(emp, { name, role, pin_code, email, phone });
       }
 
-      await fetchEmployees();
+      await initApp();
+      renderEmployeeTable();
     }
 
-    // 직원 삭제
     async function deleteEmployee(id) {
-      if (!confirm('해당 직원 정보를 정말 삭제하시겠습니까?')) return;
-
-      if (_supabase) {
-        await _supabase.from('employees').delete().eq('id', id);
-      } else {
-        dbEmployees = dbEmployees.filter(e => e.id !== id);
-      }
-
-      await fetchEmployees();
+      if (!confirm('Are you sure you want to delete this employee?')) return;
+      if (_supabase) await _supabase.from('employees').delete().eq('id', id);
+      else dbEmployees = dbEmployees.filter(e => e.id !== id);
+      await initApp();
+      renderEmployeeTable();
     }
 
-    // 스케줄러 표 그리기 (재직 중인 직원만 드롭다운에 표시)
     function renderScheduler() {
       const tbody = document.getElementById('schedule-tbody');
       tbody.innerHTML = '';
 
-      // 재직 중인 직원만 스케줄 선택에 노출
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+      const isAdmin = currentUser && currentUser.role === 'admin';
 
       shifts.forEach(shift => {
         const tr = document.createElement('tr');
-        let html = `
-          <td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">
-            ${shift.name}<br><span class="text-xs font-normal">${shift.count}</span>
-          </td>
-        `;
+        let html = `<td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">${shift.name}<br><span class="text-xs font-normal">${shift.count}</span></td>`;
 
         days.forEach(day => {
           html += `
             <td class="p-2 border-r" data-day="${day}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded bg-white" onchange="updateDropdowns(${day})">
-                  <option value="">직원 선택</option>
+                <select class="emp-select w-full p-1 text-xs border rounded bg-white" ${!isAdmin ? 'disabled' : ''} onchange="updateDropdowns(${day})">
+                  <option value="">Select Staff</option>
                   ${activeEmployees.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
-                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50">${timeOptionsHtml}</select>
+                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>${timeOptionsHtml}</select>
                   <span>~</span>
-                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50">${timeOptionsHtml}</select>
+                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>${timeOptionsHtml}</select>
                 </div>
               </div>
             </td>
@@ -366,7 +439,7 @@
           if (!option.value) return;
           if (option.value !== currentValue && selectedValues.includes(option.value)) {
             option.disabled = true;
-            option.textContent = `${option.value} (선택됨)`;
+            option.textContent = `${option.value} (Selected)`;
           } else {
             option.disabled = false;
             option.textContent = option.value;
@@ -377,19 +450,20 @@
 
     function switchTab(tabName) {
       ['scheduler', 'employees', 'actuals'].forEach(t => {
-        document.getElementById(`view-${t}`).classList.add('hidden');
-        document.getElementById(`tab-${t}`).className = 'px-4 py-2 rounded-md text-gray-600 hover:text-gray-900';
+        const view = document.getElementById(`view-${t}`);
+        const tab = document.getElementById(`tab-${t}`);
+        if (view) view.classList.add('hidden');
+        if (tab) tab.className = 'px-4 py-2 rounded-md text-gray-600 hover:text-gray-900';
       });
       document.getElementById(`view-${tabName}`).classList.remove('hidden');
       document.getElementById(`tab-${tabName}`).className = 'px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold';
     }
 
     function generateSmsText() {
-      alert("주간 스케줄 안내 문자가 클립보드에 복사되었습니다!");
+      alert("Weekly schedule announcement copied to clipboard!");
     }
 
-    // 초기화
-    fetchEmployees();
+    initApp();
   </script>
 </body>
 </html>
