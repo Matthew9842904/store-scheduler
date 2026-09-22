@@ -53,7 +53,7 @@
         <button onclick="switchTab('view-avail')" id="tab-view-avail" class="role-admin-only px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Staff Availability</button>
         <button onclick="switchTab('employees')" id="tab-employees" class="role-manager-or-admin px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Employee Management</button>
         <button onclick="switchTab('actuals')" id="tab-actuals" class="role-admin-only px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Actual Hours (ADP)</button>
-        <button onclick="handleLogout()" class="px-3 py-2 rounded-md text-red-600 hover:bg-red-50 text-xs ml-2">Log Out</button>
+        <button onclick="handleLogout()" class="px-3 py-2 rounded-md text-red-600 hover:bg-red-50 text-xs ml-2 font-bold">Log Out</button>
       </nav>
     </header>
 
@@ -104,9 +104,7 @@
           <button onclick="changeAvailWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-7 gap-3" id="submit-avail-grid">
-          <!-- Dynamic 7 Days Cards -->
-        </div>
+        <div class="grid grid-cols-1 md:grid-cols-7 gap-3" id="submit-avail-grid"></div>
       </div>
     </main>
 
@@ -198,8 +196,7 @@
       _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    let defaultAdmin = { id: 'default_admin', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active' };
-    let dbEmployees = [defaultAdmin];
+    let dbEmployees = [];
     let currentUser = null;
 
     let currentSunday = new Date(2026, 8, 20); // 2026-09-20
@@ -244,11 +241,34 @@
     async function initApp() {
       if (_supabase) {
         try {
-          const { data } = await _supabase.from('employees').select('*').order('name');
-          if (data && data.length > 0) dbEmployees = data;
-        } catch (e) { console.error("Supabase error:", e); }
+          const { data, error } = await _supabase.from('employees').select('*').order('name');
+          if (error) {
+            console.error("Supabase fetch error:", error);
+          } else if (data) {
+            dbEmployees = data;
+          }
+        } catch (e) {
+          console.error("Init error:", e);
+        }
       }
+
       populateLoginSelect();
+
+      // 세션 유지 복원 (localStorage)
+      const savedUserStr = localStorage.getItem('chatime_session_user');
+      if (savedUserStr) {
+        try {
+          const savedUser = JSON.parse(savedUserStr);
+          // DB에서 최신 유저 정보 동기화
+          const match = dbEmployees.find(e => e.id === savedUser.id);
+          if (match) {
+            currentUser = match;
+            showMainDashboard();
+          }
+        } catch (e) {
+          localStorage.removeItem('chatime_session_user');
+        }
+      }
     }
 
     function populateLoginSelect() {
@@ -274,6 +294,11 @@
       if (user.pin_code !== pin) return alert('Incorrect PIN/Password.');
 
       currentUser = user;
+      localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
+      showMainDashboard();
+    }
+
+    function showMainDashboard() {
       document.getElementById('login-screen').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden');
 
@@ -287,6 +312,7 @@
 
     function handleLogout() {
       currentUser = null;
+      localStorage.removeItem('chatime_session_user');
       document.getElementById('app').classList.add('hidden');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('login-pin').value = '';
@@ -419,10 +445,13 @@
 
       try {
         await _supabase.from('schedules').delete().eq('week_start_date', weekStartStr);
-        if (records.length > 0) await _supabase.from('schedules').insert(records);
+        if (records.length > 0) {
+          const { error } = await _supabase.from('schedules').insert(records);
+          if (error) throw error;
+        }
         alert("Schedule saved successfully!");
         await loadWeeklySchedule();
-      } catch (e) { alert("Failed to save: " + e.message); }
+      } catch (e) { alert("Failed to save schedule: " + e.message); }
     }
 
     function changeAvailWeek(offset) {
@@ -455,7 +484,6 @@
         const savedStatus = item.status || 'Available (Anytime)';
         const savedNote = item.note || '';
 
-        // 커스텀 시간 파싱 (노트에 저장되거나 개별 파싱)
         let startTime = item.start_time || '';
         let endTime = item.end_time || '';
 
@@ -521,7 +549,8 @@
 
       try {
         await _supabase.from('availabilities').delete().eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
-        await _supabase.from('availabilities').insert(records);
+        const { error } = await _supabase.from('availabilities').insert(records);
+        if (error) throw error;
         alert("Availability submitted successfully!");
       } catch (e) { alert("Failed to submit: " + e.message); }
     }
@@ -687,7 +716,17 @@
       if (!pin_code) return alert('Please assign a PIN code.');
 
       if (_supabase) {
-        await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
+        try {
+          const { error } = await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
+          if (error) {
+            alert('Failed to save staff to DB: ' + error.message);
+            return;
+          }
+          alert('New staff member added successfully!');
+        } catch (e) {
+          alert('Unexpected error: ' + e.message);
+          return;
+        }
       }
 
       await initApp();
@@ -725,7 +764,17 @@
       if (!pin_code) return alert('Please enter a PIN code.');
 
       if (_supabase) {
-        await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
+        try {
+          const { error } = await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
+          if (error) {
+            alert('Failed to update: ' + error.message);
+            return;
+          }
+          alert('Updated successfully!');
+        } catch (e) {
+          alert('Error: ' + e.message);
+          return;
+        }
       }
 
       await initApp();
@@ -734,7 +783,19 @@
 
     async function deleteEmployee(id) {
       if (!confirm('Are you sure you want to delete this employee?')) return;
-      if (_supabase) await _supabase.from('employees').delete().eq('id', id);
+      if (_supabase) {
+        try {
+          const { error } = await _supabase.from('employees').delete().eq('id', id);
+          if (error) {
+            alert('Failed to delete: ' + error.message);
+            return;
+          }
+          alert('Deleted successfully!');
+        } catch (e) {
+          alert('Error: ' + e.message);
+          return;
+        }
+      }
       await initApp();
       renderEmployeeTable();
     }
