@@ -101,15 +101,15 @@
         <div class="flex justify-between items-center mb-4">
           <div>
             <h2 class="text-lg font-bold">Submit Your Availability</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Select your availability preference and set custom hours. Submissions close every Wednesday at midnight.</p>
+            <p class="text-xs text-gray-500 mt-0.5">Select availability preference and set custom hours. Submissions for staff close every Thursday at 11:59 PM.</p>
           </div>
           <button id="btn-save-avail" onclick="saveMyAvailability()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm">
-            💾 Submit Availability
+            💾 Save Availability
           </button>
         </div>
 
         <div id="deadline-warning-box" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs font-semibold">
-          ⚠️ <span id="deadline-warning-text">The deadline for submitting availability for this week has passed. Please contact the store manager directly.</span>
+          ⚠️ <span id="deadline-warning-text">The deadline for submitting availability for this week has passed (Thursday 11:59 PM). Please contact the store manager directly.</span>
         </div>
 
         <div class="flex items-center gap-3 mb-4 bg-gray-50 p-3 rounded-lg border">
@@ -122,29 +122,53 @@
       </div>
     </main>
 
-    <!-- 3. Staff Availability Overview Tab -->
+    <!-- 3. Staff Availability Overview & Admin Override Tab -->
     <main id="view-view-avail" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-2">
           <div>
-            <h2 class="text-lg font-bold">Staff Availability Overview</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Review submitted availabilities and custom time constraints from staff.</p>
+            <h2 class="text-lg font-bold">Staff Availability Overview & Admin Override</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Review staff availabilities. As Admin, you can select any staff member and override their availability for past or locked weeks.</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-3 mb-4 bg-gray-50 p-3 rounded-lg border">
-          <button onclick="changeOverviewWeek(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev Week</button>
-          <span id="overview-week-label" class="font-bold text-sm text-gray-800">Calculating week...</span>
-          <button onclick="changeOverviewWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 bg-gray-50 p-3 rounded-lg border">
+          <div class="flex items-center gap-3">
+            <button onclick="changeOverviewWeek(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev Week</button>
+            <span id="overview-week-label" class="font-bold text-sm text-gray-800">Calculating week...</span>
+            <button onclick="changeOverviewWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
+          </div>
+
+          <!-- Admin Staff Target Selector -->
+          <div class="flex items-center gap-2 role-admin-only">
+            <label class="text-xs font-semibold text-gray-600">Admin Override Target:</label>
+            <select id="admin-override-user" class="p-1.5 border rounded bg-white text-xs font-medium" onchange="loadAdminSelectedAvail()">
+              <option value="">Select Staff to Edit Availability</option>
+            </select>
+          </div>
         </div>
 
-        <div class="overflow-x-auto border rounded-lg">
+        <!-- Overview Table -->
+        <div class="overflow-x-auto border rounded-lg mb-6">
           <table class="w-full text-left border-collapse min-w-[1000px]">
             <thead>
               <tr id="avail-overview-header" class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase"></tr>
             </thead>
             <tbody id="avail-overview-tbody" class="divide-y text-sm"></tbody>
           </table>
+        </div>
+
+        <!-- Admin Override Edit Form Section -->
+        <div id="admin-override-form-box" class="hidden border-t pt-4 bg-indigo-50/40 p-4 rounded-xl border-indigo-100">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-sm text-indigo-900 flex items-center gap-1.5">
+              <span>✏️</span> Editing Availability for: <span id="admin-target-name" class="underline text-indigo-700"></span>
+            </h3>
+            <button onclick="saveAdminOverrideAvail()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded text-xs shadow-sm">
+              💾 Save Override Availability
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-7 gap-3" id="admin-override-grid"></div>
         </div>
       </div>
     </main>
@@ -221,6 +245,7 @@
     let currentScheduleData = {};
     let weekAvailMap = {};
     let isAvailDeadlinePassed = false;
+    let adminTargetAvailData = {};
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
@@ -231,7 +256,6 @@
     ];
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    // 6 options for availability
     const availOptions = ["Available (Anytime)", "Open", "Day Only", "Closing Only", "Custom Hours", "Unavailable"];
 
     function generateTimeOptions() {
@@ -457,10 +481,6 @@
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
-    // Refined Filtering Rules:
-    // - Open Shift: Available (Anytime), Open (Open Only)
-    // - Day Shift: Available (Anytime), Open, Day Only
-    // - Closing Shift: Available (Anytime), Closing Only
     function getFilteredEmployees(employees, dayIndex, shiftType) {
       const availableList = [];
       const unavailableList = [];
@@ -601,12 +621,17 @@
 
     function checkAvailabilityDeadline() {
       const today = new Date();
-      const targetWednesday = new Date(availSunday);
-      targetWednesday.setDate(targetWednesday.getDate() - 4);
-      targetWednesday.setHours(23, 59, 59, 999);
+      // Target week's Thursday 11:59 PM (Day index 4 from Sunday)
+      const targetDeadline = new Date(availSunday);
+      targetDeadline.setDate(targetDeadline.getDate() + 4); 
+      targetDeadline.setHours(23, 59, 59, 999);
 
       const isAdmin = currentUser && currentUser.role === 'admin';
-      if (!isAdmin && today > targetWednesday) {
+      
+      // Admin always bypasses deadline
+      if (isAdmin) {
+        isAvailDeadlinePassed = false;
+      } else if (today > targetDeadline) {
         isAvailDeadlinePassed = true;
       } else {
         isAvailDeadlinePassed = false;
@@ -696,8 +721,8 @@
     }
 
     async function saveMyAvailability() {
-      if (isAvailDeadlinePassed) {
-        return alert("The deadline for submitting availability for this week has passed. Please contact the store manager directly.");
+      if (isAvailDeadlinePassed && currentUser.role !== 'admin') {
+        return alert("The deadline for submitting availability for this week has passed (Thursday 11:59 PM). Please contact the store manager directly.");
       }
       if (!_supabase || !currentUser) return alert("Database is not connected.");
       const weekStartStr = formatDateISO(availSunday);
@@ -725,7 +750,7 @@
         await _supabase.from('availabilities').delete().eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
         const { error } = await _supabase.from('availabilities').insert(records);
         if (error) throw error;
-        alert("Availability submitted successfully!");
+        alert("Availability saved successfully!");
       } catch (e) { alert("Failed to submit: " + e.message); }
     }
 
@@ -747,6 +772,7 @@
         } catch (e) { console.error(e); }
       }
       renderOverviewAvailabilityTable(overviewAvailData);
+      populateAdminOverrideSelect();
     }
 
     function renderOverviewAvailabilityTable(overviewAvailData) {
@@ -791,6 +817,123 @@
         tr.innerHTML = rHtml;
         tbody.appendChild(tr);
       });
+    }
+
+    function populateAdminOverrideSelect() {
+      const select = document.getElementById('admin-override-user');
+      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+      select.innerHTML = '<option value="">Select Staff to Edit Availability</option>' +
+        activeStaff.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+      document.getElementById('admin-override-form-box').classList.add('hidden');
+    }
+
+    async function loadAdminSelectedAvail() {
+      const empId = document.getElementById('admin-override-user').value;
+      const formBox = document.getElementById('admin-override-form-box');
+
+      if (!empId) {
+        formBox.classList.add('hidden');
+        return;
+      }
+
+      const targetEmp = dbEmployees.find(e => e.id === empId);
+      if (!targetEmp) return;
+
+      document.getElementById('admin-target-name').textContent = targetEmp.name;
+      formBox.classList.remove('hidden');
+
+      const weekStartStr = formatDateISO(overviewSunday);
+      adminTargetAvailData = {};
+
+      if (_supabase) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', empId).eq('week_start_date', weekStartStr);
+          if (data) data.forEach(item => { adminTargetAvailData[item.day_index] = item; });
+        } catch (e) { console.error(e); }
+      }
+
+      renderAdminOverrideGrid();
+    }
+
+    function renderAdminOverrideGrid() {
+      const container = document.getElementById('admin-override-grid');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
+        const item = adminTargetAvailData[i] || {};
+        const savedStatus = item.status || 'Available (Anytime)';
+        const savedNote = item.note || '';
+
+        let startTime = item.start_time || '';
+        let endTime = item.end_time || '';
+
+        const card = document.createElement('div');
+        card.className = "border rounded-xl p-3 bg-white flex flex-col justify-between space-y-2 shadow-sm";
+        card.innerHTML = `
+          <div>
+            <div class="font-bold text-xs text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
+            <select id="admin-avail-status-${i}" class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="toggleAdminCustomTimeFields(${i})">
+              ${availOptions.map(opt => `<option value="${opt}" ${opt === savedStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>
+            
+            <div id="admin-custom-container-${i}" class="${savedStatus === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
+              <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
+              <div class="flex items-center gap-1">
+                <select id="admin-avail-start-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white">${generateTimeOptionsSelected(startTime)}</select>
+                <span class="text-xs">~</span>
+                <select id="admin-avail-end-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white">${generateTimeOptionsSelected(endTime)}</select>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
+            <input type="text" id="admin-avail-note-${i}" value="${savedNote}" placeholder="e.g. Class until 5pm" class="w-full p-1.5 text-xs border rounded bg-white">
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function toggleAdminCustomTimeFields(index) {
+      const status = document.getElementById(`admin-avail-status-${index}`).value;
+      const container = document.getElementById(`admin-custom-container-${index}`);
+      if (status === 'Custom Hours') container.classList.remove('hidden'); else container.classList.add('hidden');
+    }
+
+    async function saveAdminOverrideAvail() {
+      const empId = document.getElementById('admin-override-user').value;
+      const targetEmp = dbEmployees.find(e => e.id === empId);
+      if (!empId || !targetEmp) return alert("Select a staff member first.");
+
+      const weekStartStr = formatDateISO(overviewSunday);
+      const records = [];
+
+      for (let i = 0; i < 7; i++) {
+        const status = document.getElementById(`admin-avail-status-${i}`).value;
+        const note = document.getElementById(`admin-avail-note-${i}`).value.trim();
+        const start_time = status === 'Custom Hours' ? document.getElementById(`admin-avail-start-${i}`).value : '';
+        const end_time = status === 'Custom Hours' ? document.getElementById(`admin-avail-end-${i}`).value : '';
+
+        records.push({
+          employee_id: targetEmp.id,
+          employee_name: targetEmp.name,
+          week_start_date: weekStartStr,
+          day_index: i,
+          status,
+          note,
+          start_time,
+          end_time
+        });
+      }
+
+      try {
+        await _supabase.from('availabilities').delete().eq('employee_id', targetEmp.id).eq('week_start_date', weekStartStr);
+        const { error } = await _supabase.from('availabilities').insert(records);
+        if (error) throw error;
+        alert(`Successfully updated availability for ${targetEmp.name}!`);
+        await loadOverviewAvailability();
+      } catch (e) { alert("Failed to save override: " + e.message); }
     }
 
     function updateDropdowns(dayIndex) {
