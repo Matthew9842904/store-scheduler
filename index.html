@@ -13,7 +13,11 @@
   <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white p-8 rounded-2xl shadow-lg border w-full max-w-md">
       <div class="text-center mb-6 flex flex-col items-center justify-center">
-        <img src="chatime-logo-ua6REcEa_t.jpg" alt="Chatime Logo" class="h-10 object-contain mb-3" />[cite: 3]
+        <!-- Brand Logo Badge -->
+        <div class="flex items-center gap-2 bg-purple-900 text-white px-4 py-2 rounded-xl shadow-md mb-3">
+          <span class="text-lg">🧋</span>
+          <span class="font-black tracking-wider text-lg italic">Chatime</span>
+        </div>
         <h1 class="text-xl font-bold text-gray-900">Store Scheduler</h1>
         <p class="text-xs text-gray-500 mt-1">Select your name and enter your assigned PIN to log in.</p>
       </div>
@@ -40,9 +44,13 @@
     <!-- Header with Quick Navigation Tabs -->
     <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
-        <img src="chatime-logo-ua6REcEa_t.jpg" alt="Chatime Logo" class="h-8 object-contain" />[cite: 3]
+        <!-- Brand Logo Badge -->
+        <div class="flex items-center gap-1.5 bg-purple-900 text-white px-3 py-1.5 rounded-lg shadow-sm">
+          <span>🧋</span>
+          <span class="font-black tracking-wider italic text-sm">Chatime</span>
+        </div>
         <div>
-          <h1 class="text-lg font-extrabold text-gray-900 tracking-tight">Cambie Schedule</h1>
+          <h1 class="text-base font-extrabold text-gray-900 tracking-tight">Cambie Schedule</h1>
           <div class="flex items-center gap-2 mt-0.5">
             <span id="current-user-name" class="text-xs font-bold text-gray-800"></span>
             <span id="current-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-800"></span>
@@ -338,18 +346,6 @@
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const availOptions = ["Available (Anytime)", "Open", "Day Only", "Closing Only", "Custom Hours", "Unavailable"];
 
-    function generateTimeOptions() {
-      let options = `<option value="">Time</option>`;
-      for (let h = 0; h < 24; h++) {
-        for (let m = 0; m < 60; m += 15) {
-          const hh = String(h).padStart(2, '0');
-          const mm = String(m).padStart(2, '0');
-          options += `<option value="${hh}:${mm}">${hh}:${mm}</option>`;
-        }
-      }
-      return options;
-    }
-
     function formatDateISO(d) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -465,6 +461,10 @@
     }
 
     async function loadWeeklySchedule() {
+      const saturday = new Date(currentSunday);
+      saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('current-week-label').textContent = `Week of ${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()} (${formatDateISO(currentSunday)} ~ ${formatDateISO(saturday)})`;
+
       const weekStartStr = formatDateISO(currentSunday);
       currentScheduleData = {};
       weekAvailMap = {};
@@ -487,10 +487,6 @@
     }
 
     function renderScheduler() {
-      const saturday = new Date(currentSunday);
-      saturday.setDate(saturday.getDate() + 6);
-      document.getElementById('current-week-label').textContent = `Week of ${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()} (${formatDateISO(currentSunday)} ~ ${formatDateISO(saturday)})`;
-
       const isAdminOrManager = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager');
 
       if (isAdminOrManager) {
@@ -1222,6 +1218,7 @@
         }
       });
 
+      if (tabName === 'scheduler') loadWeeklySchedule();
       if (tabName === 'submit-avail') loadMyAvailability();
       if (tabName === 'view-avail') loadOverviewAvailability();
     }
