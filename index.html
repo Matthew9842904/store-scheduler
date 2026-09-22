@@ -147,13 +147,23 @@
   </div>
 
   <script>
-    let _supabase = null;
-    if (typeof supabase !== 'undefined' && window.process?.env?.NEXT_PUBLIC_SUPABASE_URL) {
-      _supabase = supabase.createClient(window.process.env.NEXT_PUBLIC_SUPABASE_URL, window.process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-    }
-
+    // 기본 백업 마스터 계정 (DB 연동 시 자동 대체)
+    let defaultAdmin = { id: 'default_admin', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active' };
+    let dbEmployees = [defaultAdmin];
     let currentUser = null;
-    let dbEmployees = [];
+    let _supabase = null;
+
+    // Vercel / Client Supabase 초기화
+    function getSupabaseClient() {
+      if (typeof supabase === 'undefined') return null;
+      // Vercel 빌드 환경변수 혹은 글로벌 인젝션 시도
+      const url = window.env?.NEXT_PUBLIC_SUPABASE_URL || window.NEXT_PUBLIC_SUPABASE_URL;
+      const key = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || window.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (url && key) {
+        return supabase.createClient(url, key);
+      }
+      return null;
+    }
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800" },
@@ -180,17 +190,31 @@
     const timeOptionsHtml = generateTimeOptions();
 
     async function initApp() {
+      _supabase = getSupabaseClient();
       if (_supabase) {
-        const { data } = await _supabase.from('employees').select('*').order('name');
-        if (data) dbEmployees = data;
+        try {
+          const { data, error } = await _supabase.from('employees').select('*').order('name');
+          if (!error && data && data.length > 0) {
+            dbEmployees = data;
+          }
+        } catch (e) {
+          console.error("Supabase fetch error:", e);
+        }
       }
       populateLoginSelect();
     }
 
     function populateLoginSelect() {
       const select = document.getElementById('login-user');
+      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+
+      if (activeStaff.length === 0) {
+        select.innerHTML = '<option value="">No staff found</option>';
+        return;
+      }
+
       select.innerHTML = '<option value="">Select your name</option>' + 
-        dbEmployees.filter(e => e.status !== 'inactive').map(e => `<option value="${e.id}">${e.name} (${getRoleLabel(e.role)})</option>`).join('');
+        activeStaff.map(e => `<option value="${e.id}">${e.name} (${getRoleLabel(e.role)})</option>`).join('');
     }
 
     function getRoleLabel(role) {
@@ -327,6 +351,8 @@
 
       if (_supabase) {
         await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
+      } else {
+        dbEmployees.unshift({ id: String(Date.now()), name, role, pin_code, email, phone, status });
       }
 
       await initApp();
@@ -365,6 +391,9 @@
 
       if (_supabase) {
         await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
+      } else {
+        const emp = dbEmployees.find(e => e.id === id);
+        if (emp) Object.assign(emp, { name, role, pin_code, email, phone });
       }
 
       await initApp();
@@ -374,6 +403,7 @@
     async function deleteEmployee(id) {
       if (!confirm('Are you sure you want to delete this employee?')) return;
       if (_supabase) await _supabase.from('employees').delete().eq('id', id);
+      else dbEmployees = dbEmployees.filter(e => e.id !== id);
       await initApp();
       renderEmployeeTable();
     }
@@ -455,7 +485,7 @@
       alert("Weekly schedule announcement copied to clipboard!");
     }
 
-    initApp();
+    window.addEventListener('DOMContentLoaded', initApp);
   </script>
 </body>
 </html>
