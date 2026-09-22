@@ -374,11 +374,15 @@
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const availOptions = ["Available (Anytime)", "Open", "Day Only", "Closing Only", "Custom Hours", "Unavailable"];
 
-    // 12시간 AM/PM 형식의 타임 옵션 생성 함수
+    // 12시간 AM/PM 시간 선택 형식 적용 (새벽 01:15 ~ 06:45 제외)
     function generateTimeOptionsSelected(selectedVal) {
       let options = `<option value="">Time</option>`;
       for (let h = 0; h < 24; h++) {
         for (let m = 0; m < 60; m += 15) {
+          // 새벽 01:15 ~ 06:45 제외
+          if (h === 1 && m >= 15) continue;
+          if (h >= 2 && h <= 6) continue;
+
           const hh24 = String(h).padStart(2, '0');
           const mm = String(m).padStart(2, '0');
           const val24 = `${hh24}:${mm}`;
@@ -597,7 +601,6 @@
       const isAdmin = currentUser && currentUser.role === 'admin';
 
       shifts.forEach((shift) => {
-        // Day 그룹과 Closing 그룹 사이 명확한 구분선 행 삽입
         if (shift.key === 'divider') {
           const dividerTr = document.createElement('tr');
           dividerTr.className = "bg-purple-100 border-y-2 border-purple-300";
@@ -756,45 +759,13 @@
       const weekStartStr = formatDateISO(currentSunday);
       const records = [];
 
-      document.querySelectorAll('#schedule-tbody tr').forEach((tr) => {
-        const select = tr.querySelector('.emp-select');
-        if (!select) return; // divider 행 등 skip
-        
-        // 현재 행이 어떤 shift에 속하는지 찾기 위해 tr의 index 또는 data 활용
-        // 간단하게 위에서부터 순회하면서 유효한 shiftKey 매핑
-      });
-
-      // 더 정확하게 셀별로 파싱 저장
-      shifts.forEach(shift => {
-        if (shift.key === 'divider') return;
-      });
-
-      // 기존 저장 로직 유지
-      document.querySelectorAll('#schedule-tbody tr').forEach((tr, shiftIdx) => {
-        const select = tr.querySelector('.emp-select');
-        if (!select) return;
-        
-        // 실제 shifts 배열 상의 인덱스 보정 (divider 행 고려)
-        let actualShiftObj = null;
-        let sIdx = 0;
-        for (let s of shifts) {
-          if (s.key === 'divider') continue;
-          if (sIdx === shiftIdx || tr.querySelector(`td.${s.bg}`)) {
-            actualShiftObj = s;
-            break;
-          }
-          sIdx++;
-        }
-      });
-
-      // 안전하고 명확하게 cell 순회 저장
       const activeShifts = shifts.filter(s => s.key !== 'divider');
       const trs = document.querySelectorAll('#schedule-tbody tr');
       let trIdx = 0;
 
       trs.forEach(tr => {
         const empSelect = tr.querySelector('.emp-select');
-        if (!empSelect) return; // divider 행 건너뜀
+        if (!empSelect) return;
 
         const shiftKey = activeShifts[trIdx].key;
         tr.querySelectorAll('td[data-day]').forEach((cell, dayIdx) => {
@@ -1340,8 +1311,76 @@
       if (tabName === 'view-avail') loadOverviewAvailability();
     }
 
+    // 12시간 표기 변환 헬퍼 함수
+    function formatTime12h(timeStr) {
+      if (!timeStr) return '';
+      const [hStr, mStr] = timeStr.split(':');
+      let h = parseInt(hStr, 10);
+      const period = h >= 12 ? 'PM' : 'AM';
+      h = h % 12;
+      if (h === 0) h = 12;
+      return `${h}:${mStr} ${period}`;
+    }
+
+    // 요청하신 양식으로 전체 직원 문자 메시지 생성 및 클립보드 복사
     function generateSmsText() {
-      alert("Weekly schedule announcement copied to clipboard!");
+      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+      const saturday = new Date(currentSunday);
+      saturday.setDate(saturday.getDate() + 6);
+
+      const startDateStr = `${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()} (${dayNames[0]})`;
+      const endDateStr = `${saturday.toLocaleString('en-US', { month: 'short' })} ${saturday.getDate()} (${dayNames[6]})`;
+
+      let fullMessages = "";
+
+      activeEmployees.forEach(emp => {
+        let staffShifts = [];
+        const activeShifts = shifts.filter(s => s.key !== 'divider');
+
+        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+          const d = new Date(currentSunday);
+          d.setDate(d.getDate() + dayIndex);
+          const dayStr = `${d.getMonth() + 1}/${d.getDate()} (${dayNames[dayIndex]})`;
+
+          let dayShiftNames = [];
+          activeShifts.forEach(shift => {
+            const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
+            if (savedItem && savedItem.employee_name === emp.name) {
+              let shiftDisplay = shift.name; // Open, Day, Closing 등
+              if (savedItem.start_time && savedItem.end_time) {
+                shiftDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
+              }
+              dayShiftNames.push(shiftDisplay);
+            }
+          });
+
+          if (dayShiftNames.length > 0) {
+            staffShifts.push(`- ${dayStr} : ${dayShiftNames.join(', ')}`);
+          }
+        }
+
+        if (staffShifts.length > 0) {
+          const msg = `안녕하세요 ${emp.name}
+${startDateStr} 부터 ${endDateStr} 까지의 근무일을 알려드리겠습니다.
+${staffShifts.join('\n')}
+
+스케줄 확인후 컨펌 메세지 부탁드립니다. 스케줄에 이상이 있거나 문의사항이 있다면 Tammy 에게 최대한 빨리 연락주세요. 당신의 노고에 항상 감사합니다.
+
+-----------------------------------------
+`;
+          fullMessages += msg;
+        }
+      });
+
+      if (!fullMessages) {
+        return alert("No shifts are scheduled for this week yet.");
+      }
+
+      navigator.clipboard.writeText(fullMessages).then(() => {
+        alert("Weekly schedule announcement messages for all staff copied to clipboard!");
+      }).catch(err => {
+        alert("Failed to copy: " + err);
+      });
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
