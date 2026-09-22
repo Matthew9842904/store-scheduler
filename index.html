@@ -85,15 +85,13 @@
         </table>
       </div>
 
-      <!-- Staff Personal Schedule View (Only shows logged-in user's shifts) -->
+      <!-- Staff Personal Schedule View -->
       <div id="staff-schedule-view" class="hidden bg-white p-6 rounded-xl shadow-sm border space-y-4">
         <div class="border-b pb-3">
           <h2 class="text-lg font-bold text-gray-900">Your Assigned Schedule</h2>
           <p class="text-xs text-gray-500 mt-0.5">Here are your confirmed shifts for the selected week.</p>
         </div>
-        <div id="staff-shifts-container" class="grid grid-cols-1 md:grid-cols-7 gap-3">
-          <!-- Dynamic 7 Days Personal Cards -->
-        </div>
+        <div id="staff-shifts-container" class="grid grid-cols-1 md:grid-cols-7 gap-3"></div>
       </div>
     </main>
 
@@ -221,16 +219,15 @@
     let overviewSunday = new Date(2026, 8, 20);
 
     let currentScheduleData = {};
-    let myAvailData = {};
-    let overviewAvailData = [];
+    let weekAvailMap = {}; // { empName: { dayIndex: { status, note, start_time, end_time } } }
     let isAvailDeadlinePassed = false;
 
     const shifts = [
-      { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800" },
-      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800" },
-      { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800" },
-      { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800" },
-      { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800" }
+      { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
+      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "open" },
+      { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
+      { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
+      { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" }
     ];
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -258,15 +255,9 @@
     async function initApp() {
       if (_supabase) {
         try {
-          const { data, error } = await _supabase.from('employees').select('*').order('name');
-          if (!error && data && data.length > 0) {
-            dbEmployees = data;
-          } else {
-            dbEmployees = [defaultAdmin];
-          }
-        } catch (e) {
-          dbEmployees = [defaultAdmin];
-        }
+          const { data } = await _supabase.from('employees').select('*').order('name');
+          if (data && data.length > 0) dbEmployees = data;
+        } catch (e) { dbEmployees = [defaultAdmin]; }
       }
 
       if (!dbEmployees.some(e => e.role === 'admin' && e.status !== 'inactive')) {
@@ -284,9 +275,7 @@
             currentUser = match;
             showMainDashboard();
           }
-        } catch (e) {
-          localStorage.removeItem('chatime_session_user');
-        }
+        } catch (e) { localStorage.removeItem('chatime_session_user'); }
       }
     }
 
@@ -365,11 +354,22 @@
     async function loadWeeklySchedule() {
       const weekStartStr = formatDateISO(currentSunday);
       currentScheduleData = {};
+      weekAvailMap = {};
 
       if (_supabase) {
         try {
-          const { data } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStartStr);
-          if (data) data.forEach(item => { currentScheduleData[`${item.shift_key}_${item.day_index}`] = item; });
+          // 1. Schedule Data Fetch
+          const { data: schedData } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStartStr);
+          if (schedData) schedData.forEach(item => { currentScheduleData[`${item.shift_key}_${item.day_index}`] = item; });
+
+          // 2. Availability Data Fetch for Filtering
+          const { data: availData } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr);
+          if (availData) {
+            availData.forEach(item => {
+              if (!weekAvailMap[item.employee_name]) weekAvailMap[item.employee_name] = {};
+              weekAvailMap[item.employee_name][item.day_index] = item;
+            });
+          }
         } catch (e) { console.error(e); }
       }
       renderScheduler();
@@ -418,13 +418,27 @@
 
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
           const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`] || {};
+          const selectedEmp = savedItem.employee_name || '';
+
+          // Filter available employees for this specific shift and day
+          const { availableList, unavailableList } = getFilteredEmployees(activeEmployees, dayIndex, shift.type);
+
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded bg-white" ${!isAdmin ? 'disabled' : ''} onchange="updateDropdowns(${dayIndex})">
+                <select class="emp-select w-full p-1 text-xs border rounded bg-white font-medium" ${!isAdmin ? 'disabled' : ''} onchange="updateDropdowns(${dayIndex})">
                   <option value="">Select Staff</option>
-                  ${activeEmployees.map(e => `<option value="${e.name}" ${e.name === savedItem.employee_name ? 'selected' : ''}>${e.name}</option>`).join('')}
+                  ${availableList.map(e => {
+                    const noteInfo = getAvailNoteStr(e.name, dayIndex);
+                    return `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${noteInfo}</option>`;
+                  }).join('')}
+                  
+                  ${unavailableList.length > 0 ? `
+                    <option disabled>────── Unavailable ──────</option>
+                    ${unavailableList.map(e => `<option value="${e.name}" class="text-gray-400" ${e.name === selectedEmp ? 'selected' : ''}>⚠️ ${e.name} (Unavailable)</option>`).join('')}
+                  ` : ''}
                 </select>
+
                 <div class="flex items-center gap-1 text-[11px]">
                   <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>
                     ${generateTimeOptionsSelected(savedItem.start_time)}
@@ -443,6 +457,40 @@
       });
 
       for (let i = 0; i < 7; i++) updateDropdowns(i);
+    }
+
+    // Smart Filter Logic according to user submitted availability
+    function getFilteredEmployees(employees, dayIndex, shiftType) {
+      const availableList = [];
+      const unavailableList = [];
+
+      employees.forEach(emp => {
+        const empAvail = weekAvailMap[emp.name]?.[dayIndex];
+        const status = empAvail?.status || 'Available (Anytime)';
+
+        if (status === 'Unavailable') {
+          unavailableList.push(emp);
+        } else if (shiftType === 'open' && status === 'Closing Only') {
+          unavailableList.push(emp);
+        } else if (shiftType === 'closing' && status === 'Open Only') {
+          unavailableList.push(emp);
+        } else {
+          availableList.push(emp);
+        }
+      });
+
+      return { availableList, unavailableList };
+    }
+
+    function getAvailNoteStr(empName, dayIndex) {
+      const item = weekAvailMap[empName]?.[dayIndex];
+      if (!item) return '';
+      if (item.status === 'Custom Hours' && item.start_time && item.end_time) {
+        return ` (${item.start_time}~${item.end_time})`;
+      }
+      if (item.status === 'Open Only') return ` (Open)`;
+      if (item.status === 'Closing Only') return ` (Closing)`;
+      return '';
     }
 
     function renderStaffPersonalSchedule() {
@@ -536,9 +584,9 @@
     }
 
     function checkAvailabilityDeadline() {
-      const today = new Date(); // Current date/time
+      const today = new Date();
       const targetWednesday = new Date(availSunday);
-      targetWednesday.setDate(targetWednesday.getDate() - 4); // Target week's Wed
+      targetWednesday.setDate(targetWednesday.getDate() - 4);
       targetWednesday.setHours(23, 59, 59, 999);
 
       const isAdmin = currentUser && currentUser.role === 'admin';
@@ -574,17 +622,17 @@
 
       checkAvailabilityDeadline();
 
-      myAvailData = {};
+      let myAvailData = {};
       if (_supabase && currentUser) {
         try {
           const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
           if (data) data.forEach(item => { myAvailData[item.day_index] = item; });
         } catch (e) { console.error(e); }
       }
-      renderSubmitAvailGrid();
+      renderSubmitAvailGrid(myAvailData);
     }
 
-    function renderSubmitAvailGrid() {
+    function renderSubmitAvailGrid(myAvailData) {
       const container = document.getElementById('submit-avail-grid');
       container.innerHTML = '';
 
@@ -628,11 +676,7 @@
     function toggleCustomTimeFields(index) {
       const status = document.getElementById(`avail-status-${index}`).value;
       const container = document.getElementById(`custom-time-container-${index}`);
-      if (status === 'Custom Hours') {
-        container.classList.remove('hidden');
-      } else {
-        container.classList.add('hidden');
-      }
+      if (status === 'Custom Hours') container.classList.remove('hidden'); else container.classList.add('hidden');
     }
 
     async function saveMyAvailability() {
@@ -679,17 +723,17 @@
       const sat = new Date(overviewSunday); sat.setDate(sat.getDate() + 6);
       document.getElementById('overview-week-label').textContent = `Week of ${overviewSunday.toLocaleString('en-US', { month: 'short' })} ${overviewSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
 
-      overviewAvailData = [];
+      let overviewAvailData = [];
       if (_supabase) {
         try {
           const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr);
           if (data) overviewAvailData = data;
         } catch (e) { console.error(e); }
       }
-      renderOverviewAvailabilityTable();
+      renderOverviewAvailabilityTable(overviewAvailData);
     }
 
-    function renderOverviewAvailabilityTable() {
+    function renderOverviewAvailabilityTable(overviewAvailData) {
       const header = document.getElementById('avail-overview-header');
       let hHtml = `<th class="p-3 w-36 border-r">Staff Name</th>`;
       for (let i = 0; i < 7; i++) {
@@ -743,11 +787,11 @@
         if (!select) return;
         const cur = select.value;
         Array.from(select.options).forEach(opt => {
-          if (!opt.value) return;
+          if (!opt.value || opt.disabled && opt.textContent.includes('──────')) return;
           if (opt.value !== cur && selectedValues.includes(opt.value)) {
             opt.disabled = true; opt.textContent = `${opt.value} (Selected)`;
-          } else {
-            opt.disabled = false; opt.textContent = opt.value;
+          } else if (!opt.textContent.includes('Unavailable')) {
+            opt.disabled = false;
           }
         });
       });
@@ -834,9 +878,7 @@
           const { error } = await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
           if (error) return alert('Failed to save staff: ' + error.message);
           alert('New staff member added successfully!');
-        } catch (e) {
-          return alert('Unexpected error: ' + e.message);
-        }
+        } catch (e) { return alert('Unexpected error: ' + e.message); }
       }
 
       await initApp();
@@ -883,9 +925,7 @@
             if (error) return alert('Failed to update: ' + error.message);
           }
           alert('Updated successfully!');
-        } catch (e) {
-          return alert('Error: ' + e.message);
-        }
+        } catch (e) { return alert('Error: ' + e.message); }
       }
 
       await initApp();
@@ -899,9 +939,7 @@
           const { error } = await _supabase.from('employees').delete().eq('id', id);
           if (error) return alert('Failed to delete: ' + error.message);
           alert('Deleted successfully!');
-        } catch (e) {
-          return alert('Error: ' + e.message);
-        }
+        } catch (e) { return alert('Error: ' + e.message); }
       }
       await initApp();
       renderEmployeeTable();
