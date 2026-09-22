@@ -48,9 +48,11 @@
         </div>
       </div>
       <nav class="flex bg-gray-100 p-1 rounded-lg text-sm font-medium items-center gap-1">
-        <button onclick="switchTab('scheduler')" id="tab-scheduler" class="px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold">Weekly Scheduler</button>
-        <button onclick="switchTab('employees')" id="tab-employees" class="role-manager-or-admin px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">Employee Management</button>
-        <button onclick="switchTab('actuals')" id="tab-admin-only" class="role-admin-only px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">Actual Hours (ADP)</button>
+        <button onclick="switchTab('scheduler')" id="tab-scheduler" class="px-3 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold">Weekly Schedule</button>
+        <button onclick="switchTab('submit-avail')" id="tab-submit-avail" class="role-staff-only px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Submit Availability</button>
+        <button onclick="switchTab('view-avail')" id="tab-view-avail" class="role-admin-only px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Staff Availability</button>
+        <button onclick="switchTab('employees')" id="tab-employees" class="role-manager-or-admin px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Employee Management</button>
+        <button onclick="switchTab('actuals')" id="tab-actuals" class="role-admin-only px-3 py-2 rounded-md text-gray-600 hover:text-gray-900">Actual Hours (ADP)</button>
         <button onclick="handleLogout()" class="px-3 py-2 rounded-md text-red-600 hover:bg-red-50 text-xs ml-2">Log Out</button>
       </nav>
     </header>
@@ -73,22 +75,69 @@
         </div>
       </div>
 
-      <!-- 7-Day Grid View Table -->
       <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[1100px]">
           <thead>
-            <tr id="schedule-header-row" class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-              <!-- Dynamic Header Days -->
-            </tr>
+            <tr id="schedule-header-row" class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase"></tr>
           </thead>
-          <tbody id="schedule-tbody" class="divide-y text-sm">
-            <!-- Dynamic Schedule Grid -->
-          </tbody>
+          <tbody id="schedule-tbody" class="divide-y text-sm"></tbody>
         </table>
       </div>
     </main>
 
-    <!-- 2. Employee Management Tab -->
+    <!-- 2. Staff Availability Submission Tab (Staff & Manager) -->
+    <main id="view-submit-avail" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-bold">Submit Your Availability</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Select your availability preference and set custom hours if you have class/personal schedule constraints.</p>
+          </div>
+          <button onclick="saveMyAvailability()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm">
+            💾 Submit Availability
+          </button>
+        </div>
+
+        <div class="flex items-center gap-3 mb-4 bg-gray-50 p-3 rounded-lg border">
+          <button onclick="changeAvailWeek(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev Week</button>
+          <span id="avail-week-label" class="font-bold text-sm text-gray-800">Calculating week...</span>
+          <button onclick="changeAvailWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-7 gap-3" id="submit-avail-grid">
+          <!-- Dynamic 7 Days Cards -->
+        </div>
+      </div>
+    </main>
+
+    <!-- 3. Staff Availability Overview Tab (Master Admin Only) -->
+    <main id="view-view-avail" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-bold">Staff Availability Overview</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Review submitted availabilities and custom time constraints from staff.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 mb-4 bg-gray-50 p-3 rounded-lg border">
+          <button onclick="changeOverviewWeek(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev Week</button>
+          <span id="overview-week-label" class="font-bold text-sm text-gray-800">Calculating week...</span>
+          <button onclick="changeOverviewWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
+        </div>
+
+        <div class="overflow-x-auto border rounded-lg">
+          <table class="w-full text-left border-collapse min-w-[1000px]">
+            <thead>
+              <tr id="avail-overview-header" class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase"></tr>
+            </thead>
+            <tbody id="avail-overview-tbody" class="divide-y text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- 4. Employee Management Tab -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
@@ -115,15 +164,13 @@
                 <th class="p-3 role-admin-only w-32 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody id="employee-table-body" class="divide-y text-sm">
-              <!-- Dynamic Employee Roster -->
-            </tbody>
+            <tbody id="employee-table-body" class="divide-y text-sm"></tbody>
           </table>
         </div>
       </div>
     </main>
 
-    <!-- 3. Actual Hours (ADP) Tab -->
+    <!-- 5. Actual Hours (ADP) Tab -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <h2 class="text-lg font-bold mb-2">ADP Payroll - Weekly Actual Hours</h2>
@@ -136,23 +183,32 @@
               <th class="p-3">Actual Worked Hours (Total)</th>
             </tr>
           </thead>
-          <tbody id="adp-tbody" class="divide-y text-sm">
-            <!-- Dynamic ADP Table -->
-          </tbody>
+          <tbody id="adp-tbody" class="divide-y text-sm"></tbody>
         </table>
       </div>
     </main>
   </div>
 
   <script>
+    const SUPABASE_URL = "https://wphkrfiiuymdeqzfweyx.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndwaGtyZmlpdXltZGVxemZ3ZXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMjk0MTUsImV4cCI6MjEwNTYwNTQxNX0.Agq1nQYLhDaSDqTHpLitINWyO-Qtf2G8-oypJOm0-1Y";
+
+    let _supabase = null;
+    if (typeof supabase !== 'undefined') {
+      _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
     let defaultAdmin = { id: 'default_admin', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active' };
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
-    let _supabase = null;
 
-    // 날짜 상태 관리 (현재 기준: 2026년 9월 20일 일요일 주차)
-    let currentSunday = new Date(2026, 8, 20); // 2026-09-20 (Sun)
-    let currentScheduleData = {}; // DB에서 읽어온 해당 주차 스케줄 데이터
+    let currentSunday = new Date(2026, 8, 20); // 2026-09-20
+    let availSunday = new Date(2026, 8, 20);
+    let overviewSunday = new Date(2026, 8, 20);
+
+    let currentScheduleData = {};
+    let myAvailData = {};
+    let overviewAvailData = [];
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800" },
@@ -163,14 +219,7 @@
     ];
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    function getSupabaseClient() {
-      if (typeof supabase === 'undefined') return null;
-      const url = window.env?.NEXT_PUBLIC_SUPABASE_URL || window.NEXT_PUBLIC_SUPABASE_URL;
-      const key = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || window.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      if (url && key) return supabase.createClient(url, key);
-      return null;
-    }
+    const availOptions = ["Available (Anytime)", "Open Only", "Closing Only", "Custom Hours", "Unavailable"];
 
     function generateTimeOptions() {
       let options = `<option value="">Time</option>`;
@@ -183,10 +232,8 @@
       }
       return options;
     }
-
     const timeOptionsHtml = generateTimeOptions();
 
-    // 날짜 포맷 (YYYY-MM-DD)
     function formatDateISO(d) {
       const year = d.getFullYear();
       const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -195,14 +242,11 @@
     }
 
     async function initApp() {
-      _supabase = getSupabaseClient();
       if (_supabase) {
         try {
-          const { data, error } = await _supabase.from('employees').select('*').order('name');
-          if (!error && data && data.length > 0) dbEmployees = data;
-        } catch (e) {
-          console.error("Supabase fetch error:", e);
-        }
+          const { data } = await _supabase.from('employees').select('*').order('name');
+          if (data && data.length > 0) dbEmployees = data;
+        } catch (e) { console.error("Supabase error:", e); }
       }
       populateLoginSelect();
     }
@@ -253,13 +297,13 @@
       const isManager = currentUser.role === 'manager';
 
       document.querySelectorAll('.role-admin-only').forEach(el => {
-        if (isAdmin) el.classList.remove('hidden');
-        else el.classList.add('hidden');
+        if (isAdmin) el.classList.remove('hidden'); else el.classList.add('hidden');
       });
-
       document.querySelectorAll('.role-manager-or-admin').forEach(el => {
-        if (isAdmin || isManager) el.classList.remove('hidden');
-        else el.classList.add('hidden');
+        if (isAdmin || isManager) el.classList.remove('hidden'); else el.classList.add('hidden');
+      });
+      document.querySelectorAll('.role-staff-only').forEach(el => {
+        if (!isAdmin) el.classList.remove('hidden'); else el.classList.add('hidden');
       });
 
       const descEl = document.getElementById('employee-tab-desc');
@@ -270,42 +314,29 @@
       }
     }
 
-    // 주간 이동 (< Prev / Next >)
-    function changeWeek(offsetWeeks) {
-      currentSunday.setDate(currentSunday.getDate() + (offsetWeeks * 7));
+    function changeWeek(offset) {
+      currentSunday.setDate(currentSunday.getDate() + (offset * 7));
       loadWeeklySchedule();
     }
 
-    // 스케줄 데이터 읽기 & 화면 표 갱신
     async function loadWeeklySchedule() {
       const weekStartStr = formatDateISO(currentSunday);
       currentScheduleData = {};
 
       if (_supabase) {
         try {
-          const { data, error } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStartStr);
-          if (!error && data) {
-            data.forEach(item => {
-              currentScheduleData[`${item.shift_key}_${item.day_index}`] = item;
-            });
-          }
-        } catch (e) {
-          console.error("Schedule load error:", e);
-        }
+          const { data } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStartStr);
+          if (data) data.forEach(item => { currentScheduleData[`${item.shift_key}_${item.day_index}`] = item; });
+        } catch (e) { console.error(e); }
       }
-
       renderScheduler();
     }
 
     function renderScheduler() {
-      // 1. 헤더 날짜 업데이트
       const saturday = new Date(currentSunday);
       saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('current-week-label').textContent = `Week of ${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()} (${formatDateISO(currentSunday)} ~ ${formatDateISO(saturday)})`;
 
-      const headerLabel = `Week of ${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()}, ${currentSunday.getFullYear()} (${formatDateISO(currentSunday)} ~ ${formatDateISO(saturday)})`;
-      document.getElementById('current-week-label').textContent = headerLabel;
-
-      // Table Header Row 생성
       const headerRow = document.getElementById('schedule-header-row');
       let headerHtml = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
 
@@ -314,18 +345,13 @@
         d.setDate(d.getDate() + i);
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
-        const isSun = i === 0;
-        const isSat = i === 6;
-        const textColor = isSun ? 'text-red-600' : isSat ? 'text-blue-600' : 'text-gray-600';
-
-        headerHtml += `<th class="p-3 border-r text-center w-36 ${textColor}">${dayNames[i]} (${mm}/${dd})</th>`;
+        const color = i === 0 ? 'text-red-600' : i === 6 ? 'text-blue-600' : 'text-gray-600';
+        headerHtml += `<th class="p-3 border-r text-center w-36 ${color}">${dayNames[i]} (${mm}/${dd})</th>`;
       }
       headerRow.innerHTML = headerHtml;
 
-      // 2. Table Body Grid 생성
       const tbody = document.getElementById('schedule-tbody');
       tbody.innerHTML = '';
-
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const isAdmin = currentUser && currentUser.role === 'admin';
 
@@ -334,33 +360,27 @@
         let html = `<td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">${shift.name}<br><span class="text-xs font-normal">${shift.count}</span></td>`;
 
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-          const key = `${shift.key}_${dayIndex}`;
-          const savedItem = currentScheduleData[key] || {};
-          const savedEmp = savedItem.employee_name || '';
-          const savedStart = savedItem.start_time || '';
-          const savedEnd = savedItem.end_time || '';
-
+          const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`] || {};
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}">
               <div class="space-y-1">
                 <select class="emp-select w-full p-1 text-xs border rounded bg-white" ${!isAdmin ? 'disabled' : ''} onchange="updateDropdowns(${dayIndex})">
                   <option value="">Select Staff</option>
-                  ${activeEmployees.map(e => `<option value="${e.name}" ${e.name === savedEmp ? 'selected' : ''}>${e.name}</option>`).join('')}
+                  ${activeEmployees.map(e => `<option value="${e.name}" ${e.name === savedItem.employee_name ? 'selected' : ''}>${e.name}</option>`).join('')}
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
                   <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>
-                    ${generateTimeOptionsSelected(savedStart)}
+                    ${generateTimeOptionsSelected(savedItem.start_time)}
                   </select>
                   <span>~</span>
                   <select class="end-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>
-                    ${generateTimeOptionsSelected(savedEnd)}
+                    ${generateTimeOptionsSelected(savedItem.end_time)}
                   </select>
                 </div>
               </div>
             </td>
           `;
         }
-
         tr.innerHTML = html;
         tbody.appendChild(tr);
       });
@@ -372,95 +392,224 @@
       let options = `<option value="">Time</option>`;
       for (let h = 0; h < 24; h++) {
         for (let m = 0; m < 60; m += 15) {
-          const hh = String(h).padStart(2, '0');
-          const mm = String(m).padStart(2, '0');
-          const val = `${hh}:${mm}`;
+          const val = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
           options += `<option value="${val}" ${val === selectedVal ? 'selected' : ''}>${val}</option>`;
         }
       }
       return options;
     }
 
-    // 스케줄 저장 (Save Schedule)
     async function saveCurrentSchedule() {
-      if (!_supabase) {
-        alert("Database connection is not available.");
-        return;
-      }
-
+      if (!_supabase) return alert("Database connection is not configured.");
       const weekStartStr = formatDateISO(currentSunday);
-      const recordsToInsert = [];
+      const records = [];
 
-      const rows = document.querySelectorAll('#schedule-tbody tr');
-      rows.forEach((tr, shiftIdx) => {
+      document.querySelectorAll('#schedule-tbody tr').forEach((tr, shiftIdx) => {
         const shiftKey = shifts[shiftIdx].key;
-        const cells = tr.querySelectorAll('td[data-day]');
-
-        cells.forEach((cell, dayIdx) => {
-          const empSelect = cell.querySelector('.emp-select');
-          const startSelect = cell.querySelector('.start-time-select');
-          const endSelect = cell.querySelector('.end-time-select');
-
-          const empName = empSelect ? empSelect.value : '';
-          const startTime = startSelect ? startSelect.value : '';
-          const endTime = endSelect ? endSelect.value : '';
+        tr.querySelectorAll('td[data-day]').forEach((cell, dayIdx) => {
+          const empName = cell.querySelector('.emp-select')?.value || '';
+          const startTime = cell.querySelector('.start-time-select')?.value || '';
+          const endTime = cell.querySelector('.end-time-select')?.value || '';
 
           if (empName) {
-            recordsToInsert.push({
-              week_start_date: weekStartStr,
-              shift_key: shiftKey,
-              day_index: dayIdx,
-              employee_name: empName,
-              start_time: startTime,
-              end_time: endTime
-            });
+            records.push({ week_start_date: weekStartStr, shift_key: shiftKey, day_index: dayIdx, employee_name: empName, start_time: startTime, end_time: endTime });
           }
         });
       });
 
       try {
-        // 기존 주차 데이터 삭제 후 신규 일괄 저장
         await _supabase.from('schedules').delete().eq('week_start_date', weekStartStr);
-        if (recordsToInsert.length > 0) {
-          const { error } = await _supabase.from('schedules').insert(recordsToInsert);
-          if (error) throw error;
-        }
+        if (records.length > 0) await _supabase.from('schedules').insert(records);
         alert("Schedule saved successfully!");
         await loadWeeklySchedule();
-      } catch (e) {
-        alert("Failed to save schedule: " + e.message);
+      } catch (e) { alert("Failed to save: " + e.message); }
+    }
+
+    function changeAvailWeek(offset) {
+      availSunday.setDate(availSunday.getDate() + (offset * 7));
+      loadMyAvailability();
+    }
+
+    async function loadMyAvailability() {
+      const weekStartStr = formatDateISO(availSunday);
+      const sat = new Date(availSunday); sat.setDate(sat.getDate() + 6);
+      document.getElementById('avail-week-label').textContent = `Week of ${availSunday.toLocaleString('en-US', { month: 'short' })} ${availSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
+
+      myAvailData = {};
+      if (_supabase && currentUser) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
+          if (data) data.forEach(item => { myAvailData[item.day_index] = item; });
+        } catch (e) { console.error(e); }
       }
+      renderSubmitAvailGrid();
+    }
+
+    function renderSubmitAvailGrid() {
+      const container = document.getElementById('submit-avail-grid');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(availSunday); d.setDate(d.getDate() + i);
+        const item = myAvailData[i] || {};
+        const savedStatus = item.status || 'Available (Anytime)';
+        const savedNote = item.note || '';
+
+        // 커스텀 시간 파싱 (노트에 저장되거나 개별 파싱)
+        let startTime = item.start_time || '';
+        let endTime = item.end_time || '';
+
+        const card = document.createElement('div');
+        card.className = "border rounded-xl p-3 bg-gray-50 flex flex-col justify-between space-y-2";
+        card.innerHTML = `
+          <div>
+            <div class="font-bold text-sm text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
+            <select id="avail-status-${i}" class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="toggleCustomTimeFields(${i})">
+              ${availOptions.map(opt => `<option value="${opt}" ${opt === savedStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>
+            
+            <div id="custom-time-container-${i}" class="${savedStatus === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
+              <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
+              <div class="flex items-center gap-1">
+                <select id="avail-start-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white">${generateTimeOptionsSelected(startTime)}</select>
+                <span class="text-xs">~</span>
+                <select id="avail-end-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white">${generateTimeOptionsSelected(endTime)}</select>
+              </div>
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
+            <input type="text" id="avail-note-${i}" value="${savedNote}" placeholder="e.g. Class until 5pm" class="w-full p-1.5 text-xs border rounded bg-white">
+          </div>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function toggleCustomTimeFields(index) {
+      const status = document.getElementById(`avail-status-${index}`).value;
+      const container = document.getElementById(`custom-time-container-${index}`);
+      if (status === 'Custom Hours') {
+        container.classList.remove('hidden');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    async function saveMyAvailability() {
+      if (!_supabase || !currentUser) return alert("Database is not connected.");
+      const weekStartStr = formatDateISO(availSunday);
+      const records = [];
+
+      for (let i = 0; i < 7; i++) {
+        const status = document.getElementById(`avail-status-${i}`).value;
+        const note = document.getElementById(`avail-note-${i}`).value.trim();
+        const start_time = status === 'Custom Hours' ? document.getElementById(`avail-start-${i}`).value : '';
+        const end_time = status === 'Custom Hours' ? document.getElementById(`avail-end-${i}`).value : '';
+
+        records.push({
+          employee_id: currentUser.id,
+          employee_name: currentUser.name,
+          week_start_date: weekStartStr,
+          day_index: i,
+          status,
+          note,
+          start_time,
+          end_time
+        });
+      }
+
+      try {
+        await _supabase.from('availabilities').delete().eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
+        await _supabase.from('availabilities').insert(records);
+        alert("Availability submitted successfully!");
+      } catch (e) { alert("Failed to submit: " + e.message); }
+    }
+
+    function changeOverviewWeek(offset) {
+      overviewSunday.setDate(overviewSunday.getDate() + (offset * 7));
+      loadOverviewAvailability();
+    }
+
+    async function loadOverviewAvailability() {
+      const weekStartStr = formatDateISO(overviewSunday);
+      const sat = new Date(overviewSunday); sat.setDate(sat.getDate() + 6);
+      document.getElementById('overview-week-label').textContent = `Week of ${overviewSunday.toLocaleString('en-US', { month: 'short' })} ${overviewSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
+
+      overviewAvailData = [];
+      if (_supabase) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr);
+          if (data) overviewAvailData = data;
+        } catch (e) { console.error(e); }
+      }
+      renderOverviewAvailabilityTable();
+    }
+
+    function renderOverviewAvailabilityTable() {
+      const header = document.getElementById('avail-overview-header');
+      let hHtml = `<th class="p-3 w-36 border-r">Staff Name</th>`;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
+        hHtml += `<th class="p-3 border-r text-center w-36">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</th>`;
+      }
+      header.innerHTML = hHtml;
+
+      const tbody = document.getElementById('avail-overview-tbody');
+      tbody.innerHTML = '';
+      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+
+      activeEmployees.forEach(emp => {
+        const tr = document.createElement('tr');
+        let rHtml = `<td class="p-3 font-semibold text-gray-800 border-r bg-gray-50">${emp.name}</td>`;
+
+        for (let i = 0; i < 7; i++) {
+          const match = overviewAvailData.find(a => a.employee_id === emp.id && a.day_index === i);
+          if (match) {
+            const isUnavail = match.status === 'Unavailable';
+            const isCustom = match.status === 'Custom Hours';
+            const bgClass = isUnavail ? 'bg-red-50 text-red-700' : isCustom ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800';
+
+            let displayStatus = match.status;
+            if (isCustom && match.start_time && match.end_time) {
+              displayStatus = `${match.start_time} ~ ${match.end_time}`;
+            }
+
+            rHtml += `
+              <td class="p-2 border-r text-center ${bgClass}">
+                <div class="font-bold text-xs">${displayStatus}</div>
+                ${match.note ? `<div class="text-[10px] opacity-80 mt-0.5 font-normal">${match.note}</div>` : ''}
+              </td>
+            `;
+          } else {
+            rHtml += `<td class="p-2 border-r text-center text-gray-400 text-xs font-light">Not Submitted</td>`;
+          }
+        }
+        tr.innerHTML = rHtml;
+        tbody.appendChild(tr);
+      });
     }
 
     function updateDropdowns(dayIndex) {
       const cells = document.querySelectorAll(`td[data-day="${dayIndex}"]`);
-      const selects = [];
       const selectedValues = [];
+      cells.forEach(cell => { const val = cell.querySelector('.emp-select')?.value; if (val) selectedValues.push(val); });
 
       cells.forEach(cell => {
         const select = cell.querySelector('.emp-select');
-        if (select) {
-          selects.push(select);
-          if (select.value) selectedValues.push(select.value);
-        }
-      });
-
-      selects.forEach(select => {
-        const currentValue = select.value;
-        Array.from(select.options).forEach(option => {
-          if (!option.value) return;
-          if (option.value !== currentValue && selectedValues.includes(option.value)) {
-            option.disabled = true;
-            option.textContent = `${option.value} (Selected)`;
+        if (!select) return;
+        const cur = select.value;
+        Array.from(select.options).forEach(opt => {
+          if (!opt.value) return;
+          if (opt.value !== cur && selectedValues.includes(opt.value)) {
+            opt.disabled = true; opt.textContent = `${opt.value} (Selected)`;
           } else {
-            option.disabled = false;
-            option.textContent = option.value;
+            opt.disabled = false; opt.textContent = opt.value;
           }
         });
       });
     }
 
-    // 직원 관리 테이블 렌더링
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       const isAdmin = currentUser.role === 'admin';
@@ -539,8 +688,6 @@
 
       if (_supabase) {
         await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
-      } else {
-        dbEmployees.unshift({ id: String(Date.now()), name, role, pin_code, email, phone, status });
       }
 
       await initApp();
@@ -593,14 +740,17 @@
     }
 
     function switchTab(tabName) {
-      ['scheduler', 'employees', 'actuals'].forEach(t => {
+      ['scheduler', 'submit-avail', 'view-avail', 'employees', 'actuals'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const tab = document.getElementById(`tab-${t}`);
         if (view) view.classList.add('hidden');
-        if (tab) tab.className = 'px-4 py-2 rounded-md text-gray-600 hover:text-gray-900';
+        if (tab) tab.className = 'px-3 py-2 rounded-md text-gray-600 hover:text-gray-900';
       });
       document.getElementById(`view-${tabName}`).classList.remove('hidden');
-      document.getElementById(`tab-${tabName}`).className = 'px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold';
+      document.getElementById(`tab-${tabName}`).className = 'px-3 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold';
+
+      if (tabName === 'submit-avail') loadMyAvailability();
+      if (tabName === 'view-avail') loadOverviewAvailability();
     }
 
     function generateSmsText() {
