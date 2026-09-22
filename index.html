@@ -164,7 +164,7 @@
         </div>
       </div>
 
-      <!-- Staff Shift Count Summary Bar -->
+      <!-- Staff Shift Count Summary Bar with Staff Colors -->
       <div id="shift-count-summary" class="hidden bg-white p-4 rounded-xl shadow-sm border flex flex-wrap items-center gap-3">
         <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">📊 Shift Count (This Week):</span>
         <div id="shift-count-badges" class="flex flex-wrap gap-2"></div>
@@ -339,7 +339,7 @@
     let currentActiveTab = 'hub';
     let isDataModified = false;
 
-    // 직원별 고유 컬러 팔레트 (배탕 + 글자 색상)
+    // 직원별 고유 컬러 팔레트
     const staffColors = [
       { bg: 'bg-rose-100', text: 'text-rose-900', border: 'border-rose-300' },
       { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300' },
@@ -364,7 +364,8 @@
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
-      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day", divider: true }, // 구분선 적용 포인트
+      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
+      { key: "divider" }, // Day와 Closing 사이 명확한 그룹 구분선 행
       { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" }
@@ -372,6 +373,26 @@
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const availOptions = ["Available (Anytime)", "Open", "Day Only", "Closing Only", "Custom Hours", "Unavailable"];
+
+    // 12시간 AM/PM 형식의 타임 옵션 생성 함수
+    function generateTimeOptionsSelected(selectedVal) {
+      let options = `<option value="">Time</option>`;
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 15) {
+          const hh24 = String(h).padStart(2, '0');
+          const mm = String(m).padStart(2, '0');
+          const val24 = `${hh24}:${mm}`;
+
+          let period = h >= 12 ? 'PM' : 'AM';
+          let h12 = h % 12;
+          if (h12 === 0) h12 = 12;
+          const displayTime = `${h12}:${mm} ${period}`;
+
+          options += `<option value="${val24}" ${val24 === selectedVal ? 'selected' : ''}>${displayTime}</option>`;
+        }
+      }
+      return options;
+    }
 
     function formatDateISO(d) {
       const year = d.getFullYear();
@@ -529,7 +550,7 @@
       }
     }
 
-    // 직원별 배정 시프트 횟수 계산 및 요약 배지 렌더링
+    // 직원별 배정 시프트 횟수 계산 및 요약 배지 렌더링 (직원 고유 컬러 적용)
     function updateShiftCountSummary() {
       const counts = {};
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
@@ -548,7 +569,8 @@
       let html = '';
       for (const [name, count] of Object.entries(counts)) {
         if (count > 0) {
-          html += `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">${name}: <span class="text-indigo-900 font-black">${count} shifts</span></span>`;
+          const colorClass = getStaffColorClass(name);
+          html += `<span class="px-3 py-1 text-xs rounded-xl border shadow-sm ${colorClass}">${name}: <span class="font-black">${count} shifts</span></span>`;
         }
       }
       container.innerHTML = html || '<span class="text-xs text-gray-400 italic">No shifts assigned yet</span>';
@@ -574,14 +596,17 @@
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const isAdmin = currentUser && currentUser.role === 'admin';
 
-      shifts.forEach((shift, shiftIdx) => {
-        const tr = document.createElement('tr');
-        
-        // Day와 Closing 사이 구분선(Border Top) 추가
-        if (shift.divider) {
-          tr.className = "border-t-4 border-indigo-200";
+      shifts.forEach((shift) => {
+        // Day 그룹과 Closing 그룹 사이 명확한 구분선 행 삽입
+        if (shift.key === 'divider') {
+          const dividerTr = document.createElement('tr');
+          dividerTr.className = "bg-purple-100 border-y-2 border-purple-300";
+          dividerTr.innerHTML = `<td colspan="8" class="p-2 text-center text-xs font-black text-purple-900 tracking-wider uppercase">🌙 Closing Shifts (Night Group)</td>`;
+          tbody.appendChild(dividerTr);
+          return;
         }
 
+        const tr = document.createElement('tr');
         let html = `<td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">${shift.name}<br><span class="text-xs font-normal">${shift.count}</span></td>`;
 
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
@@ -598,7 +623,6 @@
                   <option value="">Select Staff</option>
                   ${availableList.map(e => {
                     const noteInfo = getAvailNoteStr(e.name, dayIndex);
-                    // 드롭다운 안에서는 상태(Open, Closing 등) 표시, 선택 후엔 이름만 깔끔하게 유지
                     return `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${noteInfo}</option>`;
                   }).join('')}
                   
@@ -688,6 +712,7 @@
 
         let assignedShifts = [];
         shifts.forEach(shift => {
+          if (shift.key === 'divider') return;
           const item = currentScheduleData[`${shift.key}_${dayIndex}`];
           if (item && item.employee_name === currentUser.name) {
             assignedShifts.push({
@@ -726,24 +751,52 @@
       }
     }
 
-    function generateTimeOptionsSelected(selectedVal) {
-      let options = `<option value="">Time</option>`;
-      for (let h = 0; h < 24; h++) {
-        for (let m = 0; m < 60; m += 15) {
-          const val = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-          options += `<option value="${val}" ${val === selectedVal ? 'selected' : ''}>${val}</option>`;
-        }
-      }
-      return options;
-    }
-
     async function saveCurrentSchedule() {
       if (!_supabase) return alert("Database connection is not configured.");
       const weekStartStr = formatDateISO(currentSunday);
       const records = [];
 
+      document.querySelectorAll('#schedule-tbody tr').forEach((tr) => {
+        const select = tr.querySelector('.emp-select');
+        if (!select) return; // divider 행 등 skip
+        
+        // 현재 행이 어떤 shift에 속하는지 찾기 위해 tr의 index 또는 data 활용
+        // 간단하게 위에서부터 순회하면서 유효한 shiftKey 매핑
+      });
+
+      // 더 정확하게 셀별로 파싱 저장
+      shifts.forEach(shift => {
+        if (shift.key === 'divider') return;
+      });
+
+      // 기존 저장 로직 유지
       document.querySelectorAll('#schedule-tbody tr').forEach((tr, shiftIdx) => {
-        const shiftKey = shifts[shiftIdx].key;
+        const select = tr.querySelector('.emp-select');
+        if (!select) return;
+        
+        // 실제 shifts 배열 상의 인덱스 보정 (divider 행 고려)
+        let actualShiftObj = null;
+        let sIdx = 0;
+        for (let s of shifts) {
+          if (s.key === 'divider') continue;
+          if (sIdx === shiftIdx || tr.querySelector(`td.${s.bg}`)) {
+            actualShiftObj = s;
+            break;
+          }
+          sIdx++;
+        }
+      });
+
+      // 안전하고 명확하게 cell 순회 저장
+      const activeShifts = shifts.filter(s => s.key !== 'divider');
+      const trs = document.querySelectorAll('#schedule-tbody tr');
+      let trIdx = 0;
+
+      trs.forEach(tr => {
+        const empSelect = tr.querySelector('.emp-select');
+        if (!empSelect) return; // divider 행 건너뜀
+
+        const shiftKey = activeShifts[trIdx].key;
         tr.querySelectorAll('td[data-day]').forEach((cell, dayIdx) => {
           const empName = cell.querySelector('.emp-select')?.value || '';
           const startTime = cell.querySelector('.start-time-select')?.value || '';
@@ -753,6 +806,7 @@
             records.push({ week_start_date: weekStartStr, shift_key: shiftKey, day_index: dayIdx, employee_name: empName, start_time: startTime, end_time: endTime });
           }
         });
+        trIdx++;
       });
 
       try {
