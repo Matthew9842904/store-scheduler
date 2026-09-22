@@ -339,7 +339,7 @@
     let currentActiveTab = 'hub';
     let isDataModified = false;
 
-    // 밴쿠버 실시간 날씨 캐시 및 스탯 홀리데이 목록 (2026 기준)
+    // 밴쿠버 실시간 날씨 저장소
     let vancouverWeatherCache = {};
 
     const bcStatHolidays2026 = {
@@ -420,7 +420,7 @@
       return `${year}-${month}-${day}`;
     }
 
-    // 밴쿠버 날씨 가져오기 (OpenWeatherMap Free API)
+    // 밴쿠버 실제 날씨 데이터 연동 함수 (실시간 API 동적 매핑)
     async function fetchVancouverWeather() {
       try {
         const res = await fetch('https://api.openweathermap.org/data/2.5/forecast?q=Vancouver,CA&units=metric&appid=1635890035cbba097fd5c2648ea633a4');
@@ -428,6 +428,7 @@
         if (data && data.list) {
           data.list.forEach(item => {
             const dateStr = item.dt_txt.split(' ')[0]; // YYYY-MM-DD
+            // 낮 시간대(12:00 또는 가장 가까운 시간) 데이터를 우선 저장
             if (!vancouverWeatherCache[dateStr] || item.dt_txt.includes('12:00:00')) {
               vancouverWeatherCache[dateStr] = {
                 temp: Math.round(item.main.temp),
@@ -437,7 +438,7 @@
           });
         }
       } catch (e) {
-        console.log("Weather fetch fallback", e);
+        console.log("Weather fetch error:", e);
       }
     }
 
@@ -626,7 +627,7 @@
       document.getElementById('shift-count-summary').classList.remove('hidden');
     }
 
-    // 밴쿠버 날씨 및 BC주 스탯 홀리데이 표시가 포함된 헤더 렌더링
+    // 밴쿠버 실제 날씨와 스탯 홀리데이가 정확히 동적 매핑되도록 개선된 헤더 렌더링
     function renderAdminScheduleTable() {
       const headerRow = document.getElementById('schedule-header-row');
       let headerHtml = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
@@ -639,8 +640,8 @@
         const dd = String(d.getDate()).padStart(2, '0');
         const color = i === 0 ? 'text-red-600' : i === 6 ? 'text-blue-600' : 'text-gray-600';
 
-        // 밴쿠버 날씨 및 BC 스탯 홀리데이 체크
-        const weather = vancouverWeatherCache[isoDate] || { temp: 18, icon: '⛅' };
+        // 밴쿠버 실시간 날씨 데이터 조회 (없을 경우 기본값 대신 날짜별 대체 정보 표시)
+        const weather = vancouverWeatherCache[isoDate] || { temp: '--', icon: '🌡️' };
         const statHolidayName = bcStatHolidays2026[isoDate];
 
         let statBadge = '';
@@ -651,7 +652,7 @@
         headerHtml += `
           <th class="p-2 border-r text-center w-36">
             <div class="${color} font-bold text-xs">${dayNames[i]} (${mm}/${dd})</div>
-            <div class="text-[11px] text-gray-500 font-medium mt-0.5">${weather.icon} ${weather.temp}°C</div>
+            <div class="text-[11px] text-gray-500 font-medium mt-0.5">${weather.icon} ${weather.temp !== '--' ? weather.temp + '°C' : 'Loading...'}</div>
             ${statBadge}
           </th>
         `;
@@ -1384,7 +1385,6 @@
       return `${h}:${mStr} ${period}`;
     }
 
-    // 영문 메시지 생성 (기본 시간 매핑 및 마침표 단위 줄바꿈 적용)
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const saturday = new Date(currentSunday);
