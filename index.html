@@ -219,19 +219,20 @@
     let overviewSunday = new Date(2026, 8, 20);
 
     let currentScheduleData = {};
-    let weekAvailMap = {}; // { empName: { dayIndex: { status, note, start_time, end_time } } }
+    let weekAvailMap = {};
     let isAvailDeadlinePassed = false;
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
-      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "open" },
+      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
       { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" }
     ];
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const availOptions = ["Available (Anytime)", "Open Only", "Closing Only", "Custom Hours", "Unavailable"];
+    // 6 options for availability
+    const availOptions = ["Available (Anytime)", "Open", "Day Only", "Closing Only", "Custom Hours", "Unavailable"];
 
     function generateTimeOptions() {
       let options = `<option value="">Time</option>`;
@@ -358,11 +359,9 @@
 
       if (_supabase) {
         try {
-          // 1. Schedule Data Fetch
           const { data: schedData } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStartStr);
           if (schedData) schedData.forEach(item => { currentScheduleData[`${item.shift_key}_${item.day_index}`] = item; });
 
-          // 2. Availability Data Fetch for Filtering
           const { data: availData } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr);
           if (availData) {
             availData.forEach(item => {
@@ -420,7 +419,6 @@
           const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`] || {};
           const selectedEmp = savedItem.employee_name || '';
 
-          // Filter available employees for this specific shift and day
           const { availableList, unavailableList } = getFilteredEmployees(activeEmployees, dayIndex, shift.type);
 
           html += `
@@ -459,7 +457,10 @@
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
-    // Smart Filter Logic according to user submitted availability
+    // Refined Filtering Rules:
+    // - Open Shift: Available (Anytime), Open (Open Only)
+    // - Day Shift: Available (Anytime), Open, Day Only
+    // - Closing Shift: Available (Anytime), Closing Only
     function getFilteredEmployees(employees, dayIndex, shiftType) {
       const availableList = [];
       const unavailableList = [];
@@ -470,10 +471,24 @@
 
         if (status === 'Unavailable') {
           unavailableList.push(emp);
-        } else if (shiftType === 'open' && status === 'Closing Only') {
-          unavailableList.push(emp);
-        } else if (shiftType === 'closing' && status === 'Open Only') {
-          unavailableList.push(emp);
+        } else if (shiftType === 'open') {
+          if (status === 'Open' || status === 'Available (Anytime)' || status === 'Custom Hours') {
+            availableList.push(emp);
+          } else {
+            unavailableList.push(emp);
+          }
+        } else if (shiftType === 'day') {
+          if (status === 'Open' || status === 'Day Only' || status === 'Available (Anytime)' || status === 'Custom Hours') {
+            availableList.push(emp);
+          } else {
+            unavailableList.push(emp);
+          }
+        } else if (shiftType === 'closing') {
+          if (status === 'Closing Only' || status === 'Available (Anytime)' || status === 'Custom Hours') {
+            availableList.push(emp);
+          } else {
+            unavailableList.push(emp);
+          }
         } else {
           availableList.push(emp);
         }
@@ -488,7 +503,8 @@
       if (item.status === 'Custom Hours' && item.start_time && item.end_time) {
         return ` (${item.start_time}~${item.end_time})`;
       }
-      if (item.status === 'Open Only') return ` (Open)`;
+      if (item.status === 'Open') return ` (Open)`;
+      if (item.status === 'Day Only') return ` (Day Only)`;
       if (item.status === 'Closing Only') return ` (Closing)`;
       return '';
     }
@@ -787,7 +803,7 @@
         if (!select) return;
         const cur = select.value;
         Array.from(select.options).forEach(opt => {
-          if (!opt.value || opt.disabled && opt.textContent.includes('──────')) return;
+          if (!opt.value || (opt.disabled && opt.textContent.includes('──────'))) return;
           if (opt.value !== cur && selectedValues.includes(opt.value)) {
             opt.disabled = true; opt.textContent = `${opt.value} (Selected)`;
           } else if (!opt.textContent.includes('Unavailable')) {
