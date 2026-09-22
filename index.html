@@ -365,7 +365,7 @@
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
       { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
-      { key: "divider" }, // Day와 Closing 사이 명확한 그룹 구분선 행
+      { key: "divider" },
       { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" }
@@ -379,7 +379,6 @@
       let options = `<option value="">Time</option>`;
       for (let h = 0; h < 24; h++) {
         for (let m = 0; m < 60; m += 15) {
-          // 새벽 01:15 ~ 06:45 제외
           if (h === 1 && m >= 15) continue;
           if (h >= 2 && h <= 6) continue;
 
@@ -554,7 +553,6 @@
       }
     }
 
-    // 직원별 배정 시프트 횟수 계산 및 요약 배지 렌더링 (직원 고유 컬러 적용)
     function updateShiftCountSummary() {
       const counts = {};
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
@@ -1322,7 +1320,7 @@
       return `${h}:${mStr} ${period}`;
     }
 
-    // 요청하신 양식으로 전체 직원 문자 메시지 생성 및 클립보드 복사
+    // 영문 메시지 생성 및 클립보드 복사 (기본 시간 매핑 및 마침표 단위 줄바꿈 적용)
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const saturday = new Date(currentSunday);
@@ -1342,32 +1340,36 @@
           d.setDate(d.getDate() + dayIndex);
           const dayStr = `${d.getMonth() + 1}/${d.getDate()} (${dayNames[dayIndex]})`;
 
-          let dayShiftNames = [];
+          let dayShiftEntries = [];
           activeShifts.forEach(shift => {
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
             if (savedItem && savedItem.employee_name === emp.name) {
-              let shiftDisplay = shift.name; // Open, Day, Closing 등
+              let timeDisplay = "";
               if (savedItem.start_time && savedItem.end_time) {
-                shiftDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
+                timeDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
+              } else {
+                // 스케줄표에 시간이 없을 경우 기본 매핑 시간 적용
+                if (shift.key === 'open') {
+                  timeDisplay = "10:00 AM ~ 5:00 PM";
+                } else if (shift.key === 'day') {
+                  timeDisplay = "11:30 AM ~ 5:00 PM";
+                } else if (shift.key.startsWith('closing')) {
+                  timeDisplay = "5:00 PM ~ 11:30 PM";
+                } else {
+                  timeDisplay = "10:00 AM ~ 5:00 PM";
+                }
               }
-              dayShiftNames.push(shiftDisplay);
+              dayShiftEntries.push(`${shift.name} (${timeDisplay})`);
             }
           });
 
-          if (dayShiftNames.length > 0) {
-            staffShifts.push(`- ${dayStr} : ${dayShiftNames.join(', ')}`);
+          if (dayShiftEntries.length > 0) {
+            staffShifts.push(`- ${dayStr} : ${dayShiftEntries.join(', ')}`);
           }
         }
 
         if (staffShifts.length > 0) {
-          const msg = `안녕하세요 ${emp.name}
-${startDateStr} 부터 ${endDateStr} 까지의 근무일을 알려드리겠습니다.
-${staffShifts.join('\n')}
-
-스케줄 확인후 컨펌 메세지 부탁드립니다. 스케줄에 이상이 있거나 문의사항이 있다면 Tammy 에게 최대한 빨리 연락주세요. 당신의 노고에 항상 감사합니다.
-
------------------------------------------
-`;
+          const msg = `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${staffShifts.join('\n')}\n\nPlease check your schedule and send a confirmation message.\nIf you notice any issues or have questions, please contact Tammy as soon as possible.\nThank you always for your hard work.\n\n-----------------------------------------\n`;
           fullMessages += msg;
         }
       });
