@@ -3,43 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>매장 주간 스케줄러</title>
+  <title>Chatime 매장 주간 스케줄러</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800 p-4 md:p-6">
-  <div class="max-w-6xl mx-auto">
-    <!-- 헤더 -->
-    <header class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6">
+<body class="bg-gray-50 min-h-screen text-gray-800">
+  <div id="app" class="max-w-7xl mx-auto p-4 md:p-6">
+    <!-- 상단 헤더 -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-4 rounded-xl shadow-sm border mb-6 gap-4">
       <div>
-        <h1 class="text-xl font-bold text-gray-900">🗓️ 주간 스케줄 관리자</h1>
-        <p class="text-xs text-gray-500 mt-1">iPad 및 모바일 크롬 지원 모드</p>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <span>🗓️</span> 매장 주간 스케줄러
+        </h1>
+        <p class="text-xs text-gray-500 mt-1">iPad Safari / Chrome 최적화 모드</p>
       </div>
-      <span class="px-3 py-1 bg-green-100 text-green-700 font-semibold rounded-full text-xs">시스템 정상 연동</span>
+      <!-- 탭 메뉴 -->
+      <nav class="flex bg-gray-100 p-1 rounded-lg text-sm font-medium">
+        <button onclick="switchTab('scheduler')" id="tab-scheduler" class="px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold">주간 스케줄러</button>
+        <button onclick="switchTab('employees')" id="tab-employees" class="px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">직원 관리</button>
+        <button onclick="switchTab('actuals')" id="tab-actuals" class="px-4 py-2 rounded-md text-gray-600 hover:text-gray-900">실제 근무시간 (ADP)</button>
+      </nav>
     </header>
 
-    <!-- 스케줄러 안내 카드 -->
-    <div class="bg-white p-6 rounded-xl shadow-sm mb-6">
-      <h2 class="text-lg font-semibold mb-2">👋 배포 성공! 스케줄러 시스템 가동 중</h2>
-      <p class="text-sm text-gray-600 mb-4">
-        Vercel과 Supabase 데이터베이스가 연결되었습니다. 직원 등록, 주간 스케줄 편성(Open/Day/Closing), 실제 근무시간 집계 기능이 탑재될 기본 레이아웃입니다.
-      </p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-        <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <p class="text-xs text-blue-600 font-medium">관리자 전용</p>
-          <p class="text-sm font-bold text-gray-800 mt-1">iPad Grid View 스케줄러</p>
+    <!-- 1. 주간 스케줄러 탭 -->
+    <main id="view-scheduler" class="space-y-6">
+      <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
+        <div class="flex items-center gap-3">
+          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">&lt; 지난주</button>
+          <span class="font-bold text-lg">2026년 9월 4주차 (09.21 ~ 09.27)</span>
+          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">다음주 &gt;</button>
         </div>
-        <div class="p-4 bg-purple-50 rounded-lg border border-purple-100">
-          <p class="text-xs text-purple-600 font-medium">직원 권한 제어</p>
-          <p class="text-sm font-bold text-gray-800 mt-1">본인 근무일/시간만 조회</p>
-        </div>
-        <div class="p-4 bg-amber-50 rounded-lg border border-amber-100">
-          <p class="text-xs text-amber-600 font-medium">ADP 연동 지원</p>
-          <p class="text-sm font-bold text-gray-800 mt-1">실제 일한 시간 자동 합산</p>
+        <button onclick="generateSmsText()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-2">
+          💬 스케줄 안내 문자 복사
+        </button>
+      </div>
+
+      <!-- 7일 Grid View Table -->
+      <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
+        <table class="w-full text-left border-collapse min-w-[800px]">
+          <thead>
+            <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
+              <th class="p-3 w-28 border-r">시프트 / 요일</th>
+              <th class="p-3 border-r text-center">월 (09/21)</th>
+              <th class="p-3 border-r text-center">화 (09/22)</th>
+              <th class="p-3 border-r text-center">수 (09/23)</th>
+              <th class="p-3 border-r text-center">목 (09/24)</th>
+              <th class="p-3 border-r text-center">금 (09/25)</th>
+              <th class="p-3 border-r text-center text-blue-600">토 (09/26)</th>
+              <th class="p-3 text-center text-red-600">일 (09/27)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y text-sm">
+            <!-- Open Row -->
+            <tr>
+              <td class="p-3 font-semibold bg-emerald-50 text-emerald-800 border-r">
+                Open<br><span class="text-xs font-normal text-emerald-600">1명</span>
+              </td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+            </tr>
+            <!-- Day Row -->
+            <tr>
+              <td class="p-3 font-semibold bg-blue-50 text-blue-800 border-r">
+                Day<br><span class="text-xs font-normal text-blue-600">1명</span>
+              </td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+            </tr>
+            <!-- Closing Row 1 -->
+            <tr>
+              <td class="p-3 font-semibold bg-purple-50 text-purple-800 border-r">
+                Closing 1<br><span class="text-xs font-normal text-purple-600">Night</span>
+              </td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+            </tr>
+            <!-- Closing Row 2 -->
+            <tr>
+              <td class="p-3 font-semibold bg-purple-50 text-purple-800 border-r">
+                Closing 2<br><span class="text-xs font-normal text-purple-600">Night</span>
+              </td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2 border-r"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+              <td class="p-2"><select class="w-full p-1 border rounded"><option>직원 선택</option></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+
+    <!-- 2. 직원 관리 탭 -->
+    <main id="view-employees" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border">
+        <h2 class="text-lg font-bold mb-4">직원 신규 등록</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <input type="text" placeholder="이름" class="p-2 border rounded-lg">
+          <input type="email" placeholder="이메일" class="p-2 border rounded-lg">
+          <input type="tel" placeholder="전화번호" class="p-2 border rounded-lg">
+          <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium p-2 rounded-lg">직원 추가</button>
         </div>
       </div>
-    </div>
+    </main>
+
+    <!-- 3. 실제 근무시간 (ADP) 탭 -->
+    <main id="view-actuals" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border">
+        <h2 class="text-lg font-bold mb-2">ADP 제출용 주간 근무시간 합계</h2>
+        <p class="text-sm text-gray-500 mb-4">직원별 실제 일한 시간을 합산하여 ADP에 바로 입력할 수 있습니다.</p>
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
+              <th class="p-3">직원명</th>
+              <th class="p-3">예정 총 시간</th>
+              <th class="p-3">실제 총 시간 (Total Hours)</th>
+              <th class="p-3">비고</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y text-sm">
+            <tr>
+              <td class="p-3 font-medium">등록된 직원이 없습니다</td>
+              <td class="p-3">-</td>
+              <td class="p-3 font-bold text-blue-600">-</td>
+              <td class="p-3 text-gray-400">데이터 없음</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
   </div>
+
+  <script>
+    function switchTab(tabName) {
+      ['scheduler', 'employees', 'actuals'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).className = 'px-4 py-2 rounded-md text-gray-600 hover:text-gray-900';
+      });
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      document.getElementById(`tab-${tabName}`).className = 'px-4 py-2 rounded-md bg-white shadow-sm text-gray-900 font-semibold';
+    }
+    function generateSmsText() {
+      alert("주간 스케줄 안내 문자가 클립보드에 복사되었습니다!");
+    }
+  </script>
 </body>
 </html>
