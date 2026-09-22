@@ -13,7 +13,6 @@
   <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white p-8 rounded-2xl shadow-lg border w-full max-w-md">
       <div class="text-center mb-6 flex flex-col items-center justify-center">
-        <!-- Brand Logo Badge -->
         <div class="flex items-center gap-2 bg-purple-900 text-white px-4 py-2 rounded-xl shadow-md mb-3">
           <span class="text-lg">🧋</span>
           <span class="font-black tracking-wider text-lg italic">Chatime</span>
@@ -44,7 +43,6 @@
     <!-- Header with Quick Navigation Tabs -->
     <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
-        <!-- Brand Logo Badge -->
         <div class="flex items-center gap-1.5 bg-purple-900 text-white px-3 py-1.5 rounded-lg shadow-sm">
           <span>🧋</span>
           <span class="font-black tracking-wider italic text-sm">Chatime</span>
@@ -164,6 +162,12 @@
             💬 Copy Schedule Text
           </button>
         </div>
+      </div>
+
+      <!-- Staff Shift Count Summary Bar -->
+      <div id="shift-count-summary" class="hidden bg-white p-4 rounded-xl shadow-sm border flex flex-wrap items-center gap-3">
+        <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">📊 Shift Count (This Week):</span>
+        <div id="shift-count-badges" class="flex flex-wrap gap-2"></div>
       </div>
 
       <div id="admin-schedule-view" class="bg-white rounded-xl shadow-sm border overflow-x-auto">
@@ -335,9 +339,32 @@
     let currentActiveTab = 'hub';
     let isDataModified = false;
 
+    // 직원별 고유 컬러 팔레트 (배탕 + 글자 색상)
+    const staffColors = [
+      { bg: 'bg-rose-100', text: 'text-rose-900', border: 'border-rose-300' },
+      { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300' },
+      { bg: 'bg-emerald-100', text: 'text-emerald-900', border: 'border-emerald-300' },
+      { bg: 'bg-purple-100', text: 'text-purple-900', border: 'border-purple-300' },
+      { bg: 'bg-amber-100', text: 'text-amber-900', border: 'border-amber-300' },
+      { bg: 'bg-cyan-100', text: 'text-cyan-900', border: 'border-cyan-300' },
+      { bg: 'bg-pink-100', text: 'text-pink-900', border: 'border-pink-300' },
+      { bg: 'bg-indigo-100', text: 'text-indigo-900', border: 'border-indigo-300' },
+      { bg: 'bg-teal-100', text: 'text-teal-900', border: 'border-teal-300' },
+      { bg: 'bg-orange-100', text: 'text-orange-900', border: 'border-orange-300' }
+    ];
+
+    function getStaffColorClass(empName) {
+      if (!empName) return '';
+      let hash = 0;
+      for (let i = 0; i < empName.length; i++) hash = empName.charCodeAt(i) + ((hash << 5) - hash);
+      const index = Math.abs(hash) % staffColors.length;
+      const c = staffColors[index];
+      return `${c.bg} ${c.text} ${c.border} font-bold`;
+    }
+
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
-      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
+      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day", divider: true }, // 구분선 적용 포인트
       { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" }
@@ -493,11 +520,39 @@
         document.getElementById('admin-schedule-view').classList.remove('hidden');
         document.getElementById('staff-schedule-view').classList.add('hidden');
         renderAdminScheduleTable();
+        updateShiftCountSummary();
       } else {
         document.getElementById('admin-schedule-view').classList.add('hidden');
         document.getElementById('staff-schedule-view').classList.remove('hidden');
+        document.getElementById('shift-count-summary').classList.add('hidden');
         renderStaffPersonalSchedule();
       }
+    }
+
+    // 직원별 배정 시프트 횟수 계산 및 요약 배지 렌더링
+    function updateShiftCountSummary() {
+      const counts = {};
+      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+      activeEmployees.forEach(e => counts[e.name] = 0);
+
+      document.querySelectorAll('.emp-select').forEach(select => {
+        const val = select.value;
+        if (val && counts[val] !== undefined) {
+          counts[val]++;
+        } else if (val) {
+          counts[val] = (counts[val] || 0) + 1;
+        }
+      });
+
+      const container = document.getElementById('shift-count-badges');
+      let html = '';
+      for (const [name, count] of Object.entries(counts)) {
+        if (count > 0) {
+          html += `<span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">${name}: <span class="text-indigo-900 font-black">${count} shifts</span></span>`;
+        }
+      }
+      container.innerHTML = html || '<span class="text-xs text-gray-400 italic">No shifts assigned yet</span>';
+      document.getElementById('shift-count-summary').classList.remove('hidden');
     }
 
     function renderAdminScheduleTable() {
@@ -519,8 +574,14 @@
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const isAdmin = currentUser && currentUser.role === 'admin';
 
-      shifts.forEach(shift => {
+      shifts.forEach((shift, shiftIdx) => {
         const tr = document.createElement('tr');
+        
+        // Day와 Closing 사이 구분선(Border Top) 추가
+        if (shift.divider) {
+          tr.className = "border-t-4 border-indigo-200";
+        }
+
         let html = `<td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">${shift.name}<br><span class="text-xs font-normal">${shift.count}</span></td>`;
 
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
@@ -528,14 +589,16 @@
           const selectedEmp = savedItem.employee_name || '';
 
           const { availableList, unavailableList } = getFilteredEmployees(activeEmployees, dayIndex, shift.type);
+          const colorClass = getStaffColorClass(selectedEmp);
 
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded bg-white font-medium" ${!isAdmin ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex})">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition ${colorClass || 'bg-white'}" ${!isAdmin ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
                   ${availableList.map(e => {
                     const noteInfo = getAvailNoteStr(e.name, dayIndex);
+                    // 드롭다운 안에서는 상태(Open, Closing 등) 표시, 선택 후엔 이름만 깔끔하게 유지
                     return `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${noteInfo}</option>`;
                   }).join('')}
                   
