@@ -57,34 +57,32 @@
 
     <!-- 1. Weekly Scheduler Tab -->
     <main id="view-scheduler" class="space-y-6">
-      <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
+      <div class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
         <div class="flex items-center gap-3">
-          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">&lt; Prev Week</button>
-          <span class="font-bold text-lg">Week 4, Sept 2026 (Sep 20 Sun ~ Sep 26 Sat)</span>
-          <button class="px-3 py-1.5 border rounded-lg hover:bg-gray-50">Next Week &gt;</button>
+          <button onclick="changeWeek(-1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">&lt; Prev Week</button>
+          <span id="current-week-label" class="font-bold text-base md:text-lg text-gray-800">Calculating week...</span>
+          <button onclick="changeWeek(1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">Next Week &gt;</button>
         </div>
-        <button onclick="generateSmsText()" class="role-admin-only px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-2">
-          💬 Copy Schedule Text
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="saveCurrentSchedule()" class="role-admin-only px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-1">
+            💾 Save Schedule
+          </button>
+          <button onclick="generateSmsText()" class="role-admin-only px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-1">
+            💬 Copy Schedule Text
+          </button>
+        </div>
       </div>
 
       <!-- 7-Day Grid View Table -->
       <div class="bg-white rounded-xl shadow-sm border overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[1100px]">
           <thead>
-            <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-              <th class="p-3 w-32 border-r">Shift / Day</th>
-              <th class="p-3 border-r text-center text-red-600 w-36">Sun (09/20)</th>
-              <th class="p-3 border-r text-center w-36">Mon (09/21)</th>
-              <th class="p-3 border-r text-center w-36">Tue (09/22)</th>
-              <th class="p-3 border-r text-center w-36">Wed (09/23)</th>
-              <th class="p-3 border-r text-center w-36">Thu (09/24)</th>
-              <th class="p-3 border-r text-center w-36">Fri (09/25)</th>
-              <th class="p-3 text-center text-blue-600 w-36">Sat (09/26)</th>
+            <tr id="schedule-header-row" class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
+              <!-- Dynamic Header Days -->
             </tr>
           </thead>
           <tbody id="schedule-tbody" class="divide-y text-sm">
-            <!-- Dynamic Content -->
+            <!-- Dynamic Schedule Grid -->
           </tbody>
         </table>
       </div>
@@ -118,7 +116,7 @@
               </tr>
             </thead>
             <tbody id="employee-table-body" class="divide-y text-sm">
-              <!-- Dynamic Content -->
+              <!-- Dynamic Employee Roster -->
             </tbody>
           </table>
         </div>
@@ -139,7 +137,7 @@
             </tr>
           </thead>
           <tbody id="adp-tbody" class="divide-y text-sm">
-            <!-- Dynamic Content -->
+            <!-- Dynamic ADP Table -->
           </tbody>
         </table>
       </div>
@@ -147,23 +145,14 @@
   </div>
 
   <script>
-    // 기본 백업 마스터 계정 (DB 연동 시 자동 대체)
     let defaultAdmin = { id: 'default_admin', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active' };
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
     let _supabase = null;
 
-    // Vercel / Client Supabase 초기화
-    function getSupabaseClient() {
-      if (typeof supabase === 'undefined') return null;
-      // Vercel 빌드 환경변수 혹은 글로벌 인젝션 시도
-      const url = window.env?.NEXT_PUBLIC_SUPABASE_URL || window.NEXT_PUBLIC_SUPABASE_URL;
-      const key = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || window.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      if (url && key) {
-        return supabase.createClient(url, key);
-      }
-      return null;
-    }
+    // 날짜 상태 관리 (현재 기준: 2026년 9월 20일 일요일 주차)
+    let currentSunday = new Date(2026, 8, 20); // 2026-09-20 (Sun)
+    let currentScheduleData = {}; // DB에서 읽어온 해당 주차 스케줄 데이터
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800" },
@@ -173,7 +162,15 @@
       { key: "closing3", name: "Closing 3", count: "Night", bg: "bg-purple-50", text: "text-purple-800" }
     ];
 
-    const days = [0, 1, 2, 3, 4, 5, 6];
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    function getSupabaseClient() {
+      if (typeof supabase === 'undefined') return null;
+      const url = window.env?.NEXT_PUBLIC_SUPABASE_URL || window.NEXT_PUBLIC_SUPABASE_URL;
+      const key = window.env?.NEXT_PUBLIC_SUPABASE_ANON_KEY || window.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      if (url && key) return supabase.createClient(url, key);
+      return null;
+    }
 
     function generateTimeOptions() {
       let options = `<option value="">Time</option>`;
@@ -189,14 +186,20 @@
 
     const timeOptionsHtml = generateTimeOptions();
 
+    // 날짜 포맷 (YYYY-MM-DD)
+    function formatDateISO(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
     async function initApp() {
       _supabase = getSupabaseClient();
       if (_supabase) {
         try {
           const { data, error } = await _supabase.from('employees').select('*').order('name');
-          if (!error && data && data.length > 0) {
-            dbEmployees = data;
-          }
+          if (!error && data && data.length > 0) dbEmployees = data;
         } catch (e) {
           console.error("Supabase fetch error:", e);
         }
@@ -207,12 +210,6 @@
     function populateLoginSelect() {
       const select = document.getElementById('login-user');
       const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
-
-      if (activeStaff.length === 0) {
-        select.innerHTML = '<option value="">No staff found</option>';
-        return;
-      }
-
       select.innerHTML = '<option value="">Select your name</option>' + 
         activeStaff.map(e => `<option value="${e.id}">${e.name} (${getRoleLabel(e.role)})</option>`).join('');
     }
@@ -240,7 +237,7 @@
       document.getElementById('current-user-badge').textContent = getRoleLabel(currentUser.role);
 
       applyRolePermissions();
-      renderScheduler();
+      loadWeeklySchedule();
       renderEmployeeTable();
     }
 
@@ -273,6 +270,197 @@
       }
     }
 
+    // 주간 이동 (< Prev / Next >)
+    function changeWeek(offsetWeeks) {
+      currentSunday.setDate(currentSunday.getDate() + (offsetWeeks * 7));
+      loadWeeklySchedule();
+    }
+
+    // 스케줄 데이터 읽기 & 화면 표 갱신
+    async function loadWeeklySchedule() {
+      const weekStartStr = formatDateISO(currentSunday);
+      currentScheduleData = {};
+
+      if (_supabase) {
+        try {
+          const { data, error } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStartStr);
+          if (!error && data) {
+            data.forEach(item => {
+              currentScheduleData[`${item.shift_key}_${item.day_index}`] = item;
+            });
+          }
+        } catch (e) {
+          console.error("Schedule load error:", e);
+        }
+      }
+
+      renderScheduler();
+    }
+
+    function renderScheduler() {
+      // 1. 헤더 날짜 업데이트
+      const saturday = new Date(currentSunday);
+      saturday.setDate(saturday.getDate() + 6);
+
+      const headerLabel = `Week of ${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()}, ${currentSunday.getFullYear()} (${formatDateISO(currentSunday)} ~ ${formatDateISO(saturday)})`;
+      document.getElementById('current-week-label').textContent = headerLabel;
+
+      // Table Header Row 생성
+      const headerRow = document.getElementById('schedule-header-row');
+      let headerHtml = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(currentSunday);
+        d.setDate(d.getDate() + i);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const isSun = i === 0;
+        const isSat = i === 6;
+        const textColor = isSun ? 'text-red-600' : isSat ? 'text-blue-600' : 'text-gray-600';
+
+        headerHtml += `<th class="p-3 border-r text-center w-36 ${textColor}">${dayNames[i]} (${mm}/${dd})</th>`;
+      }
+      headerRow.innerHTML = headerHtml;
+
+      // 2. Table Body Grid 생성
+      const tbody = document.getElementById('schedule-tbody');
+      tbody.innerHTML = '';
+
+      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+      const isAdmin = currentUser && currentUser.role === 'admin';
+
+      shifts.forEach(shift => {
+        const tr = document.createElement('tr');
+        let html = `<td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">${shift.name}<br><span class="text-xs font-normal">${shift.count}</span></td>`;
+
+        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+          const key = `${shift.key}_${dayIndex}`;
+          const savedItem = currentScheduleData[key] || {};
+          const savedEmp = savedItem.employee_name || '';
+          const savedStart = savedItem.start_time || '';
+          const savedEnd = savedItem.end_time || '';
+
+          html += `
+            <td class="p-2 border-r" data-day="${dayIndex}">
+              <div class="space-y-1">
+                <select class="emp-select w-full p-1 text-xs border rounded bg-white" ${!isAdmin ? 'disabled' : ''} onchange="updateDropdowns(${dayIndex})">
+                  <option value="">Select Staff</option>
+                  ${activeEmployees.map(e => `<option value="${e.name}" ${e.name === savedEmp ? 'selected' : ''}>${e.name}</option>`).join('')}
+                </select>
+                <div class="flex items-center gap-1 text-[11px]">
+                  <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>
+                    ${generateTimeOptionsSelected(savedStart)}
+                  </select>
+                  <span>~</span>
+                  <select class="end-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>
+                    ${generateTimeOptionsSelected(savedEnd)}
+                  </select>
+                </div>
+              </div>
+            </td>
+          `;
+        }
+
+        tr.innerHTML = html;
+        tbody.appendChild(tr);
+      });
+
+      for (let i = 0; i < 7; i++) updateDropdowns(i);
+    }
+
+    function generateTimeOptionsSelected(selectedVal) {
+      let options = `<option value="">Time</option>`;
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 15) {
+          const hh = String(h).padStart(2, '0');
+          const mm = String(m).padStart(2, '0');
+          const val = `${hh}:${mm}`;
+          options += `<option value="${val}" ${val === selectedVal ? 'selected' : ''}>${val}</option>`;
+        }
+      }
+      return options;
+    }
+
+    // 스케줄 저장 (Save Schedule)
+    async function saveCurrentSchedule() {
+      if (!_supabase) {
+        alert("Database connection is not available.");
+        return;
+      }
+
+      const weekStartStr = formatDateISO(currentSunday);
+      const recordsToInsert = [];
+
+      const rows = document.querySelectorAll('#schedule-tbody tr');
+      rows.forEach((tr, shiftIdx) => {
+        const shiftKey = shifts[shiftIdx].key;
+        const cells = tr.querySelectorAll('td[data-day]');
+
+        cells.forEach((cell, dayIdx) => {
+          const empSelect = cell.querySelector('.emp-select');
+          const startSelect = cell.querySelector('.start-time-select');
+          const endSelect = cell.querySelector('.end-time-select');
+
+          const empName = empSelect ? empSelect.value : '';
+          const startTime = startSelect ? startSelect.value : '';
+          const endTime = endSelect ? endSelect.value : '';
+
+          if (empName) {
+            recordsToInsert.push({
+              week_start_date: weekStartStr,
+              shift_key: shiftKey,
+              day_index: dayIdx,
+              employee_name: empName,
+              start_time: startTime,
+              end_time: endTime
+            });
+          }
+        });
+      });
+
+      try {
+        // 기존 주차 데이터 삭제 후 신규 일괄 저장
+        await _supabase.from('schedules').delete().eq('week_start_date', weekStartStr);
+        if (recordsToInsert.length > 0) {
+          const { error } = await _supabase.from('schedules').insert(recordsToInsert);
+          if (error) throw error;
+        }
+        alert("Schedule saved successfully!");
+        await loadWeeklySchedule();
+      } catch (e) {
+        alert("Failed to save schedule: " + e.message);
+      }
+    }
+
+    function updateDropdowns(dayIndex) {
+      const cells = document.querySelectorAll(`td[data-day="${dayIndex}"]`);
+      const selects = [];
+      const selectedValues = [];
+
+      cells.forEach(cell => {
+        const select = cell.querySelector('.emp-select');
+        if (select) {
+          selects.push(select);
+          if (select.value) selectedValues.push(select.value);
+        }
+      });
+
+      selects.forEach(select => {
+        const currentValue = select.value;
+        Array.from(select.options).forEach(option => {
+          if (!option.value) return;
+          if (option.value !== currentValue && selectedValues.includes(option.value)) {
+            option.disabled = true;
+            option.textContent = `${option.value} (Selected)`;
+          } else {
+            option.disabled = false;
+            option.textContent = option.value;
+          }
+        });
+      });
+    }
+
+    // 직원 관리 테이블 렌더링
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       const isAdmin = currentUser.role === 'admin';
@@ -347,7 +535,7 @@
       const status = document.getElementById(`input-status-${tempId}`).value;
 
       if (!name) return alert('Please enter a name.');
-      if (!pin_code) return alert('Please assign a PIN code for the staff member.');
+      if (!pin_code) return alert('Please assign a PIN code.');
 
       if (_supabase) {
         await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
@@ -391,9 +579,6 @@
 
       if (_supabase) {
         await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
-      } else {
-        const emp = dbEmployees.find(e => e.id === id);
-        if (emp) Object.assign(emp, { name, role, pin_code, email, phone });
       }
 
       await initApp();
@@ -403,71 +588,8 @@
     async function deleteEmployee(id) {
       if (!confirm('Are you sure you want to delete this employee?')) return;
       if (_supabase) await _supabase.from('employees').delete().eq('id', id);
-      else dbEmployees = dbEmployees.filter(e => e.id !== id);
       await initApp();
       renderEmployeeTable();
-    }
-
-    function renderScheduler() {
-      const tbody = document.getElementById('schedule-tbody');
-      tbody.innerHTML = '';
-
-      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
-      const isAdmin = currentUser && currentUser.role === 'admin';
-
-      shifts.forEach(shift => {
-        const tr = document.createElement('tr');
-        let html = `<td class="p-3 font-semibold ${shift.bg} ${shift.text} border-r">${shift.name}<br><span class="text-xs font-normal">${shift.count}</span></td>`;
-
-        days.forEach(day => {
-          html += `
-            <td class="p-2 border-r" data-day="${day}">
-              <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded bg-white" ${!isAdmin ? 'disabled' : ''} onchange="updateDropdowns(${day})">
-                  <option value="">Select Staff</option>
-                  ${activeEmployees.map(e => `<option value="${e.name}">${e.name}</option>`).join('')}
-                </select>
-                <div class="flex items-center gap-1 text-[11px]">
-                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>${timeOptionsHtml}</select>
-                  <span>~</span>
-                  <select class="w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''}>${timeOptionsHtml}</select>
-                </div>
-              </div>
-            </td>
-          `;
-        });
-
-        tr.innerHTML = html;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function updateDropdowns(dayIndex) {
-      const cells = document.querySelectorAll(`td[data-day="${dayIndex}"]`);
-      const selects = [];
-      const selectedValues = [];
-
-      cells.forEach(cell => {
-        const select = cell.querySelector('.emp-select');
-        if (select) {
-          selects.push(select);
-          if (select.value) selectedValues.push(select.value);
-        }
-      });
-
-      selects.forEach(select => {
-        const currentValue = select.value;
-        Array.from(select.options).forEach(option => {
-          if (!option.value) return;
-          if (option.value !== currentValue && selectedValues.includes(option.value)) {
-            option.disabled = true;
-            option.textContent = `${option.value} (Selected)`;
-          } else {
-            option.disabled = false;
-            option.textContent = option.value;
-          }
-        });
-      });
     }
 
     function switchTab(tabName) {
