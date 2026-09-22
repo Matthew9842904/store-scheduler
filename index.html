@@ -12,8 +12,9 @@
   <!-- ================= 1. Login Screen ================= -->
   <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white p-8 rounded-2xl shadow-lg border w-full max-w-md">
-      <div class="text-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">🧋 Chatime Scheduler</h1>
+      <div class="text-center mb-6 flex flex-col items-center justify-center">
+        <img src="chatime-logo-ua6REcEa_t.jpg" alt="Chatime Logo" class="h-10 object-contain mb-3" />[cite: 3]
+        <h1 class="text-xl font-bold text-gray-900">Store Scheduler</h1>
         <p class="text-xs text-gray-500 mt-1">Select your name and enter your assigned PIN to log in.</p>
       </div>
       <form onsubmit="handleLogin(event)" class="space-y-4">
@@ -36,35 +37,41 @@
 
   <!-- ================= 2. Main Dashboard ================= -->
   <div id="app" class="hidden max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-    <!-- Header -->
-    <header class="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
+    <!-- Header with Quick Navigation Tabs -->
+    <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-purple-900 text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-sm">🧋</div>
+        <img src="chatime-logo-ua6REcEa_t.jpg" alt="Chatime Logo" class="h-8 object-contain" />[cite: 3]
         <div>
-          <h1 class="text-xl font-extrabold text-gray-900 tracking-tight">Chatime Cambie</h1>
-          <p class="text-[11px] text-gray-500">Store Weekly Scheduling System</p>
+          <h1 class="text-lg font-extrabold text-gray-900 tracking-tight">Cambie Schedule</h1>
+          <div class="flex items-center gap-2 mt-0.5">
+            <span id="current-user-name" class="text-xs font-bold text-gray-800"></span>
+            <span id="current-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-800"></span>
+          </div>
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <div class="text-right">
-          <span id="current-user-name" class="text-xs font-bold text-gray-800 block"></span>
-          <span id="current-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-800 inline-block"></span>
-        </div>
-        <button onclick="goHome()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg text-xs flex items-center gap-1 transition">
-          🏠 Menu
-        </button>
+      <!-- Quick Jump Navigation Bar -->
+      <nav class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center">
+        <button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 font-semibold transition">🏠 Menu</button>
+        <button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Weekly Schedule</button>
+        <button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Submit Availability</button>
+        <button onclick="switchTab('view-avail')" id="nav-view-avail" class="role-admin-only px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Staff Availability</button>
+        <button onclick="switchTab('employees')" id="nav-employees" class="role-manager-or-admin px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Employees</button>
+        <button onclick="switchTab('actuals')" id="nav-actuals" class="role-admin-only px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Hours</button>
+      </nav>
+
+      <div class="flex items-center gap-2">
         <button onclick="handleLogout()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
           Log Out
         </button>
       </div>
     </header>
 
-    <!-- 3x3 Navigation Hub View -->
-    <div id="view-hub" class="py-8 max-w-4xl mx-auto">
+    <!-- 3x3 Navigation Hub View (Initial Home Screen) -->
+    <div id="view-hub" class="py-6 max-w-4xl mx-auto">
       <div class="text-center mb-8">
         <h2 class="text-2xl font-extrabold text-gray-800">Main Menu</h2>
-        <p class="text-xs text-gray-500 mt-1">Select a module to proceed.</p>
+        <p class="text-xs text-gray-500 mt-1">Select a module below or use the top navigation bar anytime.</p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -1204,9 +1211,14 @@
       currentActiveTab = tabName;
       ['hub', 'scheduler', 'submit-avail', 'view-avail', 'employees', 'actuals'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
+        const navBtn = document.getElementById(`nav-${t}`);
         if (view) {
           if (t === tabName) view.classList.remove('hidden');
           else view.classList.add('hidden');
+        }
+        if (navBtn) {
+          if (t === tabName) navBtn.className = 'px-2.5 py-1.5 rounded-md bg-white shadow-sm text-indigo-700 font-bold transition';
+          else navBtn.className = 'px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition';
         }
       });
 
