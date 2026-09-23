@@ -1908,7 +1908,7 @@
       return `${h}:${mStr} ${period}`;
     }
 
-    // 날짜 오름차순(시간순) 정렬 및 지정 영문 문구 추가된 문자열 생성 함수
+    // 날짜 오름차순 정렬 및 명확한 답장 요구 문구가 포함된 문자열 생성 함수
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const saturday = new Date(currentSunday); saturday.setDate(saturday.getDate() + 6);
@@ -1932,12 +1932,12 @@
           }
         });
 
-        // 날짜순(일요일~토요일 오름차순) 정렬 적용
+        // 날짜순(일요일~토요일 오름차순) 정렬
         staffShifts.sort((a, b) => a.dayIndex - b.dayIndex);
 
         if (staffShifts.length > 0) {
           const shiftLines = staffShifts.map(s => s.text).join('\n');
-          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease check your schedule, and if you have any questions or changes, please contact Tammy as soon as possible. Always appreciate your hard work.\n-----------------------------------------\n`;
+          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease review and reply to confirm your schedule, and if you have any questions or changes, please contact Tammy as soon as possible. Always appreciate your hard work.\n-----------------------------------------\n`;
         }
       });
 
