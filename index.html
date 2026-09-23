@@ -417,7 +417,6 @@
       return `${c.bg} ${c.text} ${c.border} font-bold`;
     }
 
-    // 오픈 1개, 데이 2개, 마감 3개 구조
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
       { key: "day1", name: "Day 1", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
@@ -788,7 +787,7 @@
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}" data-shift-key="${shift.key}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onchange="markModified(); onStaffSelectChange(this); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
@@ -807,6 +806,18 @@
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
+    // 직원을 해제(Select Staff)했을 때 시간 셀렉트박스를 'Time'으로 자동 초기화하는 함수
+    function onStaffSelectChange(selectEl) {
+      const cell = selectEl.closest('td');
+      const startSelect = cell.querySelector('.start-time-select');
+      const endSelect = cell.querySelector('.end-time-select');
+      
+      if (!selectEl.value) {
+        if (startSelect) startSelect.value = "";
+        if (endSelect) endSelect.value = "";
+      }
+    }
+
     function updateDropdowns(dayIndex) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       
@@ -816,7 +827,7 @@
         if (select) {
           const shiftKey = cell.getAttribute('data-shift-key');
           const savedItem = currentScheduleData[`${shiftKey}_${dayIndex}`];
-          const initialEmp = select.value !== undefined && select.value !== null ? select.value : (savedItem ? savedItem.employee_name : '') || '';
+          const initialEmp = select.value !== undefined && select.value !== null && select.value !== "" ? select.value : (savedItem ? savedItem.employee_name : '') || '';
           dayCells.push({ cell, select, currentVal: initialEmp, shiftKey });
         }
       });
