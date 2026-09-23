@@ -48,7 +48,7 @@
           <span class="font-black tracking-wider italic text-sm">Chatime</span>
         </div>
         <div>
-          <h1 class="text-base font-extrabold text-gray-900 tracking-tight">Cambie Schedule</h1>
+          <h1 class="text-base font-extrabold text-gray-900 tracking-tight">Chatime Hub</h1>
           <div class="flex items-center gap-2 mt-0.5">
             <span id="current-user-name" class="text-xs font-bold text-gray-800"></span>
             <span id="current-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-800"></span>
@@ -147,7 +147,7 @@
     <main id="view-view-avail" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div>
-          <h2 class="text-lg font-bold">Staff Availability Overview</h2>
+          <h2 class="text-lg font-bold">Team Availability Overview</h2>
           <p id="avail-overview-desc" class="text-xs text-gray-500 mt-0.5">Review all staff availabilities for this week.</p>
         </div>
 
@@ -195,12 +195,12 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
           <div>
-            <h2 class="text-lg font-bold text-gray-900">My Actual Hours (2-Week Payroll Entry)</h2>
+            <h2 class="text-lg font-bold text-gray-900">Log Hours (2-Week Payroll Entry)</h2>
             <p class="text-xs text-gray-500 mt-0.5">Enter your actual start and end times for the 14-day pay period. Hours are calculated automatically.</p>
           </div>
           <div class="flex items-center gap-3">
             <button onclick="saveMyActualHours()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-sm transition">
-              💾 Save My Actual Hours
+              💾 Save Logged Hours
             </button>
           </div>
         </div>
@@ -250,7 +250,7 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-lg font-bold">Staff Roster & Permissions</h2>
+            <h2 class="text-lg font-bold">Team Directory & Permissions</h2>
             <p id="employee-tab-desc" class="text-xs text-gray-500 mt-0.5"></p>
           </div>
           <button id="add-emp-btn" onclick="addNewRow()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm items-center gap-1">
@@ -577,30 +577,30 @@
       const isAdminOrManager = currentUser.role === 'admin' || currentUser.role === 'manager';
 
       let navHtml = `<button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 font-semibold transition">🏠 Menu</button>`;
-      navHtml += `<button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Weekly Schedule</button>`;
-      navHtml += `<button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Submit Availability</button>`;
+      navHtml += `<button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Scheduler</button>`;
+      navHtml += `<button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Availability</button>`;
 
       if (isAdminOrManager) {
-        navHtml += `<button onclick="switchTab('view-avail')" id="nav-view-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Staff Availability</button>`;
-        navHtml += `<button onclick="switchTab('employees')" id="nav-employees" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Employees</button>`;
-        navHtml += `<button onclick="switchTab('actuals')" id="nav-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Hours</button>`;
+        navHtml += `<button onclick="switchTab('view-avail')" id="nav-view-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Team Availability</button>`;
+        navHtml += `<button onclick="switchTab('employees')" id="nav-employees" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Team Directory</button>`;
+        navHtml += `<button onclick="switchTab('actuals')" id="nav-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Payroll</button>`;
       }
 
-      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Actual Hours</button>`;
+      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button>`;
       document.getElementById('top-nav-bar').innerHTML = navHtml;
 
       let hubHtml = `
         <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
-          <div><h3 class="font-bold text-gray-900 text-base">Weekly Schedule</h3><p class="text-xs text-gray-500 mt-1">View personal or manage store weekly shifts.</p></div>
+          <div><h3 class="font-bold text-gray-900 text-base">Scheduler</h3><p class="text-xs text-gray-500 mt-1">View personal or manage store weekly shifts.</p></div>
         </button>
         <button onclick="switchTab('submit-avail')" class="p-6 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">⏰</div>
-          <div><h3 class="font-bold text-gray-900 text-base">Submit Availability</h3><p class="text-xs text-gray-500 mt-1">Submit your weekly availability preferences.</p></div>
+          <div><h3 class="font-bold text-gray-900 text-base">My Availability</h3><p class="text-xs text-gray-500 mt-1">Submit your weekly availability preferences.</p></div>
         </button>
         <button onclick="switchTab('my-actuals')" class="p-6 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-600 group-hover:text-white transition">⏱️</div>
-          <div><h3 class="font-bold text-gray-900 text-base">My Actual Hours</h3><p class="text-xs text-gray-500 mt-1">Log your 2-week actual working hours for payroll.</p></div>
+          <div><h3 class="font-bold text-gray-900 text-base">Log Hours</h3><p class="text-xs text-gray-500 mt-1">Log your 2-week actual working hours for payroll.</p></div>
         </button>
       `;
 
@@ -608,15 +608,15 @@
         hubHtml += `
           <button onclick="switchTab('view-avail')" class="p-6 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
             <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">👥</div>
-            <div><h3 class="font-bold text-gray-900 text-base">Staff Availability</h3><p class="text-xs text-gray-500 mt-1">Review team availability & overview.</p></div>
+            <div><h3 class="font-bold text-gray-900 text-base">Team Availability</h3><p class="text-xs text-gray-500 mt-1">Review team availability & overview.</p></div>
           </button>
           <button onclick="switchTab('employees')" class="p-6 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
             <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
-            <div><h3 class="font-bold text-gray-900 text-base">Employee Management</h3><p class="text-xs text-gray-500 mt-1">Staff roster, First/Last Name, PIN codes.</p></div>
+            <div><h3 class="font-bold text-gray-900 text-base">Team Directory</h3><p class="text-xs text-gray-500 mt-1">Staff roster, First/Last Name, PIN codes.</p></div>
           </button>
           <button onclick="switchTab('actuals')" class="p-6 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
             <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
-            <div><h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3><p class="text-xs text-gray-500 mt-1">Summary table & weekly detailed tables.</p></div>
+            <div><h3 class="font-bold text-gray-900 text-base">ADP Payroll</h3><p class="text-xs text-gray-500 mt-1">Summary table & weekly detailed tables.</p></div>
           </button>
         `;
       }
@@ -815,7 +815,6 @@
         if (startSelect) startSelect.value = "";
         if (endSelect) endSelect.value = "";
       } else {
-        // 기본 근무 시간 자동 설정 (사용자가 직접 바꾸지 않은 경우)
         if (shiftKey === 'open') {
           if (startSelect) startSelect.value = "10:00";
           if (endSelect) endSelect.value = "17:00";
@@ -1921,7 +1920,6 @@
       return `${h}:${mStr} ${period}`;
     }
 
-    // 조건에 맞게 숫자 제거, 기본/지정 시간 처리 및 날짜 오름차순 정렬 문자열 생성 함수
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const saturday = new Date(currentSunday); saturday.setDate(saturday.getDate() + 6);
@@ -1937,7 +1935,6 @@
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
             if (savedItem && savedItem.employee_name === emp.name) {
               
-              // 1 & 3 조건: 입력된 지정 시간이 있으면 우선 적용, 없으면 기본 근무 시간 규칙 적용
               let timeDisplay = "";
               if (savedItem.start_time && savedItem.end_time) {
                 timeDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
@@ -1951,7 +1948,6 @@
                 }
               }
 
-              // 2 조건: 숫자 제거 (Open, Day, Closing)
               let cleanShiftName = "Open";
               if (shift.key === 'open') cleanShiftName = "Open";
               else if (shift.key.startsWith('day')) cleanShiftName = "Day";
@@ -1965,7 +1961,6 @@
           }
         });
 
-        // 날짜순(일요일~토요일 오름차순) 정렬
         staffShifts.sort((a, b) => a.dayIndex - b.dayIndex);
 
         if (staffShifts.length > 0) {
