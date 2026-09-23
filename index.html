@@ -313,7 +313,7 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours (Admin) - Summary Table on Top + Week 1 and Week 2 Detailed Tables Below -->
+    <!-- 5. ADP Hours (Admin) - Schedule Discrepancy Alert Box on Top -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -326,6 +326,15 @@
             <span id="admin-pay-period-label" class="font-bold text-sm text-gray-800">Calculating...</span>
             <button onclick="changeAdminPayPeriod(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next 2 Weeks &gt;</button>
           </div>
+        </div>
+
+        <!-- Schedule Discrepancy Alert Notice (Top) -->
+        <div id="schedule-discrepancy-container" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl shadow-xs space-y-2">
+          <div class="flex items-center gap-2 font-bold text-amber-900 text-sm">
+            <span>⚠️</span>
+            <span>Schedule Discrepancy Alerts (Logged hours differ from or not found in scheduled shifts):</span>
+          </div>
+          <div id="schedule-discrepancy-list" class="space-y-1 pl-6 text-xs text-amber-800"></div>
         </div>
 
         <!-- 1. Top Summary Table -->
@@ -845,7 +854,7 @@
     }
 
     // ==========================================
-    // My Actual Hours (Staff Entry)
+    // My Actual Hours (Staff Entry with Schedule Validation)
     // ==========================================
     function changePayPeriod(offset) {
       myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (offset * 14));
@@ -859,23 +868,38 @@
       document.getElementById('pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
 
       let savedActualsMap = {};
+      let week1Schedules = {};
+      let week2Schedules = {};
+
       if (_supabase && currentUser) {
         try {
-          const { data } = await _supabase.from('actual_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
-          if (data) {
-            data.forEach(item => { savedActualsMap[item.day_offset] = item; });
-          }
+          const { data: actData } = await _supabase.from('actual_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+          if (actData) actData.forEach(item => { savedActualsMap[item.day_offset] = item; });
+
+          // 주차별 스케줄 데이터 로드 (스케줄 대조용)
+          const w1DateStr = formatDateISO(myPayPeriodStart);
+          const w2Start = new Date(myPayPeriodStart); w2Start.setDate(w2Start.getDate() + 7);
+          const w2DateStr = formatDateISO(w2Start);
+
+          const { data: sched1 } = await _supabase.from('schedules').select('*').eq('week_start_date', w1DateStr).eq('employee_name', currentUser.name);
+          if (sched1) sched1.forEach(s => { week1Schedules[s.day_index] = true; });
+
+          const { data: sched2 } = await _supabase.from('schedules').select('*').eq('week_start_date', w2DateStr).eq('employee_name', currentUser.name);
+          if (sched2) sched2.forEach(s => { week2Schedules[s.day_index] = true; });
+
         } catch (e) { console.error(e); }
       }
-      renderMyActualsGrid(savedActualsMap);
+      renderMyActualsGrid(savedActualsMap, week1Schedules, week2Schedules);
     }
 
-    function renderMyActualsGrid(savedMap) {
+    function renderMyActualsGrid(savedMap, w1Sched, w2Sched) {
       const container = document.getElementById('my-actuals-tables-container');
       let html = '';
 
       ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
         const startIdx = wIdx * 7;
+        const schedMap = wIdx === 0 ? w1Sched : w2Sched;
+
         html += `
           <div class="border rounded-xl overflow-hidden shadow-sm">
             <div class="bg-indigo-50 px-4 py-2 font-bold text-xs text-indigo-950 border-b">${weekTitle}</div>
@@ -889,7 +913,9 @@
         for (let i = 0; i < 7; i++) {
           const d = new Date(myPayPeriodStart);
           d.setDate(d.getDate() + startIdx + i);
-          html += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
+          const hasScheduledShift = schedMap[i] === true;
+          const badge = hasScheduledShift ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded ml-1">Scheduled</span>` : `<span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded ml-1">No Shift</span>`;
+          html += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}${badge}</th>`;
         }
         html += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Total</th>`;
         html += `</tr></thead><tbody class="text-sm"><tr>`;
@@ -898,12 +924,14 @@
         let weekTotal = 0;
         for (let i = 0; i < 7; i++) {
           const globalDayIdx = startIdx + i;
+          const localDayIdx = i;
           const item = savedMap[globalDayIdx] || {};
           const hoursVal = item.hours || 0;
           weekTotal += Number(hoursVal);
+          const isScheduled = schedMap[localDayIdx] === true;
 
           html += `
-            <td class="p-2 border-r text-center align-middle" data-day-offset="${globalDayIdx}">
+            <td class="p-2 border-r text-center align-middle ${!isScheduled ? 'bg-amber-50/40' : ''}" data-day-offset="${globalDayIdx}" data-scheduled="${isScheduled}">
               <div class="space-y-1">
                 <select class="my-start w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(item.start_time)}</select>
                 <select class="my-end w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(item.end_time)}</select>
@@ -930,6 +958,17 @@
       let hours = 0;
 
       if (start && end) {
+        const isScheduled = cell.getAttribute('data-scheduled') === 'true';
+        if (!isScheduled) {
+          const proceed = confirm("스케줄에 나와있지 않은 날입니다. 그래도 입력하시겠습니까?");
+          if (!proceed) {
+            cell.querySelector('.my-start').value = '';
+            cell.querySelector('.my-end').value = '';
+            document.getElementById(`my-hrs-display-${dayOffset}`).textContent = '0.00';
+            return;
+          }
+        }
+
         const [sh, sm] = start.split(':').map(Number);
         const [eh, em] = end.split(':').map(Number);
         let diff = (eh * 60 + em) - (sh * 60 + sm);
@@ -961,28 +1000,32 @@
         const end_time = cell.querySelector('.my-end').value;
         const hours = parseFloat(document.getElementById(`my-hrs-display-${i}`).textContent) || 0;
 
-        records.push({
-          employee_id: currentUser.id,
-          employee_name: currentUser.name,
-          period_start_date: periodStartStr,
-          day_offset: i,
-          start_time,
-          end_time,
-          hours
-        });
+        if (start_time || end_time || hours > 0) {
+          records.push({
+            employee_id: currentUser.id,
+            employee_name: currentUser.name,
+            period_start_date: periodStartStr,
+            day_offset: i,
+            start_time,
+            end_time,
+            hours
+          });
+        }
       }
 
       try {
         await _supabase.from('actual_hours').delete().eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
-        const { error } = await _supabase.from('actual_hours').insert(records);
-        if (error) throw error;
+        if (records.length > 0) {
+          const { error } = await _supabase.from('actual_hours').insert(records);
+          if (error) throw error;
+        }
         isDataModified = false;
         alert("Your actual hours saved successfully!");
       } catch (e) { alert("Failed to save: " + e.message); }
     }
 
     // ==========================================
-    // Admin ADP Bi-Weekly Master Sheet
+    // Admin ADP Bi-Weekly Master Sheet & Schedule Discrepancy Detection
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -996,16 +1039,31 @@
       document.getElementById('admin-pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
 
       let allActualsData = [];
+      let allSchedulesMap = {}; // key: "empName_dayIndex", value: true
+
       if (_supabase) {
         try {
           const { data } = await _supabase.from('actual_hours').select('*').eq('period_start_date', periodStartStr);
           if (data) allActualsData = data;
+
+          // 주차별 스케줄 로드
+          const w1DateStr = periodStartStr;
+          const w2Start = new Date(adminPayPeriodStart); w2Start.setDate(w2Start.getDate() + 7);
+          const w2DateStr = formatDateISO(w2Start);
+
+          const { data: sched1 } = await _supabase.from('schedules').select('*').eq('week_start_date', w1DateStr);
+          if (sched1) sched1.forEach(s => { allSchedulesMap[`${s.employee_name}_${s.day_index}`] = true; });
+
+          const { data: sched2 } = await _supabase.from('schedules').select('*').eq('week_start_date', w2DateStr);
+          if (sched2) sched2.forEach(s => { allSchedulesMap[`${s.employee_name}_${s.day_index + 7}`] = true; });
+
         } catch (e) { console.error(e); }
       }
-      renderAdminBiWeeklyMaster(allActualsData);
+
+      renderAdminBiWeeklyMaster(allActualsData, allSchedulesMap);
     }
 
-    function renderAdminBiWeeklyMaster(allData) {
+    function renderAdminBiWeeklyMaster(allData, schedulesMap) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
 
       activeEmployees.sort((a, b) => {
@@ -1015,6 +1073,35 @@
         return (a.first_name || '').localeCompare(b.first_name || '');
       });
 
+      // 0. 스케줄 불일치(또는 스케줄 없는 날 근무 입력) 탐지 및 맨 위 알림 표시
+      let discrepancies = [];
+      allData.forEach(act => {
+        if (act.hours > 0) {
+          const key = `${act.employee_name}_${act.day_offset}`;
+          if (!schedulesMap[key]) {
+            const d = new Date(adminPayPeriodStart);
+            d.setDate(d.getDate() + act.day_offset);
+            const dateStr = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
+            discrepancies.push({
+              name: act.employee_name,
+              dateStr: dateStr,
+              hours: act.hours,
+              time: `${act.start_time || '?'} ~ ${act.end_time || '?'}`
+            });
+          }
+        }
+      });
+
+      const discContainer = document.getElementById('schedule-discrepancy-container');
+      const discList = document.getElementById('schedule-discrepancy-list');
+      if (discrepancies.length > 0) {
+        discList.innerHTML = discrepancies.map(d => `<div>• <strong>${d.name}</strong>님이 스케줄에 없는 날짜인 <strong>${d.dateStr}</strong>에 근무({d.time}, <strong>${d.hours}시간</strong>)를 입력했습니다.</div>`).join('');
+        discContainer.classList.remove('hidden');
+      } else {
+        discContainer.classList.add('hidden');
+      }
+
+      // 1. Render Top Summary Table
       const summaryTbody = document.getElementById('admin-summary-tbody');
       let summaryHtml = '';
 
@@ -1051,11 +1138,12 @@
       });
       summaryTbody.innerHTML = summaryHtml || `<tr><td colspan="7" class="p-6 text-center text-gray-400">No active staff found.</td></tr>`;
 
-      renderDetailedWeeklyTable('admin-week1-header', 'admin-week1-tbody', activeEmployees, allData, 0);
-      renderDetailedWeeklyTable('admin-week2-header', 'admin-week2-tbody', activeEmployees, allData, 7);
+      // 2. Render Week 1 & Week 2 Detailed Tables
+      renderDetailedWeeklyTable('admin-week1-header', 'admin-week1-tbody', activeEmployees, allData, schedulesMap, 0);
+      renderDetailedWeeklyTable('admin-week2-header', 'admin-week2-tbody', activeEmployees, allData, schedulesMap, 7);
     }
 
-    function renderDetailedWeeklyTable(headerId, tbodyId, employees, allData, weekOffset) {
+    function renderDetailedWeeklyTable(headerId, tbodyId, employees, allData, schedulesMap, weekOffset) {
       const headerRow = document.getElementById(headerId);
       const tbody = document.getElementById(tbodyId);
 
@@ -1097,10 +1185,15 @@
           const hrs = match.hours ? Number(match.hours).toFixed(2) : '0.00';
           weekSum += Number(hrs);
 
+          const isScheduled = schedulesMap[`${emp.name}_${globalDayIdx}`] === true;
+          const hasWorked = match.hours > 0;
+          const cellBg = (hasWorked && !isScheduled) ? 'bg-amber-100/70 border-amber-300' : '';
+
           rowHtml += `
-            <td class="p-2 border-r text-center align-middle">
+            <td class="p-2 border-r text-center align-middle ${cellBg}">
               <div class="text-[11px] text-gray-600">${st} ~ ${et}</div>
               <div class="text-xs font-bold text-indigo-700 mt-0.5">${hrs}h</div>
+              ${(hasWorked && !isScheduled) ? '<span class="text-[9px] bg-red-600 text-white px-1 rounded font-bold">Unscheduled</span>' : ''}
             </td>
           `;
         }
@@ -1122,7 +1215,7 @@
     }
 
     // ==========================================
-    // Employee Management (Inline Close without Resetting Tab)
+    // Employee Management
     // ==========================================
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
@@ -1229,7 +1322,6 @@
         }
       }
 
-      // 메모리 내 직원 데이터 객체 직접 업데이트 (탭 튕김 현상 원천 방지)
       const targetEmp = dbEmployees.find(e => e.id === id);
       if (targetEmp) {
         targetEmp.staff_no = staff_no;
