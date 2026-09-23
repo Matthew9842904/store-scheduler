@@ -40,7 +40,7 @@
 
   <!-- ================= 2. Main Dashboard ================= -->
   <div id="app" class="hidden max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-    <!-- Header with Quick Navigation Tabs -->
+    <!-- Header with Dynamic Role-based Navigation Tabs -->
     <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5 bg-purple-900 text-white px-3 py-1.5 rounded-lg shadow-sm">
@@ -56,16 +56,8 @@
         </div>
       </div>
 
-      <!-- Quick Jump Navigation Bar -->
-      <nav class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center">
-        <button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 font-semibold transition">🏠 Menu</button>
-        <button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Weekly Schedule</button>
-        <button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Submit Availability</button>
-        <button onclick="switchTab('view-avail')" id="nav-view-avail" class="role-admin-only px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Staff Availability</button>
-        <button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Actual Hours</button>
-        <button onclick="switchTab('employees')" id="nav-employees" class="role-manager-or-admin px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Employees</button>
-        <button onclick="switchTab('actuals')" id="nav-actuals" class="role-admin-only px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Hours</button>
-      </nav>
+      <!-- Quick Jump Navigation Bar (Dynamic rendered based on role) -->
+      <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"></nav>
 
       <div class="flex items-center gap-2">
         <button onclick="handleLogout()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
@@ -74,68 +66,13 @@
       </div>
     </header>
 
-    <!-- 3x3 Navigation Hub View (Initial Home Screen) -->
+    <!-- Main Menu Hub View (Dynamic Grid based on role) -->
     <div id="view-hub" class="py-6 max-w-4xl mx-auto">
       <div class="text-center mb-8">
         <h2 class="text-2xl font-extrabold text-gray-800">Main Menu</h2>
         <p class="text-xs text-gray-500 mt-1">Select a module below or use the top navigation bar anytime.</p>
       </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <!-- Button 1: Weekly Schedule -->
-        <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
-          <div>
-            <h3 class="font-bold text-gray-900 text-base">Weekly Schedule</h3>
-            <p class="text-xs text-gray-500 mt-1">View personal or manage store weekly shifts.</p>
-          </div>
-        </button>
-
-        <!-- Button 2: Submit Availability -->
-        <button onclick="switchTab('submit-avail')" class="p-6 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">⏰</div>
-          <div>
-            <h3 class="font-bold text-gray-900 text-base">Submit Availability</h3>
-            <p class="text-xs text-gray-500 mt-1">Submit your weekly availability preferences.</p>
-          </div>
-        </button>
-
-        <!-- Button 3: My Actual Hours (Staff Entry) -->
-        <button onclick="switchTab('my-actuals')" class="p-6 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-600 group-hover:text-white transition">⏱️</div>
-          <div>
-            <h3 class="font-bold text-gray-900 text-base">My Actual Hours</h3>
-            <p class="text-xs text-gray-500 mt-1">Log your 2-week actual working hours for payroll.</p>
-          </div>
-        </button>
-
-        <!-- Button 4: Staff Availability (Admin) -->
-        <button onclick="switchTab('view-avail')" class="role-admin-only p-6 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">👥</div>
-          <div>
-            <h3 class="font-bold text-gray-900 text-base">Staff Availability</h3>
-            <p class="text-xs text-gray-500 mt-1">Review team availability & admin override.</p>
-          </div>
-        </button>
-
-        <!-- Button 5: Employee Management -->
-        <button onclick="switchTab('employees')" class="role-manager-or-admin p-6 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
-          <div>
-            <h3 class="font-bold text-gray-900 text-base">Employee Management</h3>
-            <p class="text-xs text-gray-500 mt-1">Staff roster, First/Last Name, PIN codes.</p>
-          </div>
-        </button>
-
-        <!-- Button 6: Actual Hours (ADP) Admin -->
-        <button onclick="switchTab('actuals')" class="role-admin-only p-6 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
-          <div>
-            <h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3>
-            <p class="text-xs text-gray-500 mt-1">Summary table & weekly detailed tables.</p>
-          </div>
-        </button>
-      </div>
+      <div id="hub-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
     </div>
 
     <!-- 1. Weekly Scheduler Tab -->
@@ -147,10 +84,10 @@
           <button onclick="changeWeek(1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">Next Week &gt;</button>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="saveCurrentSchedule()" class="role-admin-only px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-1">
+          <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-sm items-center gap-1">
             💾 Save Schedule
           </button>
-          <button onclick="generateSmsText()" class="role-admin-only px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm flex items-center gap-1">
+          <button onclick="generateSmsText()" id="btn-copy-sms" class="hidden px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm items-center gap-1">
             💬 Copy Schedule Text
           </button>
         </div>
@@ -211,7 +148,7 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div>
           <h2 class="text-lg font-bold">Staff Availability Overview & Admin Override</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Review all staff availabilities. As Admin, you can select any staff member below to modify their availability for this week.</p>
+          <p class="text-xs text-gray-500 mt-0.5">Review all staff availabilities. As Admin/Manager, you can select any staff member below to modify their availability for this week.</p>
         </div>
 
         <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border">
@@ -220,8 +157,8 @@
           <button onclick="changeOverviewWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
         </div>
 
-        <div class="role-admin-only bg-indigo-50 border border-indigo-200 p-4 rounded-xl space-y-3">
-          <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wide">👑 Admin Override: Modify Staff Availability</label>
+        <div id="override-section-box" class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl space-y-3">
+          <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wide">👑 Admin/Manager Override: Modify Staff Availability</label>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <select id="admin-override-user" class="p-2 border rounded-lg bg-white text-sm font-semibold text-indigo-900 flex-1" onchange="loadAdminSelectedAvail()">
               <option value="">-- Click here to select staff to edit --</option>
@@ -316,7 +253,7 @@
             <h2 class="text-lg font-bold">Staff Roster & Permissions</h2>
             <p id="employee-tab-desc" class="text-xs text-gray-500 mt-0.5"></p>
           </div>
-          <button id="add-emp-btn" onclick="addNewRow()" class="role-admin-only px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm flex items-center gap-1">
+          <button id="add-emp-btn" onclick="addNewRow()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm items-center gap-1">
             ➕ Add New Staff
           </button>
         </div>
@@ -330,11 +267,11 @@
                 <th class="p-3 w-32">Last Name</th>
                 <th class="p-3 w-32">ENG Name (Display)</th>
                 <th class="p-3 w-28">Role</th>
-                <th class="p-3 role-admin-only w-20">PIN</th>
+                <th class="p-3 pin-header w-20">PIN</th>
                 <th class="p-3">Email</th>
                 <th class="p-3 w-32">Phone</th>
                 <th class="p-3 w-20 text-center">Status</th>
-                <th class="p-3 role-admin-only w-28 text-center">Actions</th>
+                <th class="p-3 action-header w-28 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="employee-table-body" class="divide-y text-sm"></tbody>
@@ -343,7 +280,7 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours (Admin) - Schedule Discrepancy & Missing Hours Alerts on Top -->
+    <!-- 5. ADP Hours (Admin/Manager) -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -611,6 +548,7 @@
       document.getElementById('current-user-name').textContent = currentUser.name;
       document.getElementById('current-user-badge').textContent = getRoleLabel(currentUser.role);
 
+      setupNavigationAndHub();
       applyRolePermissions();
       switchTab('hub');
       renderEmployeeTable();
@@ -630,25 +568,100 @@
 
     function goHome() { switchTab('hub'); }
 
+    // 권한별 상단 네비게이션바 및 3x3 Hub 메뉴 동적 구성
+    function setupNavigationAndHub() {
+      const isAdminOrManager = currentUser.role === 'admin' || currentUser.role === 'manager';
+      const isAdmin = currentUser.role === 'admin';
+
+      // 1. Top Nav Bar
+      let navHtml = `<button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 font-semibold transition">🏠 Menu</button>`;
+      navHtml += `<button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Weekly Schedule</button>`;
+      navHtml += `<button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Submit Availability</button>`;
+
+      if (isAdminOrManager) {
+        navHtml += `<button onclick="switchTab('view-avail')" id="nav-view-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Staff Availability</button>`;
+        navHtml += `<button onclick="switchTab('employees')" id="nav-employees" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Employees</button>`;
+        navHtml += `<button onclick="switchTab('actuals')" id="nav-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Hours</button>`;
+      }
+
+      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Actual Hours</button>`;
+      document.getElementById('top-nav-bar').innerHTML = navHtml;
+
+      // 2. 3x3 Hub Grid
+      let hubHtml = `
+        <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
+          <div><h3 class="font-bold text-gray-900 text-base">Weekly Schedule</h3><p class="text-xs text-gray-500 mt-1">View personal or manage store weekly shifts.</p></div>
+        </button>
+        <button onclick="switchTab('submit-avail')" class="p-6 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">⏰</div>
+          <div><h3 class="font-bold text-gray-900 text-base">Submit Availability</h3><p class="text-xs text-gray-500 mt-1">Submit your weekly availability preferences.</p></div>
+        </button>
+        <button onclick="switchTab('my-actuals')" class="p-6 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+          <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-600 group-hover:text-white transition">⏱️</div>
+          <div><h3 class="font-bold text-gray-900 text-base">My Actual Hours</h3><p class="text-xs text-gray-500 mt-1">Log your 2-week actual working hours for payroll.</p></div>
+        </button>
+      `;
+
+      if (isAdminOrManager) {
+        hubHtml += `
+          <button onclick="switchTab('view-avail')" class="p-6 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">👥</div>
+            <div><h3 class="font-bold text-gray-900 text-base">Staff Availability</h3><p class="text-xs text-gray-500 mt-1">Review team availability & admin override.</p></div>
+          </button>
+          <button onclick="switchTab('employees')" class="p-6 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
+            <div><h3 class="font-bold text-gray-900 text-base">Employee Management</h3><p class="text-xs text-gray-500 mt-1">Staff roster, First/Last Name, PIN codes.</p></div>
+          </button>
+          <button onclick="switchTab('actuals')" class="p-6 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
+            <div><h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3><p class="text-xs text-gray-500 mt-1">Summary table & weekly detailed tables.</p></div>
+          </button>
+        `;
+      }
+      document.getElementById('hub-grid').innerHTML = hubHtml;
+    }
+
     function applyRolePermissions() {
       const isAdmin = currentUser.role === 'admin';
       const isManager = currentUser.role === 'manager';
 
-      document.querySelectorAll('.role-admin-only').forEach(el => {
-        if (isAdmin) el.classList.remove('hidden'); else el.classList.add('hidden');
-      });
-      document.querySelectorAll('.role-manager-or-admin').forEach(el => {
-        if (isAdmin || isManager) el.classList.remove('hidden'); else el.classList.add('hidden');
-      });
+      // 1. Weekly Schedule 쓰기 버튼 (Master Admin 전용)
+      if (isAdmin) {
+        document.getElementById('btn-save-schedule').classList.remove('hidden');
+        document.getElementById('btn-copy-sms').classList.remove('hidden');
+      } else {
+        document.getElementById('btn-save-schedule').classList.add('hidden');
+        document.getElementById('btn-copy-sms').classList.add('hidden');
+      }
+
+      // 2. Staff Availability Override 권한 (Admin & Manager 모두 가능)
+      const overrideBox = document.getElementById('override-section-box');
+      if (isAdmin || isManager) {
+        if (overrideBox) overrideBox.classList.remove('hidden');
+      } else {
+        if (overrideBox) overrideBox.classList.add('hidden');
+      }
+
+      // 3. Employee Management (Master Admin만 직원 추가/수정/삭제 가능, Manager는 읽기 전용)
+      const addEmpBtn = document.getElementById('add-emp-btn');
+      if (isAdmin) {
+        if (addEmpBtn) addEmpBtn.classList.remove('hidden');
+      } else {
+        if (addEmpBtn) addEmpBtn.classList.add('hidden');
+      }
 
       const descEl = document.getElementById('employee-tab-desc');
       if (isAdmin) {
         descEl.textContent = 'Manage staff First/Last name, Staff No., PIN codes, and permissions.';
       } else if (isManager) {
-        descEl.textContent = 'View contact information (Phone and Email) for all active staff members.';
+        descEl.textContent = 'View contact information (Phone and Email) for all active staff members (Read-Only).';
       }
     }
 
+    // ==========================================
+    // Weekly Schedule
+    // ==========================================
     function changeWeek(offset) {
       currentSunday.setDate(currentSunday.getDate() + (offset * 7));
       loadWeeklySchedule();
@@ -682,11 +695,13 @@
 
     function renderScheduler() {
       const isAdminOrManager = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager');
+      // 매니저는 읽기만 가능하도록 스케줄 테이블 컨트롤 제어
+      const canEditSchedule = currentUser && currentUser.role === 'admin';
 
       if (isAdminOrManager) {
         document.getElementById('admin-schedule-view').classList.remove('hidden');
         document.getElementById('staff-schedule-view').classList.add('hidden');
-        renderAdminScheduleTable();
+        renderAdminScheduleTable(canEditSchedule);
         updateShiftCountSummary();
       } else {
         document.getElementById('admin-schedule-view').classList.add('hidden');
@@ -719,7 +734,7 @@
       document.getElementById('shift-count-summary').classList.remove('hidden');
     }
 
-    function renderAdminScheduleTable() {
+    function renderAdminScheduleTable(canEdit) {
       const headerRow = document.getElementById('schedule-header-row');
       let headerHtml = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
 
@@ -748,7 +763,6 @@
       const tbody = document.getElementById('schedule-tbody');
       tbody.innerHTML = '';
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
-      const isAdmin = currentUser && currentUser.role === 'admin';
 
       shifts.forEach((shift) => {
         if (shift.key === 'divider') {
@@ -771,15 +785,15 @@
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition ${colorClass || 'bg-white'}" ${!isAdmin ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition ${colorClass || 'bg-white'}" ${!canEdit ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
                   ${availableList.map(e => `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${getAvailNoteStr(e.name, dayIndex)}</option>`).join('')}
                   ${unavailableList.length > 0 ? `<option disabled>────── Unavailable ──────</option>${unavailableList.map(e => `<option value="${e.name}" class="text-gray-400" ${e.name === selectedEmp ? 'selected' : ''}>⚠️ ${e.name} (Unavailable)</option>`).join('')}` : ''}
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
-                  <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.start_time)}</select>
+                  <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!canEdit ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.start_time)}</select>
                   <span>~</span>
-                  <select class="end-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.end_time)}</select>
+                  <select class="end-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!canEdit ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.end_time)}</select>
                 </div>
               </div>
             </td>
@@ -881,6 +895,273 @@
         alert("Schedule saved successfully!");
         await loadWeeklySchedule();
       } catch (e) { alert("Failed to save schedule: " + e.message); }
+    }
+
+    // ==========================================
+    // Staff Availability Submission (with Cut-off)
+    // ==========================================
+    function changeAvailWeek(offset) {
+      availSunday.setDate(availSunday.getDate() + (offset * 7));
+      loadMyAvailabilityForm();
+    }
+
+    async function loadMyAvailabilityForm() {
+      const saturday = new Date(availSunday);
+      saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('avail-week-label').textContent = `Week of ${availSunday.toLocaleString('en-US', { month: 'short' })} ${availSunday.getDate()} (${formatDateISO(availSunday)} ~ ${formatDateISO(saturday)})`;
+
+      checkAvailabilityDeadline(availSunday);
+
+      let existingMap = {};
+      const weekStartStr = formatDateISO(availSunday);
+      if (_supabase && currentUser) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).eq('employee_name', currentUser.name);
+          if (data) data.forEach(item => { existingMap[item.day_index] = item; });
+        } catch (e) { console.error(e); }
+      }
+
+      const grid = document.getElementById('submit-avail-grid');
+      let html = '';
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(availSunday);
+        d.setDate(d.getDate() + i);
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const saved = existingMap[i] || {};
+        const selStatus = saved.status || 'Available (Anytime)';
+
+        html += `
+          <div class="border rounded-xl p-4 bg-gray-50 flex flex-col justify-between space-y-3" data-avail-day="${i}">
+            <div class="font-bold text-sm text-gray-800 border-b pb-1 flex justify-between items-center">
+              <span>${dayNames[i]}</span>
+              <span class="text-xs font-normal text-gray-500">${mm}/${dd}</span>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-600 mb-1">Preference</label>
+              <select class="avail-status w-full p-2 text-xs border rounded bg-white font-medium" onchange="toggleCustomAvailHours(this)">
+                ${availOptions.map(opt => `<option value="${opt}" ${opt === selStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+              </select>
+            </div>
+            <div class="avail-custom-box ${selStatus === 'Custom Hours' ? '' : 'hidden'} space-y-1 pt-1">
+              <label class="block text-[10px] font-bold text-indigo-700">Custom Hours</label>
+              <div class="flex items-center gap-1 text-[11px]">
+                <select class="avail-start w-1/2 p-1 border rounded bg-white">${generateTimeOptionsSelected(saved.start_time)}</select>
+                <span>~</span>
+                <select class="avail-end w-1/2 p-1 border rounded bg-white">${generateTimeOptionsSelected(saved.end_time)}</select>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    function checkAvailabilityDeadline(sundayDate) {
+      const thursday = new Date(sundayDate);
+      thursday.setDate(thursday.getDate() - 3); // 해당 주 수요일/목요일 계산 (일요일 기준 직전 목요일)
+      thursday.setHours(23, 59, 59, 999);
+
+      const now = new Date();
+      isAvailDeadlinePassed = now > thursday;
+
+      const warningBox = document.getElementById('deadline-warning-box');
+      const saveBtn = document.getElementById('btn-save-avail');
+
+      if (isAvailDeadlinePassed && currentUser.role === 'employee') {
+        warningBox.classList.remove('hidden');
+        saveBtn.disabled = true;
+        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        warningBox.classList.add('hidden');
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
+    function toggleCustomAvailHours(selectEl) {
+      const box = selectEl.closest('[data-avail-day]').querySelector('.avail-custom-box');
+      if (selectEl.value === 'Custom Hours') box.classList.remove('hidden'); else box.classList.add('hidden');
+      markModified();
+    }
+
+    async function saveMyAvailability() {
+      if (isAvailDeadlinePassed && currentUser.role === 'employee') return alert("Deadline passed.");
+      if (!_supabase || !currentUser) return alert("Database not connected.");
+
+      const weekStartStr = formatDateISO(availSunday);
+      const records = [];
+
+      document.querySelectorAll('#submit-avail-grid [data-avail-day]').forEach(card => {
+        const dayIndex = parseInt(card.getAttribute('data-avail-day'), 10);
+        const status = card.querySelector('.avail-status').value;
+        const startTime = card.querySelector('.avail-start')?.value || '';
+        const endTime = card.querySelector('.avail-end')?.value || '';
+
+        records.push({
+          employee_name: currentUser.name,
+          week_start_date: weekStartStr,
+          day_index: dayIndex,
+          status,
+          start_time: startTime,
+          end_time: endTime
+        });
+      });
+
+      try {
+        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).eq('employee_name', currentUser.name);
+        const { error } = await _supabase.from('availabilities').insert(records);
+        if (error) throw error;
+        isDataModified = false;
+        alert("Availability saved successfully!");
+      } catch (e) { alert("Failed to save availability: " + e.message); }
+    }
+
+    // ==========================================
+    // Staff Availability Overview & Admin/Manager Override
+    // ==========================================
+    function changeOverviewWeek(offset) {
+      overviewSunday.setDate(overviewSunday.getDate() + (offset * 7));
+      loadOverviewAvailability();
+    }
+
+    async function loadOverviewAvailability() {
+      const saturday = new Date(overviewSunday);
+      saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('overview-week-label').textContent = `Week of ${overviewSunday.toLocaleString('en-US', { month: 'short' })} ${overviewSunday.getDate()} (${formatDateISO(overviewSunday)} ~ ${formatDateISO(saturday)})`;
+
+      const weekStartStr = formatDateISO(overviewSunday);
+      let allAvail = [];
+      if (_supabase) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr);
+          if (data) allAvail = data;
+        } catch (e) { console.error(e); }
+      }
+
+      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+      const select = document.getElementById('admin-override-user');
+      select.innerHTML = '<option value="">-- Click here to select staff to edit --</option>' + 
+        activeStaff.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+
+      renderOverviewTable(activeStaff, allAvail);
+    }
+
+    function renderOverviewTable(staffList, allAvail) {
+      const headerRow = document.getElementById('avail-overview-header');
+      let hHtml = `<th class="p-3 w-36 border-r">Staff Name</th>`;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(overviewSunday);
+        d.setDate(d.getDate() + i);
+        hHtml += `<th class="p-2 border-r text-center">${dayNames[i]} (${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})</th>`;
+      }
+      headerRow.innerHTML = hHtml;
+
+      const tbody = document.getElementById('avail-overview-tbody');
+      let tHtml = '';
+
+      staffList.forEach(emp => {
+        let rowHtml = `<td class="p-3 font-semibold border-r ${getStaffColorClass(emp.name)}">${emp.name}</td>`;
+        for (let i = 0; i < 7; i++) {
+          const match = allAvail.find(a => a.employee_name === emp.name && a.day_index === i);
+          const st = match?.status || 'Available (Anytime)';
+          let badgeColor = 'bg-gray-100 text-gray-700';
+          if (st === 'Unavailable') badgeColor = 'bg-red-100 text-red-800 font-bold';
+          else if (st === 'Open') badgeColor = 'bg-emerald-100 text-emerald-800';
+          else if (st === 'Day Only') badgeColor = 'bg-blue-100 text-blue-800';
+          else if (st === 'Closing Only') badgeColor = 'bg-purple-100 text-purple-800';
+          else if (st === 'Custom Hours') badgeColor = 'bg-amber-100 text-amber-800';
+
+          const note = (st === 'Custom Hours' && match.start_time) ? `<br><span class="text-[10px] text-gray-500">${match.start_time}~${match.end_time}</span>` : '';
+
+          rowHtml += `<td class="p-2 border-r text-center align-middle"><span class="px-2 py-1 text-xs rounded-lg inline-block ${badgeColor}">${st}${note}</span></td>`;
+        }
+        tHtml += `<tr class="hover:bg-gray-50">${rowHtml}</tr>`;
+      });
+      tbody.innerHTML = tHtml;
+    }
+
+    async function loadAdminSelectedAvail() {
+      const name = document.getElementById('admin-override-user').value;
+      const box = document.getElementById('admin-override-form-box');
+      if (!name) { box.classList.add('hidden'); return; }
+
+      document.getElementById('admin-target-name').textContent = name;
+      box.classList.remove('hidden');
+
+      const weekStartStr = formatDateISO(overviewSunday);
+      let existingMap = {};
+      if (_supabase) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).eq('employee_name', name);
+          if (data) data.forEach(item => { existingMap[item.day_index] = item; });
+        } catch (e) { console.error(e); }
+      }
+
+      const grid = document.getElementById('admin-override-grid');
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
+        const saved = existingMap[i] || {};
+        const selStatus = saved.status || 'Available (Anytime)';
+
+        html += `
+          <div class="border rounded-xl p-3 bg-white flex flex-col justify-between space-y-2" data-override-day="${i}">
+            <div class="font-bold text-xs text-indigo-900 border-b pb-1">${dayNames[i]} (${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})</div>
+            <div>
+              <select class="override-status w-full p-1.5 text-xs border rounded bg-gray-50 font-medium" onchange="toggleOverrideCustom(this)">
+                ${availOptions.map(opt => `<option value="${opt}" ${opt === selStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+              </select>
+            </div>
+            <div class="override-custom-box ${selStatus === 'Custom Hours' ? '' : 'hidden'} space-y-1">
+              <div class="flex items-center gap-1 text-[11px]">
+                <select class="override-start w-1/2 p-1 border rounded bg-gray-50">${generateTimeOptionsSelected(saved.start_time)}</select>
+                <span>~</span>
+                <select class="override-end w-1/2 p-1 border rounded bg-gray-50">${generateTimeOptionsSelected(saved.end_time)}</select>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    function toggleOverrideCustom(selectEl) {
+      const box = selectEl.closest('[data-override-day]').querySelector('.override-custom-box');
+      if (selectEl.value === 'Custom Hours') box.classList.remove('hidden'); else box.classList.add('hidden');
+    }
+
+    async function saveAdminOverrideAvail() {
+      const name = document.getElementById('admin-override-user').value;
+      if (!name || !_supabase) return;
+
+      const weekStartStr = formatDateISO(overviewSunday);
+      const records = [];
+
+      document.querySelectorAll('#admin-override-grid [data-override-day]').forEach(card => {
+        const dayIndex = parseInt(card.getAttribute('data-override-day'), 10);
+        const status = card.querySelector('.override-status').value;
+        const startTime = card.querySelector('.override-start')?.value || '';
+        const endTime = card.querySelector('.override-end')?.value || '';
+
+        records.push({
+          employee_name: name,
+          week_start_date: weekStartStr,
+          day_index: dayIndex,
+          status,
+          start_time: startTime,
+          end_time: endTime
+        });
+      });
+
+      try {
+        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).eq('employee_name', name);
+        const { error } = await _supabase.from('availabilities').insert(records);
+        if (error) throw error;
+        alert(`Successfully updated availability for ${name}!`);
+        loadOverviewAvailability();
+      } catch (e) { alert("Failed to save override: " + e.message); }
     }
 
     // ==========================================
@@ -1151,7 +1432,7 @@
     }
 
     // ==========================================
-    // Admin ADP Bi-Weekly Master Sheet & Discrepancy & Missing Hours Notices
+    // Admin / Manager ADP Bi-Weekly Master Sheet
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -1202,7 +1483,6 @@
         return (a.first_name || '').localeCompare(b.first_name || '');
       });
 
-      // 알림 메시지 구성 (스케줄 불일치 + 누락 시간)
       let alertsHtml = [];
 
       allData.forEach(act => {
@@ -1212,7 +1492,7 @@
             const d = new Date(adminPayPeriodStart);
             d.setDate(d.getDate() + act.day_offset);
             const dateStr = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
-            alertsHtml.append || alertsHtml.push(`<div>• <strong>${act.employee_name}</strong> logged hours on an unscheduled date: <strong>${dateStr}</strong>, total <strong>${Number(act.hours).toFixed(2)}h</strong>.</div>`);
+            alertsHtml.push(`<div>• <strong>${act.employee_name}</strong> logged hours on an unscheduled date: <strong>${dateStr}</strong>, total <strong>${Number(act.hours).toFixed(2)}h</strong>.</div>`);
           }
         }
       });
@@ -1234,7 +1514,6 @@
         discContainer.classList.add('hidden');
       }
 
-      // 1. Render Top Summary Table (누락 시간 합산 포함)
       const summaryTbody = document.getElementById('admin-summary-tbody');
       let summaryHtml = '';
 
@@ -1255,7 +1534,6 @@
           if (m2 && m2.hours) w2Sum += Number(m2.hours);
         }
 
-        // 누락 시간도 주차별 합산에 반영 (날짜 기준으로 Week 1 또는 Week 2에 가산)
         const periodStartSec = adminPayPeriodStart.getTime();
         const periodEndSec = new Date(adminPayPeriodStart); periodEndSec.setDate(periodEndSec.getDate() + 7);
 
@@ -1285,7 +1563,6 @@
       });
       summaryTbody.innerHTML = summaryHtml || `<tr><td colspan="7" class="p-6 text-center text-gray-400">No active staff found.</td></tr>`;
 
-      // 2. Render Week 1 & Week 2 Detailed Tables
       renderDetailedWeeklyTable('admin-week1-header', 'admin-week1-tbody', activeEmployees, allData, schedulesMap, 0);
       renderDetailedWeeklyTable('admin-week2-header', 'admin-week2-tbody', activeEmployees, allData, schedulesMap, 7);
     }
@@ -1514,7 +1791,7 @@
       });
 
       if (tabName === 'scheduler') loadWeeklySchedule();
-      if (tabName === 'submit-avail') loadMyAvailability();
+      if (tabName === 'submit-avail') loadMyAvailabilityForm();
       if (tabName === 'view-avail') loadOverviewAvailability();
       if (tabName === 'my-actuals') loadMyActualHoursForm();
       if (tabName === 'actuals') loadAdminActualHoursMaster();
