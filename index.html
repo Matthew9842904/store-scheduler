@@ -630,7 +630,6 @@
         document.getElementById('btn-copy-sms').classList.add('hidden');
       }
 
-      // 👑 Admin Override Box: Master Admin에게만 허용 (Manager는 제외)
       const overrideBox = document.getElementById('override-section-box');
       const descEl = document.getElementById('avail-overview-desc');
       if (isAdmin) {
@@ -876,7 +875,18 @@
           const empName = cell.querySelector('.emp-select')?.value || '';
           const startTime = cell.querySelector('.start-time-select')?.value || '';
           const endTime = cell.querySelector('.end-time-select')?.value || '';
-          if (empName) records.push({ week_start_date: weekStartStr, shift_key: shiftKey, day_index: dayIdx, employee_name: empName, start_time: startTime, end_time: endTime });
+          if (empName) {
+            const matchedEmp = dbEmployees.find(e => e.name === empName);
+            records.push({
+              week_start_date: weekStartStr,
+              shift_key: shiftKey,
+              day_index: dayIdx,
+              employee_id: matchedEmp ? matchedEmp.id : null,
+              employee_name: empName,
+              start_time: startTime || null,
+              end_time: endTime || null
+            });
+          }
         });
         trIdx++;
       });
@@ -912,7 +922,7 @@
       const weekStartStr = formatDateISO(availSunday);
       if (_supabase && currentUser) {
         try {
-          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).eq('employee_name', currentUser.name);
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).eq('employee_id', currentUser.id);
           if (data) data.forEach(item => { existingMap[item.day_index] = item; });
         } catch (e) { console.error(e); }
       }
@@ -1017,6 +1027,7 @@
         const endTime = card.querySelector('.avail-end')?.value || '';
 
         records.push({
+          employee_id: currentUser.id,
           employee_name: currentUser.name,
           week_start_date: weekStartStr,
           day_index: dayIndex,
@@ -1027,7 +1038,7 @@
       });
 
       try {
-        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).eq('employee_name', currentUser.name);
+        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).eq('employee_id', currentUser.id);
         const { error } = await _supabase.from('availabilities').insert(records);
         if (error) throw error;
         isDataModified = false;
@@ -1060,7 +1071,7 @@
       const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
       const select = document.getElementById('admin-override-user');
       select.innerHTML = '<option value="">-- Click here to select staff to edit --</option>' + 
-        activeStaff.map(e => `<option value="${e.name}">${e.name}</option>`).join('');
+        activeStaff.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
 
       renderOverviewTable(activeStaff, allAvail);
     }
@@ -1081,7 +1092,7 @@
       staffList.forEach(emp => {
         let rowHtml = `<td class="p-3 font-semibold border-r ${getStaffColorClass(emp.name)}">${emp.name}</td>`;
         for (let i = 0; i < 7; i++) {
-          const match = allAvail.find(a => a.employee_name === emp.name && a.day_index === i);
+          const match = allAvail.find(a => (a.employee_id === emp.id || a.employee_name === emp.name) && a.day_index === i);
           const st = match?.status || 'Available (Anytime)';
           let badgeColor = 'bg-gray-100 text-gray-700';
           if (st === 'Unavailable') badgeColor = 'bg-red-100 text-red-800 font-bold';
@@ -1100,18 +1111,21 @@
     }
 
     async function loadAdminSelectedAvail() {
-      const name = document.getElementById('admin-override-user').value;
+      const empId = document.getElementById('admin-override-user').value;
       const box = document.getElementById('admin-override-form-box');
-      if (!name) { box.classList.add('hidden'); return; }
+      if (!empId) { box.classList.add('hidden'); return; }
 
-      document.getElementById('admin-target-name').textContent = name;
+      const targetEmp = dbEmployees.find(e => e.id === empId);
+      if (!targetEmp) { box.classList.add('hidden'); return; }
+
+      document.getElementById('admin-target-name').textContent = targetEmp.name;
       box.classList.remove('hidden');
 
       const weekStartStr = formatDateISO(overviewSunday);
       let existingMap = {};
       if (_supabase) {
         try {
-          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).eq('employee_name', name);
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).or(`employee_id.eq.${empId},employee_name.eq.${targetEmp.name}`);
           if (data) data.forEach(item => { existingMap[item.day_index] = item; });
         } catch (e) { console.error(e); }
       }
@@ -1150,8 +1164,11 @@
     }
 
     async function saveAdminOverrideAvail() {
-      const name = document.getElementById('admin-override-user').value;
-      if (!name || !_supabase) return;
+      const empId = document.getElementById('admin-override-user').value;
+      if (!empId || !_supabase) return;
+
+      const targetEmp = dbEmployees.find(e => e.id === empId);
+      if (!targetEmp) return alert("Employee not found.");
 
       const weekStartStr = formatDateISO(overviewSunday);
       const records = [];
@@ -1163,7 +1180,8 @@
         const endTime = card.querySelector('.override-end')?.value || '';
 
         records.push({
-          employee_name: name,
+          employee_id: targetEmp.id,
+          employee_name: targetEmp.name,
           week_start_date: weekStartStr,
           day_index: dayIndex,
           status,
@@ -1173,10 +1191,10 @@
       });
 
       try {
-        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).eq('employee_name', name);
+        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).or(`employee_id.eq.${targetEmp.id},employee_name.eq.${targetEmp.name}`);
         const { error } = await _supabase.from('availabilities').insert(records);
         if (error) throw error;
-        alert(`Successfully updated availability for ${name}!`);
+        alert(`Successfully updated availability for ${targetEmp.name}!`);
         loadOverviewAvailability();
       } catch (e) { alert("Failed to save override: " + e.message); }
     }
@@ -1544,17 +1562,17 @@
         let w2Sum = 0;
 
         for (let i = 0; i < 7; i++) {
-          const m1 = allData.find(a => a.employee_id === emp.id && a.day_offset === i);
+          const m1 = allData.find(a => (a.employee_id === emp.id || a.employee_name === emp.name) && a.day_offset === i);
           if (m1 && m1.hours) w1Sum += Number(m1.hours);
 
-          const m2 = allData.find(a => a.employee_id === emp.id && a.day_offset === i + 7);
+          const m2 = allData.find(a => (a.employee_id === emp.id || a.employee_name === emp.name) && a.day_offset === i + 7);
           if (m2 && m2.hours) w2Sum += Number(m2.hours);
         }
 
         const periodStartSec = adminPayPeriodStart.getTime();
         const periodEndSec = new Date(adminPayPeriodStart); periodEndSec.setDate(periodEndSec.getDate() + 7);
 
-        missingData.filter(m => m.employee_id === emp.id).forEach(miss => {
+        missingData.filter(m => m.employee_id === emp.id || m.employee_name === emp.name).forEach(miss => {
           const missTime = new Date(miss.date + 'T00:00:00').getTime();
           const hrs = Number(miss.hours) || 0;
           if (missTime >= periodStartSec && missTime < periodEndSec.getTime()) {
@@ -1620,7 +1638,7 @@
         let weekSum = 0;
         for (let i = 0; i < 7; i++) {
           const globalDayIdx = weekOffset + i;
-          const match = allData.find(a => a.employee_id === emp.id && a.day_offset === globalDayIdx) || {};
+          const match = allData.find(a => (a.employee_id === emp.id || a.employee_name === emp.name) && a.day_offset === globalDayIdx) || {};
           const st = match.start_time ? formatTime12hShort(match.start_time) : '-';
           const et = match.end_time ? formatTime12hShort(match.end_time) : '-';
           const hrs = match.hours ? Number(match.hours).toFixed(2) : '0.00';
@@ -1836,7 +1854,7 @@
           for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
             const d = new Date(currentSunday); d.setDate(d.getDate() + dayIndex);
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
-            if (savedItem && savedItem.employee_name === emp.name) {
+            if (savedItem && (savedItem.employee_name === emp.name || savedItem.employee_id === emp.id)) {
               let timeDisplay = (savedItem.start_time && savedItem.end_time) ? `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}` : "10:00 AM ~ 5:00 PM";
               staffShifts.push(`- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${shift.name} (${timeDisplay})`);
             }
