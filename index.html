@@ -368,7 +368,6 @@
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
 
-    // 오늘 날짜 기준 이번 주 일요일 자동 계산
     let _todayForSunday = new Date();
     let currentSunday = new Date(_todayForSunday.setDate(_todayForSunday.getDate() - _todayForSunday.getDay()));
     currentSunday.setHours(0, 0, 0, 0);
@@ -806,7 +805,6 @@
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
-    // 직원을 해제(Select Staff)했을 때 시간 셀렉트박스를 'Time'으로 자동 초기화하는 함수
     function onStaffSelectChange(selectEl) {
       const cell = selectEl.closest('td');
       const startSelect = cell.querySelector('.start-time-select');
@@ -1910,6 +1908,7 @@
       return `${h}:${mStr} ${period}`;
     }
 
+    // 날짜 오름차순(시간순) 정렬 및 지정 영문 문구 추가된 문자열 생성 함수
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const saturday = new Date(currentSunday); saturday.setDate(saturday.getDate() + 6);
@@ -1925,12 +1924,20 @@
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
             if (savedItem && savedItem.employee_name === emp.name) {
               let timeDisplay = (savedItem.start_time && savedItem.end_time) ? `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}` : "10:00 AM ~ 5:00 PM";
-              staffShifts.push(`- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${shift.name} (${timeDisplay})`);
+              staffShifts.push({
+                dayIndex: dayIndex,
+                text: `- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${shift.name} (${timeDisplay})`
+              });
             }
           }
         });
+
+        // 날짜순(일요일~토요일 오름차순) 정렬 적용
+        staffShifts.sort((a, b) => a.dayIndex - b.dayIndex);
+
         if (staffShifts.length > 0) {
-          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${staffShifts.join('\n')}\n\nPlease check your schedule.\n-----------------------------------------\n`;
+          const shiftLines = staffShifts.map(s => s.text).join('\n');
+          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease check your schedule, and if you have any questions or changes, please contact Tammy as soon as possible. Always appreciate your hard work.\n-----------------------------------------\n`;
         }
       });
 
