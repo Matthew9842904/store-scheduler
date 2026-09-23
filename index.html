@@ -414,7 +414,8 @@
 
     const shifts = [
       { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
-      { key: "day", name: "Day", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
+      { key: "day1", name: "Day 1", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
+      { key: "day2", name: "Day 2", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
       { key: "divider" },
       { key: "closing1", name: "Closing 1", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
       { key: "closing2", name: "Closing 2", count: "Night", bg: "bg-purple-50", text: "text-purple-800", type: "closing" },
@@ -818,7 +819,7 @@
 
       dayCells.forEach(({ cell, select, currentVal, shiftKey }) => {
         const isClosingShift = shiftKey.startsWith('closing');
-        const isDayOrOpenShift = shiftKey === 'open' || shiftKey === 'day';
+        const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
 
         let optionsHtml = '<option value="">Select Staff</option>';
         let unavailableOptionsHtml = '';
