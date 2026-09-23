@@ -982,7 +982,7 @@
     }
 
     // ==========================================
-    // Admin ADP Bi-Weekly Master Sheet (Top Summary + Week 1 & Week 2 Detailed Tables)
+    // Admin ADP Bi-Weekly Master Sheet
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -1008,7 +1008,6 @@
     function renderAdminBiWeeklyMaster(allData) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
 
-      // 사번(Staff No.) 기준 오름차순 정렬
       activeEmployees.sort((a, b) => {
         let numA = parseInt(a.staff_no || '999', 10);
         let numB = parseInt(b.staff_no || '999', 10);
@@ -1016,7 +1015,6 @@
         return (a.first_name || '').localeCompare(b.first_name || '');
       });
 
-      // 1. Render Top Summary Table
       const summaryTbody = document.getElementById('admin-summary-tbody');
       let summaryHtml = '';
 
@@ -1053,7 +1051,6 @@
       });
       summaryTbody.innerHTML = summaryHtml || `<tr><td colspan="7" class="p-6 text-center text-gray-400">No active staff found.</td></tr>`;
 
-      // 2. Render Week 1 & Week 2 Detailed Tables (Column = Days, Row = Staff)
       renderDetailedWeeklyTable('admin-week1-header', 'admin-week1-tbody', activeEmployees, allData, 0);
       renderDetailedWeeklyTable('admin-week2-header', 'admin-week2-tbody', activeEmployees, allData, 7);
     }
@@ -1062,7 +1059,6 @@
       const headerRow = document.getElementById(headerId);
       const tbody = document.getElementById(tbodyId);
 
-      // 헤더 생성 (Staff No., First Name, Last Name, ENG Name + 7일치 날짜/요일 + Weekly Total)
       let hHtml = `
         <th class="p-2 border-r w-20 text-center bg-gray-200">Staff No.</th>
         <th class="p-2 border-r w-32 bg-gray-200">First Name</th>
@@ -1078,7 +1074,6 @@
       hHtml += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Total</th>`;
       headerRow.innerHTML = hHtml;
 
-      // 바디 생성 (각 직원별 행)
       let tbodyHtml = '';
       employees.forEach(emp => {
         const staffNo = emp.staff_no || '-';
@@ -1127,7 +1122,7 @@
     }
 
     // ==========================================
-    // Employee Management (First Name, Last Name, Staff No.)
+    // Employee Management (Inline Close without Resetting Tab)
     // ==========================================
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
@@ -1189,10 +1184,13 @@
       if (!first_name || !pin_code) return alert('First Name and PIN required.');
 
       if (_supabase) {
-        await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status }]);
+        const { data, error } = await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status }]).select();
+        if (error) { alert("Failed: " + error.message); return; }
+        if (data && data[0]) dbEmployees.push(data[0]);
+      } else {
+        dbEmployees.push({ id: 'local_' + Date.now(), staff_no, first_name, last_name, name, role, pin_code, email, phone, status });
       }
       isDataModified = false;
-      await initApp();
       renderEmployeeTable();
     }
 
@@ -1221,22 +1219,38 @@
       const role = document.getElementById(`edit-role-${id}`).value;
       const pin_code = document.getElementById(`edit-pin-${id}`).value.trim();
       const email = document.getElementById(`edit-email-${id}`).value.trim();
-      const phone = document.getElementById(`edit-phone-${id}`)? document.getElementById(`edit-phone-${id}`).value.trim() : '';
+      const phone = document.getElementById(`edit-phone-${id}`) ? document.getElementById(`edit-phone-${id}`).value.trim() : '';
 
       if (_supabase) {
-        if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status: 'active' }]);
-        else await _supabase.from('employees').update({ staff_no, first_name, last_name, name, role, pin_code, email, phone }).eq('id', id);
+        if (id === defaultAdmin.id) {
+          await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status: 'active' }]);
+        } else {
+          await _supabase.from('employees').update({ staff_no, first_name, last_name, name, role, pin_code, email, phone }).eq('id', id);
+        }
       }
+
+      // 메모리 내 직원 데이터 객체 직접 업데이트 (탭 튕김 현상 원천 방지)
+      const targetEmp = dbEmployees.find(e => e.id === id);
+      if (targetEmp) {
+        targetEmp.staff_no = staff_no;
+        targetEmp.first_name = first_name;
+        targetEmp.last_name = last_name;
+        targetEmp.name = name;
+        targetEmp.role = role;
+        targetEmp.pin_code = pin_code;
+        targetEmp.email = email;
+        targetEmp.phone = phone;
+      }
+
       isDataModified = false;
-      await initApp();
       renderEmployeeTable();
     }
 
     async function deleteEmployee(id) {
       if (!confirm('Delete employee?')) return;
       if (_supabase && id !== defaultAdmin.id) await _supabase.from('employees').delete().eq('id', id);
+      dbEmployees = dbEmployees.filter(e => e.id !== id);
       isDataModified = false;
-      await initApp();
       renderEmployeeTable();
     }
 
