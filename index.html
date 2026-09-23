@@ -253,9 +253,9 @@
       </div>
     </main>
 
-    <!-- My Actual Hours Tab (Staff Entry) -->
+    <!-- My Actual Hours Tab (Staff Entry + Missing Hours Table) -->
     <main id="view-my-actuals" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
           <div>
             <h2 class="text-lg font-bold text-gray-900">My Actual Hours (2-Week Payroll Entry)</h2>
@@ -275,6 +275,36 @@
         </div>
 
         <div id="my-actuals-tables-container" class="space-y-6"></div>
+
+        <!-- Missing Hours from Last Payroll Period Section -->
+        <div class="pt-6 border-t space-y-4">
+          <div class="flex justify-between items-center">
+            <div>
+              <h3 class="font-bold text-sm text-gray-900">⚠️ Missing Hours from Previous Payroll Period</h3>
+              <p class="text-xs text-gray-500 mt-0.5">If you had any unrecorded hours from the last payroll, enter them below with a reason.</p>
+            </div>
+            <button onclick="addMissingHourRow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs">
+              ➕ Add Missing Hour
+            </button>
+          </div>
+
+          <div class="overflow-x-auto border rounded-xl shadow-xs">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
+                  <th class="p-3 w-36">Date</th>
+                  <th class="p-3 w-28">Day</th>
+                  <th class="p-3 w-36">Start Time</th>
+                  <th class="p-3 w-36">End Time</th>
+                  <th class="p-3 w-28 text-center">Total Hours</th>
+                  <th class="p-3">Reason for Missing Hours</th>
+                  <th class="p-3 w-20 text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="missing-hours-tbody" class="text-sm divide-y"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </main>
 
@@ -313,13 +343,13 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours (Admin) - Schedule Discrepancy Alert Box on Top -->
+    <!-- 5. ADP Hours (Admin) - Schedule Discrepancy & Missing Hours Alerts on Top -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
           <div>
             <h2 class="text-lg font-bold text-gray-900">ADP Payroll - Bi-Weekly Actual Hours</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Bi-weekly master hours summary and detailed daily tables sorted by Staff No.</p>
+            <p class="text-xs text-gray-500 mt-0.5">Bi-weekly master hours summary, detailed daily tables, and missing hours notices.</p>
           </div>
           <div class="flex items-center gap-3">
             <button onclick="changeAdminPayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
@@ -328,13 +358,13 @@
           </div>
         </div>
 
-        <!-- Schedule Discrepancy Alert Notice (Top) -->
-        <div id="schedule-discrepancy-container" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl shadow-xs space-y-2">
+        <!-- Schedule Discrepancy & Missing Hours Alert Notice (Top) -->
+        <div id="schedule-discrepancy-container" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl shadow-xs space-y-3">
           <div class="flex items-center gap-2 font-bold text-amber-900 text-sm">
             <span>⚠️</span>
-            <span>Schedule Discrepancy Alerts (Logged hours differ from or not found in scheduled shifts):</span>
+            <span>Payroll Discrepancy & Missing Hours Alerts:</span>
           </div>
-          <div id="schedule-discrepancy-list" class="space-y-1 pl-6 text-xs text-amber-800"></div>
+          <div id="schedule-discrepancy-list" class="space-y-1.5 pl-6 text-xs text-amber-800"></div>
         </div>
 
         <!-- 1. Top Summary Table -->
@@ -854,7 +884,7 @@
     }
 
     // ==========================================
-    // My Actual Hours (Staff Entry with Schedule Validation)
+    // My Actual Hours & Missing Hours Entry
     // ==========================================
     function changePayPeriod(offset) {
       myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (offset * 14));
@@ -870,13 +900,13 @@
       let savedActualsMap = {};
       let week1Schedules = {};
       let week2Schedules = {};
+      let missingHoursList = [];
 
       if (_supabase && currentUser) {
         try {
           const { data: actData } = await _supabase.from('actual_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
           if (actData) actData.forEach(item => { savedActualsMap[item.day_offset] = item; });
 
-          // 주차별 스케줄 데이터 로드 (스케줄 대조용)
           const w1DateStr = formatDateISO(myPayPeriodStart);
           const w2Start = new Date(myPayPeriodStart); w2Start.setDate(w2Start.getDate() + 7);
           const w2DateStr = formatDateISO(w2Start);
@@ -887,9 +917,13 @@
           const { data: sched2 } = await _supabase.from('schedules').select('*').eq('week_start_date', w2DateStr).eq('employee_name', currentUser.name);
           if (sched2) sched2.forEach(s => { week2Schedules[s.day_index] = true; });
 
+          const { data: missData } = await _supabase.from('missing_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+          if (missData) missingHoursList = missData;
+
         } catch (e) { console.error(e); }
       }
       renderMyActualsGrid(savedActualsMap, week1Schedules, week2Schedules);
+      renderMissingHoursTable(missingHoursList);
     }
 
     function renderMyActualsGrid(savedMap, w1Sched, w2Sched) {
@@ -960,7 +994,7 @@
       if (start && end) {
         const isScheduled = cell.getAttribute('data-scheduled') === 'true';
         if (!isScheduled) {
-          const proceed = confirm("스케줄에 나와있지 않은 날입니다. 그래도 입력하시겠습니까?");
+          const proceed = confirm("This date is not in your schedule. Do you still want to enter hours?");
           if (!proceed) {
             cell.querySelector('.my-start').value = '';
             cell.querySelector('.my-end').value = '';
@@ -985,6 +1019,70 @@
       }
       document.getElementById('week-0-total').textContent = w0Tot.toFixed(2) + 'h';
       document.getElementById('week-1-total').textContent = w1Tot.toFixed(2) + 'h';
+      markModified();
+    }
+
+    function renderMissingHoursTable(list) {
+      const tbody = document.getElementById('missing-hours-tbody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400 text-xs">No missing hours recorded for this period.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map((item, idx) => `
+        <tr class="missing-row hover:bg-gray-50" data-missing-id="${item.id || idx}">
+          <td class="p-2"><input type="date" class="miss-date w-full p-1 text-xs border rounded bg-white" value="${item.date || ''}" onchange="calcMissingRowHours(this)"></td>
+          <td class="p-2 miss-day font-semibold text-gray-600 text-xs">${item.date ? dayNames[new Date(item.date + 'T00:00:00').getDay()] : '-'}</td>
+          <td class="p-2"><select class="miss-start w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected(item.start_time)}</select></td>
+          <td class="p-2"><select class="miss-end w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected(item.end_time)}</select></td>
+          <td class="p-2 text-center font-bold text-indigo-700 miss-hrs">${Number(item.hours || 0).toFixed(2)}h</td>
+          <td class="p-2"><input type="text" class="miss-reason w-full p-1 text-xs border rounded bg-white" placeholder="Enter reason" value="${item.reason || ''}"></td>
+          <td class="p-2 text-center"><button onclick="removeMissingRow(this)" class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border border-red-200">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function addMissingHourRow() {
+      const tbody = document.getElementById('missing-hours-tbody');
+      if (tbody.querySelector('.text-gray-400')) tbody.innerHTML = '';
+      const tr = document.createElement('tr');
+      tr.className = "missing-row hover:bg-gray-50";
+      tr.innerHTML = `
+        <td class="p-2"><input type="date" class="miss-date w-full p-1 text-xs border rounded bg-white" value="${formatDateISO(new Date())}" onchange="calcMissingRowHours(this)"></td>
+        <td class="p-2 miss-day font-semibold text-gray-600 text-xs">${dayNames[new Date().getDay()]}</td>
+        <td class="p-2"><select class="miss-start w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected('09:00')}</select></td>
+        <td class="p-2"><select class="miss-end w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected('17:00')}</select></td>
+        <td class="p-2 text-center font-bold text-indigo-700 miss-hrs">8.00h</td>
+        <td class="p-2"><input type="text" class="miss-reason w-full p-1 text-xs border rounded bg-white" placeholder="Enter reason"></td>
+        <td class="p-2 text-center"><button onclick="removeMissingRow(this)" class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border border-red-200">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
+      markModified();
+    }
+
+    function calcMissingRowHours(el) {
+      const tr = el.closest('tr');
+      const dateVal = tr.querySelector('.miss-date').value;
+      if (dateVal) {
+        const d = new Date(dateVal + 'T00:00:00');
+        tr.querySelector('.miss-day').textContent = dayNames[d.getDay()];
+      }
+      const start = tr.querySelector('.miss-start').value;
+      const end = tr.querySelector('.miss-end').value;
+      let hours = 0;
+      if (start && end) {
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        let diff = (eh * 60 + em) - (sh * 60 + sm);
+        if (diff < 0) diff += 24 * 60;
+        hours = diff / 60;
+      }
+      tr.querySelector('.miss-hrs').textContent = hours.toFixed(2) + 'h';
+      markModified();
+    }
+
+    function removeMissingRow(btn) {
+      btn.closest('tr').remove();
       markModified();
     }
 
@@ -1013,19 +1111,47 @@
         }
       }
 
+      const missingRecords = [];
+      document.querySelectorAll('#missing-hours-tbody .missing-row').forEach(tr => {
+        const date = tr.querySelector('.miss-date')?.value;
+        const start_time = tr.querySelector('.miss-start')?.value;
+        const end_time = tr.querySelector('.miss-end')?.value;
+        const hours = parseFloat(tr.querySelector('.miss-hrs')?.textContent) || 0;
+        const reason = tr.querySelector('.miss-reason')?.value || '';
+        if (date && hours > 0) {
+          missingRecords.push({
+            employee_id: currentUser.id,
+            employee_name: currentUser.name,
+            period_start_date: periodStartStr,
+            date,
+            start_time,
+            end_time,
+            hours,
+            reason
+          });
+        }
+      });
+
       try {
         await _supabase.from('actual_hours').delete().eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
         if (records.length > 0) {
           const { error } = await _supabase.from('actual_hours').insert(records);
           if (error) throw error;
         }
+
+        await _supabase.from('missing_hours').delete().eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+        if (missingRecords.length > 0) {
+          const { error: missErr } = await _supabase.from('missing_hours').insert(missingRecords);
+          if (missErr) throw missErr;
+        }
+
         isDataModified = false;
-        alert("Your actual hours saved successfully!");
+        alert("Your actual hours & missing hours saved successfully!");
       } catch (e) { alert("Failed to save: " + e.message); }
     }
 
     // ==========================================
-    // Admin ADP Bi-Weekly Master Sheet & Schedule Discrepancy Detection
+    // Admin ADP Bi-Weekly Master Sheet & Discrepancy & Missing Hours Notices
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -1039,14 +1165,14 @@
       document.getElementById('admin-pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
 
       let allActualsData = [];
-      let allSchedulesMap = {}; // key: "empName_dayIndex", value: true
+      let allSchedulesMap = {};
+      let allMissingData = [];
 
       if (_supabase) {
         try {
           const { data } = await _supabase.from('actual_hours').select('*').eq('period_start_date', periodStartStr);
           if (data) allActualsData = data;
 
-          // 주차별 스케줄 로드
           const w1DateStr = periodStartStr;
           const w2Start = new Date(adminPayPeriodStart); w2Start.setDate(w2Start.getDate() + 7);
           const w2DateStr = formatDateISO(w2Start);
@@ -1057,13 +1183,16 @@
           const { data: sched2 } = await _supabase.from('schedules').select('*').eq('week_start_date', w2DateStr);
           if (sched2) sched2.forEach(s => { allSchedulesMap[`${s.employee_name}_${s.day_index + 7}`] = true; });
 
+          const { data: missData } = await _supabase.from('missing_hours').select('*').eq('period_start_date', periodStartStr);
+          if (missData) allMissingData = missData;
+
         } catch (e) { console.error(e); }
       }
 
-      renderAdminBiWeeklyMaster(allActualsData, allSchedulesMap);
+      renderAdminBiWeeklyMaster(allActualsData, allSchedulesMap, allMissingData);
     }
 
-    function renderAdminBiWeeklyMaster(allData, schedulesMap) {
+    function renderAdminBiWeeklyMaster(allData, schedulesMap, missingData) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
 
       activeEmployees.sort((a, b) => {
@@ -1073,8 +1202,9 @@
         return (a.first_name || '').localeCompare(b.first_name || '');
       });
 
-      // 0. 스케줄 불일치(또는 스케줄 없는 날 근무 입력) 탐지 및 맨 위 알림 표시
-      let discrepancies = [];
+      // 알림 메시지 구성 (스케줄 불일치 + 누락 시간)
+      let alertsHtml = [];
+
       allData.forEach(act => {
         if (act.hours > 0) {
           const key = `${act.employee_name}_${act.day_offset}`;
@@ -1082,26 +1212,29 @@
             const d = new Date(adminPayPeriodStart);
             d.setDate(d.getDate() + act.day_offset);
             const dateStr = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
-            discrepancies.push({
-              name: act.employee_name,
-              dateStr: dateStr,
-              hours: act.hours,
-              time: `${act.start_time || '?'} ~ ${act.end_time || '?'}`
-            });
+            alertsHtml.append || alertsHtml.push(`<div>• <strong>${act.employee_name}</strong> logged hours on an unscheduled date: <strong>${dateStr}</strong>, total <strong>${Number(act.hours).toFixed(2)}h</strong>.</div>`);
           }
+        }
+      });
+
+      missingData.forEach(miss => {
+        if (miss.hours > 0) {
+          const d = new Date(miss.date + 'T00:00:00');
+          const dateStr = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
+          alertsHtml.push(`<div>• <strong>${miss.employee_name}</strong> submitted <strong>Missing Hours</strong> for <strong>${dateStr}</strong> (${Number(miss.hours).toFixed(2)}h). Reason: <em>"${miss.reason || 'No reason provided'}"</em></div>`);
         }
       });
 
       const discContainer = document.getElementById('schedule-discrepancy-container');
       const discList = document.getElementById('schedule-discrepancy-list');
-      if (discrepancies.length > 0) {
-        discList.innerHTML = discrepancies.map(d => `<div>• <strong>${d.name}</strong>님이 스케줄에 없는 날짜인 <strong>${d.dateStr}</strong>에 근무({d.time}, <strong>${d.hours}시간</strong>)를 입력했습니다.</div>`).join('');
+      if (alertsHtml.length > 0) {
+        discList.innerHTML = alertsHtml.join('');
         discContainer.classList.remove('hidden');
       } else {
         discContainer.classList.add('hidden');
       }
 
-      // 1. Render Top Summary Table
+      // 1. Render Top Summary Table (누락 시간 합산 포함)
       const summaryTbody = document.getElementById('admin-summary-tbody');
       let summaryHtml = '';
 
@@ -1121,6 +1254,20 @@
           const m2 = allData.find(a => a.employee_id === emp.id && a.day_offset === i + 7);
           if (m2 && m2.hours) w2Sum += Number(m2.hours);
         }
+
+        // 누락 시간도 주차별 합산에 반영 (날짜 기준으로 Week 1 또는 Week 2에 가산)
+        const periodStartSec = adminPayPeriodStart.getTime();
+        const periodEndSec = new Date(adminPayPeriodStart); periodEndSec.setDate(periodEndSec.getDate() + 7);
+
+        missingData.filter(m => m.employee_id === emp.id).forEach(miss => {
+          const missTime = new Date(miss.date + 'T00:00:00').getTime();
+          const hrs = Number(miss.hours) || 0;
+          if (missTime >= periodStartSec && missTime < periodEndSec.getTime()) {
+            w1Sum += hrs;
+          } else {
+            w2Sum += hrs;
+          }
+        });
 
         const totalSum = w1Sum + w2Sum;
 
