@@ -368,10 +368,15 @@
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
 
-    let currentSunday = new Date(2026, 8, 20); // 2026-09-20
-    let availSunday = new Date(2026, 8, 27);   // 2026-09-27
-    let overviewSunday = new Date(2026, 8, 27); // 2026-09-27
-    let myPayPeriodStart = new Date(2026, 8, 13); // 2026-09-13
+    // 오늘 날짜 기준 이번 주 일요일 자동 계산
+    let _todayForSunday = new Date();
+    let currentSunday = new Date(_todayForSunday.setDate(_todayForSunday.getDate() - _todayForSunday.getDay()));
+    currentSunday.setHours(0, 0, 0, 0);
+
+    let availSunday = new Date(currentSunday);
+    let overviewSunday = new Date(currentSunday);
+
+    let myPayPeriodStart = new Date(2026, 8, 13); // 필요에 따라 조정 가능
     let adminPayPeriodStart = new Date(2026, 8, 13);
 
     let currentScheduleData = {};
@@ -872,7 +877,7 @@
         }
 
         select.innerHTML = optionsHtml;
-        select.value = currentVal; // 명시적으로 현재 값 적용 (비어있으면 빈 칸 선택)
+        select.value = currentVal;
 
         if (currentVal) {
           select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(currentVal)}`;
