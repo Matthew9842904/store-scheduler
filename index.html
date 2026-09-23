@@ -62,6 +62,7 @@
         <button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Weekly Schedule</button>
         <button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Submit Availability</button>
         <button onclick="switchTab('view-avail')" id="nav-view-avail" class="role-admin-only px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Staff Availability</button>
+        <button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Actual Hours</button>
         <button onclick="switchTab('employees')" id="nav-employees" class="role-manager-or-admin px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Employees</button>
         <button onclick="switchTab('actuals')" id="nav-actuals" class="role-admin-only px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Hours</button>
       </nav>
@@ -99,7 +100,16 @@
           </div>
         </button>
 
-        <!-- Button 3: Staff Availability (Admin) -->
+        <!-- Button 3: My Actual Hours (Staff Entry) -->
+        <button onclick="switchTab('my-actuals')" class="p-6 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+          <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-600 group-hover:text-white transition">⏱️</div>
+          <div>
+            <h3 class="font-bold text-gray-900 text-base">My Actual Hours</h3>
+            <p class="text-xs text-gray-500 mt-1">Log your 2-week actual working hours for payroll.</p>
+          </div>
+        </button>
+
+        <!-- Button 4: Staff Availability (Admin) -->
         <button onclick="switchTab('view-avail')" class="role-admin-only p-6 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">👥</div>
           <div>
@@ -108,7 +118,7 @@
           </div>
         </button>
 
-        <!-- Button 4: Employee Management -->
+        <!-- Button 5: Employee Management -->
         <button onclick="switchTab('employees')" class="role-manager-or-admin p-6 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
           <div>
@@ -117,32 +127,14 @@
           </div>
         </button>
 
-        <!-- Button 5: Actual Hours (ADP) -->
+        <!-- Button 6: Actual Hours (ADP) Admin -->
         <button onclick="switchTab('actuals')" class="role-admin-only p-6 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
           <div>
-            <h3 class="font-bold text-gray-900 text-base">Actual Hours (ADP)</h3>
-            <p class="text-xs text-gray-500 mt-1">Payroll summary for ADP entry.</p>
+            <h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3>
+            <p class="text-xs text-gray-500 mt-1">2-week payroll summary matching ADP sheet.</p>
           </div>
         </button>
-
-        <!-- Slots 6 to 9 -->
-        <div class="p-6 bg-gray-50 border border-dashed border-gray-200 rounded-2xl flex flex-col justify-between opacity-50">
-          <div class="w-10 h-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-lg mb-4">🔒</div>
-          <div><h3 class="font-bold text-gray-400 text-base">Coming Soon</h3><p class="text-[11px] text-gray-400 mt-1">Reserved slot for future expansion.</p></div>
-        </div>
-        <div class="p-6 bg-gray-50 border border-dashed border-gray-200 rounded-2xl flex flex-col justify-between opacity-50">
-          <div class="w-10 h-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-lg mb-4">🔒</div>
-          <div><h3 class="font-bold text-gray-400 text-base">Coming Soon</h3><p class="text-[11px] text-gray-400 mt-1">Reserved slot for future expansion.</p></div>
-        </div>
-        <div class="p-6 bg-gray-50 border border-dashed border-gray-200 rounded-2xl flex flex-col justify-between opacity-50">
-          <div class="w-10 h-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-lg mb-4">🔒</div>
-          <div><h3 class="font-bold text-gray-400 text-base">Coming Soon</h3><p class="text-[11px] text-gray-400 mt-1">Reserved slot for future expansion.</p></div>
-        </div>
-        <div class="p-6 bg-gray-50 border border-dashed border-gray-200 rounded-2xl flex flex-col justify-between opacity-50">
-          <div class="w-10 h-10 rounded-xl bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-lg mb-4">🔒</div>
-          <div><h3 class="font-bold text-gray-400 text-base">Coming Soon</h3><p class="text-[11px] text-gray-400 mt-1">Reserved slot for future expansion.</p></div>
-        </div>
       </div>
     </div>
 
@@ -262,6 +254,39 @@
       </div>
     </main>
 
+    <!-- NEW: My Actual Hours Tab (Staff 2-Week Payroll Entry) -->
+    <main id="view-my-actuals" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">My Actual Hours (2-Week Payroll Entry)</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Enter your actual start and end times for the 14-day pay period. Hours are calculated automatically.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="saveMyActualHours()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-sm transition">
+              💾 Save My Actual Hours
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border">
+          <button onclick="changePayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
+          <span id="pay-period-label" class="font-bold text-sm text-gray-800">Calculating pay period...</span>
+          <button onclick="changePayPeriod(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next 2 Weeks &gt;</button>
+        </div>
+
+        <!-- 2-Week Excel-like Form matching ADP sheet -->
+        <div class="overflow-x-auto border rounded-xl shadow-sm">
+          <table class="w-full text-left border-collapse min-w-[1100px]">
+            <thead>
+              <tr id="my-actuals-header-row" class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center"></tr>
+            </thead>
+            <tbody id="my-actuals-tbody" class="text-sm"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
     <!-- 4. Employee Management Tab -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
@@ -295,21 +320,30 @@
       </div>
     </main>
 
-    <!-- 5. Actual Hours (ADP) Tab -->
+    <!-- 5. Actual Hours (ADP) Admin Tab matching user screenshot -->
     <main id="view-actuals" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-xl shadow-sm border">
-        <h2 class="text-lg font-bold mb-2">ADP Payroll - Weekly Actual Hours</h2>
-        <p class="text-sm text-gray-500 mb-4">Sum of actual worked hours per employee ready for ADP entry.</p>
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-              <th class="p-3">Staff Name</th>
-              <th class="p-3">Scheduled Hours</th>
-              <th class="p-3">Actual Worked Hours (Total)</th>
-            </tr>
-          </thead>
-          <tbody id="adp-tbody" class="divide-y text-sm"></tbody>
-        </table>
+      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">ADP Payroll - Bi-Weekly Actual Hours</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Review 2-week actual hours submitted by all staff members for ADP payroll entry.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="changeAdminPayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
+            <span id="admin-pay-period-label" class="font-bold text-sm text-gray-800">Calculating...</span>
+            <button onclick="changeAdminPayPeriod(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next 2 Weeks &gt;</button>
+          </div>
+        </div>
+
+        <!-- Admin 2-Week Master Excel Sheet View matching screenshot -->
+        <div class="overflow-x-auto border rounded-xl shadow-sm">
+          <table class="w-full text-left border-collapse min-w-[1300px]" border="1">
+            <thead>
+              <tr id="admin-actuals-header" class="bg-gray-100 border-b text-[11px] font-semibold text-gray-700 uppercase text-center"></tr>
+            </thead>
+            <tbody id="admin-actuals-tbody" class="text-xs divide-y"></tbody>
+          </table>
+        </div>
       </div>
     </main>
   </div>
@@ -330,6 +364,8 @@
     let currentSunday = new Date(2026, 8, 20); // 2026-09-20
     let availSunday = new Date(2026, 8, 20);
     let overviewSunday = new Date(2026, 8, 20);
+    let myPayPeriodStart = new Date(2026, 8, 13); // 2026-09-13 (2주 시작 일요일 기준)
+    let adminPayPeriodStart = new Date(2026, 8, 13);
 
     let currentScheduleData = {};
     let weekAvailMap = {};
@@ -339,25 +375,15 @@
     let currentActiveTab = 'hub';
     let isDataModified = false;
 
-    // 밴쿠버 14일치 실시간 날씨 데이터 저장소
     let realVancouverWeatherCache = {};
 
-    // BC주 스탯 홀리데이 목록 (2026 기준)
     const bcStatHolidays2026 = {
-      '2026-01-01': "New Year's Day",
-      '2026-02-16': "Family Day",
-      '2026-04-03': "Good Friday",
-      '2026-05-18': "Victoria Day",
-      '2026-07-01': "Canada Day",
-      '2026-08-03': "BC Day",
-      '2026-09-07': "Labour Day",
-      '2026-09-30': "Truth and Reconciliation",
-      '2026-10-12': "Thanksgiving",
-      '2026-11-11': "Remembrance Day",
-      '2026-12-25': "Christmas Day"
+      '2026-01-01': "New Year's Day", '2026-02-16': "Family Day", '2026-04-03': "Good Friday",
+      '2026-05-18': "Victoria Day", '2026-07-01': "Canada Day", '2026-08-03': "BC Day",
+      '2026-09-07': "Labour Day", '2026-09-30': "Truth and Reconciliation", '2026-10-12': "Thanksgiving",
+      '2026-11-11': "Remembrance Day", '2026-12-25': "Christmas Day"
     };
 
-    // 직원별 고유 컬러 팔레트
     const staffColors = [
       { bg: 'bg-rose-100', text: 'text-rose-900', border: 'border-rose-300' },
       { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300' },
@@ -421,35 +447,30 @@
       return `${year}-${month}-${day}`;
     }
 
-    // 밴쿠버 14일치 실시간 날씨 데이터 페치 (forecast_days=14 설정)
     async function fetchRealVancouverWeather14Days() {
       try {
         const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=49.2827&longitude=-123.1207&daily=temperature_2m_max,weathercode&timezone=America%2FVancouver&forecast_days=14');
         const data = await response.json();
         if (data && data.daily && data.daily.time) {
           for (let i = 0; i < data.daily.time.length; i++) {
-            const dateStr = data.daily.time[i]; // YYYY-MM-DD
-            const maxTemp = Math.round(data.daily.temperature_2m_max[i]);
-            const code = data.daily.weathercode[i];
+            const dateStr = data.daily.time[i];
             realVancouverWeatherCache[dateStr] = {
-              temp: maxTemp,
-              icon: getWeatherEmojiByCode(code)
+              temp: Math.round(data.daily.temperature_2m_max[i]),
+              icon: getWeatherEmojiByCode(data.daily.weathercode[i])
             };
           }
         }
-      } catch (err) {
-        console.log("14-day weather fetch warning:", err);
-      }
+      } catch (err) { console.log(err); }
     }
 
     function getWeatherEmojiByCode(code) {
-      if (code === 0) return '☀️'; // 맑음
-      if (code >= 1 && code <= 3) return '⛅'; // 구름 조금 / 구름 많음
-      if (code >= 45 && code <= 48) return '🌫️'; // 안개
-      if (code >= 51 && code <= 67) return '🌧️'; // 비 / 이슬비 (폭우 대응 가능)
-      if (code >= 71 && code <= 77) return '❄️'; // 눈
-      if (code >= 80 && code <= 82) return '🌧️'; // 소나기
-      if (code >= 95) return '⛈️'; // 천둥번개
+      if (code === 0) return '☀️';
+      if (code >= 1 && code <= 3) return '⛅';
+      if (code >= 45 && code <= 48) return '🌫️';
+      if (code >= 51 && code <= 67) return '🌧️';
+      if (code >= 71 && code <= 77) return '❄️';
+      if (code >= 80 && code <= 82) return '🌧️';
+      if (code >= 95) return '⛈️';
       return '🌤️';
     }
 
@@ -498,7 +519,6 @@
       e.preventDefault();
       const empId = document.getElementById('login-user').value;
       const pin = document.getElementById('login-pin').value;
-
       let user = dbEmployees.find(e => e.id === empId);
 
       if (!user) return alert('Please select a staff member.');
@@ -533,9 +553,7 @@
       document.getElementById('login-pin').value = '';
     }
 
-    function goHome() {
-      switchTab('hub');
-    }
+    function goHome() { switchTab('hub'); }
 
     function applyRolePermissions() {
       const isAdmin = currentUser.role === 'admin';
@@ -610,11 +628,8 @@
 
       document.querySelectorAll('.emp-select').forEach(select => {
         const val = select.value;
-        if (val && counts[val] !== undefined) {
-          counts[val]++;
-        } else if (val) {
-          counts[val] = (counts[val] || 0) + 1;
-        }
+        if (val && counts[val] !== undefined) counts[val]++;
+        else if (val) counts[val] = 1;
       });
 
       const container = document.getElementById('shift-count-badges');
@@ -644,10 +659,7 @@
         const weather = realVancouverWeatherCache[isoDate] || { temp: '--', icon: '🌡️' };
         const statHolidayName = bcStatHolidays2026[isoDate];
 
-        let statBadge = '';
-        if (statHolidayName) {
-          statBadge = `<div class="mt-0.5"><span class="px-1.5 py-0.5 text-[9px] bg-red-100 text-red-700 font-extrabold rounded border border-red-200">★ Stat: ${statHolidayName}</span></div>`;
-        }
+        let statBadge = statHolidayName ? `<div class="mt-0.5"><span class="px-1.5 py-0.5 text-[9px] bg-red-100 text-red-700 font-extrabold rounded border border-red-200">★ Stat: ${statHolidayName}</span></div>` : '';
 
         headerHtml += `
           <th class="p-2 border-r text-center w-36">
@@ -679,7 +691,6 @@
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
           const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`] || {};
           const selectedEmp = savedItem.employee_name || '';
-
           const { availableList, unavailableList } = getFilteredEmployees(activeEmployees, dayIndex, shift.type);
           const colorClass = getStaffColorClass(selectedEmp);
 
@@ -692,21 +703,12 @@
                     const noteInfo = getAvailNoteStr(e.name, dayIndex);
                     return `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${noteInfo}</option>`;
                   }).join('')}
-                  
-                  ${unavailableList.length > 0 ? `
-                    <option disabled>────── Unavailable ──────</option>
-                    ${unavailableList.map(e => `<option value="${e.name}" class="text-gray-400" ${e.name === selectedEmp ? 'selected' : ''}>⚠️ ${e.name} (Unavailable)</option>`).join('')}
-                  ` : ''}
+                  ${unavailableList.length > 0 ? `<option disabled>────── Unavailable ──────</option>${unavailableList.map(e => `<option value="${e.name}" class="text-gray-400" ${e.name === selectedEmp ? 'selected' : ''}>⚠️ ${e.name} (Unavailable)</option>`).join('')}` : ''}
                 </select>
-
                 <div class="flex items-center gap-1 text-[11px]">
-                  <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''} onchange="markModified()">
-                    ${generateTimeOptionsSelected(savedItem.start_time)}
-                  </select>
+                  <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.start_time)}</select>
                   <span>~</span>
-                  <select class="end-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''} onchange="markModified()">
-                    ${generateTimeOptionsSelected(savedItem.end_time)}
-                  </select>
+                  <select class="end-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!isAdmin ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.end_time)}</select>
                 </div>
               </div>
             </td>
@@ -722,45 +724,22 @@
     function getFilteredEmployees(employees, dayIndex, shiftType) {
       const availableList = [];
       const unavailableList = [];
-
       employees.forEach(emp => {
         const empAvail = weekAvailMap[emp.name]?.[dayIndex];
         const status = empAvail?.status || 'Available (Anytime)';
-
-        if (status === 'Unavailable') {
-          unavailableList.push(emp);
-        } else if (shiftType === 'open') {
-          if (status === 'Open' || status === 'Available (Anytime)' || status === 'Custom Hours') {
-            availableList.push(emp);
-          } else {
-            unavailableList.push(emp);
-          }
-        } else if (shiftType === 'day') {
-          if (status === 'Open' || status === 'Day Only' || status === 'Available (Anytime)' || status === 'Custom Hours') {
-            availableList.push(emp);
-          } else {
-            unavailableList.push(emp);
-          }
-        } else if (shiftType === 'closing') {
-          if (status === 'Closing Only' || status === 'Available (Anytime)' || status === 'Custom Hours') {
-            availableList.push(emp);
-          } else {
-            unavailableList.push(emp);
-          }
-        } else {
-          availableList.push(emp);
-        }
+        if (status === 'Unavailable') unavailableList.push(emp);
+        else if (shiftType === 'open' && (status === 'Open' || status === 'Available (Anytime)' || status === 'Custom Hours')) availableList.push(emp);
+        else if (shiftType === 'day' && (status === 'Open' || status === 'Day Only' || status === 'Available (Anytime)' || status === 'Custom Hours')) availableList.push(emp);
+        else if (shiftType === 'closing' && (status === 'Closing Only' || status === 'Available (Anytime)' || status === 'Custom Hours')) availableList.push(emp);
+        else availableList.push(emp);
       });
-
       return { availableList, unavailableList };
     }
 
     function getAvailNoteStr(empName, dayIndex) {
       const item = weekAvailMap[empName]?.[dayIndex];
       if (!item) return '';
-      if (item.status === 'Custom Hours' && item.start_time && item.end_time) {
-        return ` (${item.start_time}~${item.end_time})`;
-      }
+      if (item.status === 'Custom Hours' && item.start_time && item.end_time) return ` (${item.start_time}~${item.end_time})`;
       if (item.status === 'Open') return ` (Open)`;
       if (item.status === 'Day Only') return ` (Day Only)`;
       if (item.status === 'Closing Only') return ` (Closing)`;
@@ -770,7 +749,6 @@
     function renderStaffPersonalSchedule() {
       const container = document.getElementById('staff-shifts-container');
       container.innerHTML = '';
-
       for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
         const d = new Date(currentSunday);
         d.setDate(d.getDate() + dayIndex);
@@ -782,36 +760,20 @@
           if (shift.key === 'divider') return;
           const item = currentScheduleData[`${shift.key}_${dayIndex}`];
           if (item && item.employee_name === currentUser.name) {
-            assignedShifts.push({
-              name: shift.name,
-              time: (item.start_time && item.end_time) ? `${item.start_time} - ${item.end_time}` : 'Assigned'
-            });
+            assignedShifts.push({ name: shift.name, time: (item.start_time && item.end_time) ? `${item.start_time} - ${item.end_time}` : 'Assigned' });
           }
         });
 
         const card = document.createElement('div');
         const hasShift = assignedShifts.length > 0;
         card.className = `border rounded-xl p-4 flex flex-col justify-between ${hasShift ? 'bg-indigo-50/60 border-indigo-200' : 'bg-gray-50 border-gray-200 opacity-60'}`;
-
-        let shiftsHtml = '';
-        if (hasShift) {
-          shiftsHtml = assignedShifts.map(s => `
-            <div class="mt-2 bg-indigo-600 text-white p-2 rounded-lg text-center shadow-sm">
-              <div class="font-bold text-xs">${s.name}</div>
-              <div class="text-[11px] font-medium opacity-90 mt-0.5">${s.time}</div>
-            </div>
-          `).join('');
-        } else {
-          shiftsHtml = `<div class="text-xs text-gray-400 mt-3 text-center italic">Off / No Shift</div>`;
-        }
-
         card.innerHTML = `
           <div>
             <div class="font-bold text-sm text-gray-800 border-b pb-1 flex justify-between items-center">
               <span>${dayNames[dayIndex]}</span>
               <span class="text-xs font-normal text-gray-500">${mm}/${dd}</span>
             </div>
-            ${shiftsHtml}
+            ${hasShift ? assignedShifts.map(s => `<div class="mt-2 bg-indigo-600 text-white p-2 rounded-lg text-center shadow-sm"><div class="font-bold text-xs">${s.name}</div><div class="text-[11px] font-medium opacity-90 mt-0.5">${s.time}</div></div>`).join('') : '<div class="text-xs text-gray-400 mt-3 text-center italic">Off / No Shift</div>'}
           </div>
         `;
         container.appendChild(card);
@@ -822,24 +784,18 @@
       if (!_supabase) return alert("Database connection is not configured.");
       const weekStartStr = formatDateISO(currentSunday);
       const records = [];
-
       const activeShifts = shifts.filter(s => s.key !== 'divider');
-      const trs = document.querySelectorAll('#schedule-tbody tr');
       let trIdx = 0;
 
-      trs.forEach(tr => {
+      document.querySelectorAll('#schedule-tbody tr').forEach(tr => {
         const empSelect = tr.querySelector('.emp-select');
         if (!empSelect) return;
-
         const shiftKey = activeShifts[trIdx].key;
         tr.querySelectorAll('td[data-day]').forEach((cell, dayIdx) => {
           const empName = cell.querySelector('.emp-select')?.value || '';
           const startTime = cell.querySelector('.start-time-select')?.value || '';
           const endTime = cell.querySelector('.end-time-select')?.value || '';
-
-          if (empName) {
-            records.push({ week_start_date: weekStartStr, shift_key: shiftKey, day_index: dayIdx, employee_name: empName, start_time: startTime, end_time: endTime });
-          }
+          if (empName) records.push({ week_start_date: weekStartStr, shift_key: shiftKey, day_index: dayIdx, employee_name: empName, start_time: startTime, end_time: endTime });
         });
         trIdx++;
       });
@@ -856,25 +812,246 @@
       } catch (e) { alert("Failed to save schedule: " + e.message); }
     }
 
+    // ==========================================
+    // NEW: Staff 2-Week Actual Hours Logic
+    // ==========================================
+    function changePayPeriod(offset) {
+      myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (offset * 14));
+      loadMyActualHoursForm();
+    }
+
+    async function loadMyActualHoursForm() {
+      const periodStartStr = formatDateISO(myPayPeriodStart);
+      const periodEnd = new Date(myPayPeriodStart);
+      periodEnd.setDate(periodEnd.getDate() + 13);
+      document.getElementById('pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
+
+      let savedActualsMap = {};
+      if (_supabase && currentUser) {
+        try {
+          const { data } = await _supabase.from('actual_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+          if (data) {
+            data.forEach(item => { savedActualsMap[item.day_offset] = item; });
+          }
+        } catch (e) { console.error(e); }
+      }
+      renderMyActualsGrid(savedActualsMap);
+    }
+
+    function renderMyActualsGrid(savedMap) {
+      const headerRow = document.getElementById('my-actuals-header-row');
+      const tbody = document.getElementById('my-actuals-tbody');
+
+      let hHtml = `<th class="p-3 border-r w-48">Week / Day</th>`;
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(myPayPeriodStart);
+        d.setDate(d.getDate() + i);
+        hHtml += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
+      }
+      hHtml += `<th class="p-3 text-center bg-gray-200">Total Hours</th>`;
+      headerRow.innerHTML = hHtml;
+
+      // 2주를 주차별로 나누어 렌더링 (Week 1, Week 2)
+      let tbodyHtml = '';
+      ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
+        tbodyHtml += `<tr class="bg-indigo-50 font-bold text-xs text-indigo-950"><td colspan="16" class="p-2 border-t">${weekTitle}</td></tr>`;
+        
+        let rowHtml = `<td class="p-3 font-semibold border-r bg-gray-50">Actual Hours</td>`;
+        let weekTotal = 0;
+
+        for (let dayInWeek = 0; dayInWeek < 7; dayInWeek++) {
+          const globalDayIdx = (wIdx * 7) + dayInWeek;
+          const item = savedMap[globalDayIdx] || {};
+          const startVal = item.start_time || '';
+          const endVal = item.end_time || '';
+          const hoursVal = item.hours || 0;
+          weekTotal += Number(hoursVal);
+
+          rowHtml += `
+            <td class="p-1 border-r text-center align-middle" data-day-offset="${globalDayIdx}">
+              <div class="space-y-1">
+                <select class="my-start w-full p-0.5 text-[11px] border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(startVal)}</select>
+                <select class="my-end w-full p-0.5 text-[11px] border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(endVal)}</select>
+                <div class="text-[11px] font-bold text-indigo-700"><span id="my-hrs-display-${globalDayIdx}">${Number(hoursVal).toFixed(2)}</span>h</div>
+              </div>
+            </td>
+          `;
+        }
+        rowHtml += `<td class="p-3 text-center font-bold bg-gray-100 text-indigo-900" id="week-${wIdx}-total">${weekTotal.toFixed(2)}h</td>`;
+        tbodyHtml += `<tr class="border-b">${rowHtml}</tr>`;
+      });
+
+      tbody.innerHTML = tbodyHtml;
+    }
+
+    function calcMyHours(dayOffset) {
+      const cell = document.querySelector(`td[data-day-offset="${dayOffset}"]`);
+      if (!cell) return;
+      const start = cell.querySelector('.my-start').value;
+      const end = cell.querySelector('.my-end').value;
+      let hours = 0;
+
+      if (start && end) {
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        let diff = (eh * 60 + em) - (sh * 60 + sm);
+        if (diff < 0) diff += 24 * 60; // 야간 연장 대응
+        hours = diff / 60;
+      }
+
+      document.getElementById(`my-hrs-display-${dayOffset}`).textContent = hours.toFixed(2);
+      
+      // 주간 총합 재계산
+      let w0Tot = 0, w1Tot = 0;
+      for (let i = 0; i < 7; i++) {
+        w0Tot += Number(document.getElementById(`my-hrs-display-${i}`).textContent);
+        w1Tot += Number(document.getElementById(`my-hrs-display-${i+7}`).textContent);
+      }
+      document.getElementById('week-0-total').textContent = w0Tot.toFixed(2) + 'h';
+      document.getElementById('week-1-total').textContent = w1Tot.toFixed(2) + 'h';
+      markModified();
+    }
+
+    async function saveMyActualHours() {
+      if (!_supabase || !currentUser) return alert("Database is not connected.");
+      const periodStartStr = formatDateISO(myPayPeriodStart);
+      const records = [];
+
+      for (let i = 0; i < 14; i++) {
+        const cell = document.querySelector(`td[data-day-offset="${i}"]`);
+        if (!cell) continue;
+        const start_time = cell.querySelector('.my-start').value;
+        const end_time = cell.querySelector('.my-end').value;
+        const hours = parseFloat(document.getElementById(`my-hrs-display-${i}`).textContent) || 0;
+
+        records.push({
+          employee_id: currentUser.id,
+          employee_name: currentUser.name,
+          period_start_date: periodStartStr,
+          day_offset: i,
+          start_time,
+          end_time,
+          hours
+        });
+      }
+
+      try {
+        await _supabase.from('actual_hours').delete().eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+        const { error } = await _supabase.from('actual_hours').insert(records);
+        if (error) throw error;
+        isDataModified = false;
+        alert("Your actual hours saved successfully!");
+      } catch (e) { alert("Failed to save: " + e.message); }
+    }
+
+    // ==========================================
+    // NEW: Admin ADP Bi-Weekly Actual Hours Master Sheet matching screenshot
+    // ==========================================
+    function changeAdminPayPeriod(offset) {
+      adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
+      loadAdminActualHoursMaster();
+    }
+
+    async function loadAdminActualHoursMaster() {
+      const periodStartStr = formatDateISO(adminPayPeriodStart);
+      const periodEnd = new Date(adminPayPeriodStart);
+      periodEnd.setDate(periodEnd.getDate() + 13);
+      document.getElementById('admin-pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
+
+      let allActualsData = [];
+      if (_supabase) {
+        try {
+          const { data } = await _supabase.from('actual_hours').select('*').eq('period_start_date', periodStartStr);
+          if (data) allActualsData = data;
+        } catch (e) { console.error(e); }
+      }
+      renderAdminActualHoursTable(allActualsData);
+    }
+
+    function renderAdminActualHoursTable(allData) {
+      const headerRow = document.getElementById('admin-actuals-header');
+      const tbody = document.getElementById('admin-actuals-tbody');
+      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+
+      // 엑셀 양식 헤더 생성 (사원번호, 성, 이름, 영문이름 + 14일치(Start, End, Hours) + Weekly Hours)
+      let h1 = `<th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-16">Staff NO.</th>
+                <th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-28">First Name</th>
+                <th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-28">Last Name</th>
+                <th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-24">ENG Name</th>`;
+
+      // 2주 14일 날짜 헤더
+      for (let w = 0; w < 2; w++) {
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(adminPayPeriodStart);
+          d.setDate(d.getDate() + (w * 7) + i);
+          h1 += `<th colspan="3" class="p-1 border-r text-center">${formatDateISO(d)}<br>${dayNames[d.getDay()]}</th>`;
+        }
+        h1 += `<th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-20">Weekly Hours</th>`;
+      }
+      headerRow.innerHTML = h1;
+
+      let tbodyHtml = '';
+      activeEmployees.forEach((emp, idx) => {
+        let rowHtml = `
+          <td class="p-2 border-r text-center font-bold text-gray-600">${idx + 1}</td>
+          <td class="p-2 border-r font-semibold">${emp.name.split(' ')[0] || emp.name}</td>
+          <td class="p-2 border-r font-semibold">${emp.name.split(' ')[1] || 'Staff'}</td>
+          <td class="p-2 border-r font-bold ${getStaffColorClass(emp.name)}">${emp.name}</td>
+        `;
+
+        let week1Total = 0;
+        let week2Total = 0;
+
+        // 주차별 7일씩 순회
+        for (let w = 0; w < 2; w++) {
+          let currentWeekSum = 0;
+          for (let i = 0; i < 7; i++) {
+            const dayOffset = (w * 7) + i;
+            const match = allData.find(a => a.employee_id === emp.id && a.day_offset === dayOffset) || {};
+            const st = match.start_time ? formatTime12hShort(match.start_time) : '';
+            const et = match.end_time ? formatTime12hShort(match.end_time) : '';
+            const hrs = match.hours ? Number(match.hours).toFixed(2) : '';
+            if (match.hours) currentWeekSum += Number(match.hours);
+
+            rowHtml += `
+              <td class="p-1 border-r text-center text-gray-600">${st}</td>
+              <td class="p-1 border-r text-center text-gray-600">${et}</td>
+              <td class="p-1 border-r text-center font-bold text-indigo-800 bg-gray-50/50">${hrs}</td>
+            `;
+          }
+          if (w === 0) week1Total = currentWeekSum;
+          else week2Total = currentWeekSum;
+
+          rowHtml += `<td class="p-2 border-r text-center font-black text-gray-900 bg-gray-100">${currentWeekSum.toFixed(2)}</td>`;
+        }
+
+        tbodyHtml += `<tr class="hover:bg-gray-50">${rowHtml}</tr>`;
+      });
+
+      tbody.innerHTML = tbodyHtml || `<tr><td colspan="36" class="p-6 text-center text-gray-400">No actual hours submitted for this pay period.</td></tr>`;
+    }
+
+    function formatTime12hShort(timeStr) {
+      if (!timeStr) return '';
+      const [hStr, mStr] = timeStr.split(':');
+      let h = parseInt(hStr, 10);
+      const period = h >= 12 ? 'pm' : 'am';
+      h = h % 12; if (h === 0) h = 12;
+      return mStr === '00' ? `${h}${period}` : `${h}:${mStr}${period}`;
+    }
+
+    // ==========================================
+    // Existing Availability & Employee Modules
+    // ==========================================
     function checkAvailabilityDeadline() {
       const today = new Date();
       const targetDeadline = new Date(availSunday);
       targetDeadline.setDate(targetDeadline.getDate() + 4); 
       targetDeadline.setHours(23, 59, 59, 999);
-
-      const isAdmin = currentUser && currentUser.role === 'admin';
-      
-      if (isAdmin) {
-        isAvailDeadlinePassed = false;
-      } else if (today > targetDeadline) {
-        isAvailDeadlinePassed = true;
-      } else {
-        isAvailDeadlinePassed = false;
-      }
+      isAvailDeadlinePassed = (currentUser && currentUser.role !== 'admin' && today > targetDeadline);
 
       const warningBox = document.getElementById('deadline-warning-box');
       const saveBtn = document.getElementById('btn-save-avail');
-
       if (isAvailDeadlinePassed) {
         warningBox.classList.remove('hidden');
         saveBtn.disabled = true;
@@ -886,18 +1063,12 @@
       }
     }
 
-    function changeAvailWeek(offset) {
-      availSunday.setDate(availSunday.getDate() + (offset * 7));
-      loadMyAvailability();
-    }
-
+    function changeAvailWeek(offset) { availSunday.setDate(availSunday.getDate() + (offset * 7)); loadMyAvailability(); }
     async function loadMyAvailability() {
       const weekStartStr = formatDateISO(availSunday);
       const sat = new Date(availSunday); sat.setDate(sat.getDate() + 6);
       document.getElementById('avail-week-label').textContent = `Week of ${availSunday.toLocaleString('en-US', { month: 'short' })} ${availSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
-
       checkAvailabilityDeadline();
-
       let myAvailData = {};
       if (_supabase && currentUser) {
         try {
@@ -911,41 +1082,35 @@
     function renderSubmitAvailGrid(myAvailData) {
       const container = document.getElementById('submit-avail-grid');
       container.innerHTML = '';
-
       for (let i = 0; i < 7; i++) {
         const d = new Date(availSunday); d.setDate(d.getDate() + i);
         const item = myAvailData[i] || {};
         const savedStatus = item.status || 'Available (Anytime)';
         const savedNote = item.note || '';
-
-        let startTime = item.start_time || '';
-        let endTime = item.end_time || '';
         const disabledAttr = isAvailDeadlinePassed ? 'disabled' : '';
 
-        const card = document.createElement('div');
-        card.className = "border rounded-xl p-3 bg-gray-50 flex flex-col justify-between space-y-2";
-        card.innerHTML = `
-          <div>
-            <div class="font-bold text-sm text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
-            <select id="avail-status-${i}" ${disabledAttr} class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="markModified(); toggleCustomTimeFields(${i})">
-              ${availOptions.map(opt => `<option value="${opt}" ${opt === savedStatus ? 'selected' : ''}>${opt}</option>`).join('')}
-            </select>
-            
-            <div id="custom-time-container-${i}" class="${savedStatus === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
-              <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
-              <div class="flex items-center gap-1">
-                <select id="avail-start-${i}" ${disabledAttr} class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(startTime)}</select>
-                <span class="text-xs">~</span>
-                <select id="avail-end-${i}" ${disabledAttr} class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(endTime)}</select>
+        container.innerHTML += `
+          <div class="border rounded-xl p-3 bg-gray-50 flex flex-col justify-between space-y-2">
+            <div>
+              <div class="font-bold text-sm text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
+              <select id="avail-status-${i}" ${disabledAttr} class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="markModified(); toggleCustomTimeFields(${i})">
+                ${availOptions.map(opt => `<option value="${opt}" ${opt === savedStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+              </select>
+              <div id="custom-time-container-${i}" class="${savedStatus === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
+                <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
+                <div class="flex items-center gap-1">
+                  <select id="avail-start-${i}" ${disabledAttr} class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.start_time)}</select>
+                  <span class="text-xs">~</span>
+                  <select id="avail-end-${i}" ${disabledAttr} class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.end_time)}</select>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
-            <input type="text" id="avail-note-${i}" ${disabledAttr} value="${savedNote}" placeholder="e.g. Class until 5pm" class="w-full p-1.5 text-xs border rounded bg-white" oninput="markModified()">
+            <div>
+              <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
+              <input type="text" id="avail-note-${i}" ${disabledAttr} value="${savedNote}" placeholder="e.g. Class until 5pm" class="w-full p-1.5 text-xs border rounded bg-white" oninput="markModified()">
+            </div>
           </div>
         `;
-        container.appendChild(card);
       }
     }
 
@@ -956,50 +1121,31 @@
     }
 
     async function saveMyAvailability() {
-      if (isAvailDeadlinePassed && currentUser.role !== 'admin') {
-        return alert("The deadline for submitting availability for this week has passed (Thursday 11:59 PM). Please contact the store manager directly.");
-      }
-      if (!_supabase || !currentUser) return alert("Database is not connected.");
+      if (isAvailDeadlinePassed && currentUser.role !== 'admin') return alert("Deadline passed.");
+      if (!_supabase || !currentUser) return alert("Database not connected.");
       const weekStartStr = formatDateISO(availSunday);
       const records = [];
-
       for (let i = 0; i < 7; i++) {
         const status = document.getElementById(`avail-status-${i}`).value;
         const note = document.getElementById(`avail-note-${i}`).value.trim();
         const start_time = status === 'Custom Hours' ? document.getElementById(`avail-start-${i}`).value : '';
         const end_time = status === 'Custom Hours' ? document.getElementById(`avail-end-${i}`).value : '';
-
-        records.push({
-          employee_id: currentUser.id,
-          employee_name: currentUser.name,
-          week_start_date: weekStartStr,
-          day_index: i,
-          status,
-          note,
-          start_time,
-          end_time
-        });
+        records.push({ employee_id: currentUser.id, employee_name: currentUser.name, week_start_date: weekStartStr, day_index: i, status, note, start_time, end_time });
       }
-
       try {
         await _supabase.from('availabilities').delete().eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
         const { error } = await _supabase.from('availabilities').insert(records);
         if (error) throw error;
         isDataModified = false;
         alert("Availability saved successfully!");
-      } catch (e) { alert("Failed to submit: " + e.message); }
+      } catch (e) { alert("Failed: " + e.message); }
     }
 
-    function changeOverviewWeek(offset) {
-      overviewSunday.setDate(overviewSunday.getDate() + (offset * 7));
-      loadOverviewAvailability();
-    }
-
+    function changeOverviewWeek(offset) { overviewSunday.setDate(overviewSunday.getDate() + (offset * 7)); loadOverviewAvailability(); }
     async function loadOverviewAvailability() {
       const weekStartStr = formatDateISO(overviewSunday);
       const sat = new Date(overviewSunday); sat.setDate(sat.getDate() + 6);
       document.getElementById('overview-week-label').textContent = `Week of ${overviewSunday.toLocaleString('en-US', { month: 'short' })} ${overviewSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
-
       let overviewAvailData = [];
       if (_supabase) {
         try {
@@ -1022,112 +1168,75 @@
 
       const tbody = document.getElementById('avail-overview-tbody');
       tbody.innerHTML = '';
-      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
-
-      activeEmployees.forEach(emp => {
-        const tr = document.createElement('tr');
+      dbEmployees.filter(e => e.status !== 'inactive').forEach(emp => {
         let rHtml = `<td class="p-3 font-semibold text-gray-800 border-r bg-gray-50">${emp.name}</td>`;
-
         for (let i = 0; i < 7; i++) {
           const match = overviewAvailData.find(a => a.employee_id === emp.id && a.day_index === i);
           if (match) {
             const isUnavail = match.status === 'Unavailable';
             const isCustom = match.status === 'Custom Hours';
             const bgClass = isUnavail ? 'bg-red-50 text-red-700' : isCustom ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800';
-
-            let displayStatus = match.status;
-            if (isCustom && match.start_time && match.end_time) {
-              displayStatus = `${match.start_time} ~ ${match.end_time}`;
-            }
-
-            rHtml += `
-              <td class="p-2 border-r text-center ${bgClass}">
-                <div class="font-bold text-xs">${displayStatus}</div>
-                ${match.note ? `<div class="text-[10px] opacity-80 mt-0.5 font-normal">${match.note}</div>` : ''}
-              </td>
-            `;
+            rHtml += `<td class="p-2 border-r text-center ${bgClass}"><div class="font-bold text-xs">${isCustom && match.start_time ? match.start_time+'~'+match.end_time : match.status}</div>${match.note ? `<div class="text-[10px] opacity-80 mt-0.5">${match.note}</div>` : ''}</td>`;
           } else {
             rHtml += `<td class="p-2 border-r text-center text-gray-400 text-xs font-light">Not Submitted</td>`;
           }
         }
-        tr.innerHTML = rHtml;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `<tr>${rHtml}</tr>`;
       });
     }
 
     function populateAdminOverrideSelect() {
       const select = document.getElementById('admin-override-user');
-      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
       select.innerHTML = '<option value="">-- Click here to select staff to edit --</option>' +
-        activeStaff.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+        dbEmployees.filter(e => e.status !== 'inactive').map(e => `<option value="${e.id}">${e.name}</option>`).join('');
       document.getElementById('admin-override-form-box').classList.add('hidden');
     }
 
     async function loadAdminSelectedAvail() {
       const empId = document.getElementById('admin-override-user').value;
       const formBox = document.getElementById('admin-override-form-box');
-
-      if (!empId) {
-        formBox.classList.add('hidden');
-        return;
-      }
-
+      if (!empId) { formBox.classList.add('hidden'); return; }
       const targetEmp = dbEmployees.find(e => e.id === empId);
-      if (!targetEmp) return;
-
       document.getElementById('admin-target-name').textContent = targetEmp.name;
       formBox.classList.remove('hidden');
 
       const weekStartStr = formatDateISO(overviewSunday);
       adminTargetAvailData = {};
-
       if (_supabase) {
-        try {
-          const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', empId).eq('week_start_date', weekStartStr);
-          if (data) data.forEach(item => { adminTargetAvailData[item.day_index] = item; });
-        } catch (e) { console.error(e); }
+        const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', empId).eq('week_start_date', weekStartStr);
+        if (data) data.forEach(item => { adminTargetAvailData[item.day_index] = item; });
       }
-
       renderAdminOverrideGrid();
     }
 
     function renderAdminOverrideGrid() {
       const container = document.getElementById('admin-override-grid');
       container.innerHTML = '';
-
       for (let i = 0; i < 7; i++) {
         const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
         const item = adminTargetAvailData[i] || {};
-        const savedStatus = item.status || 'Available (Anytime)';
-        const savedNote = item.note || '';
-
-        let startTime = item.start_time || '';
-        let endTime = item.end_time || '';
-
-        const card = document.createElement('div');
-        card.className = "border rounded-xl p-3 bg-white flex flex-col justify-between space-y-2 shadow-sm";
-        card.innerHTML = `
-          <div>
-            <div class="font-bold text-xs text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
-            <select id="admin-avail-status-${i}" class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="markModified(); toggleAdminCustomTimeFields(${i})">
-              ${availOptions.map(opt => `<option value="${opt}" ${opt === savedStatus ? 'selected' : ''}>${opt}</option>`).join('')}
-            </select>
-            
-            <div id="admin-custom-container-${i}" class="${savedStatus === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
-              <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
-              <div class="flex items-center gap-1">
-                <select id="admin-avail-start-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(startTime)}</select>
-                <span class="text-xs">~</span>
-                <select id="admin-avail-end-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(endTime)}</select>
+        container.innerHTML += `
+          <div class="border rounded-xl p-3 bg-white flex flex-col justify-between space-y-2 shadow-sm">
+            <div>
+              <div class="font-bold text-xs text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
+              <select id="admin-avail-status-${i}" class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="markModified(); toggleAdminCustomTimeFields(${i})">
+                ${availOptions.map(opt => `<option value="${opt}" ${opt === item.status ? 'selected' : ''}>${opt}</option>`).join('')}
+              </select>
+              <div id="admin-custom-container-${i}" class="${item.status === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
+                <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
+                <div class="flex items-center gap-1">
+                  <select id="admin-avail-start-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.start_time)}</select>
+                  <span>~</span>
+                  <select id="admin-avail-end-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.end_time)}</select>
+                </div>
               </div>
             </div>
-          </div>
-          <div>
-            <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
-            <input type="text" id="admin-avail-note-${i}" value="${savedNote}" placeholder="e.g. Class until 5pm" class="w-full p-1.5 text-xs border rounded bg-white" oninput="markModified()">
+            <div>
+              <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
+              <input type="text" id="admin-avail-note-${i}" value="${item.note || ''}" class="w-full p-1.5 text-xs border rounded bg-white" oninput="markModified()">
+            </div>
           </div>
         `;
-        container.appendChild(card);
       }
     }
 
@@ -1140,29 +1249,15 @@
     async function saveAdminOverrideAvail() {
       const empId = document.getElementById('admin-override-user').value;
       const targetEmp = dbEmployees.find(e => e.id === empId);
-      if (!empId || !targetEmp) return alert("Select a staff member first.");
-
       const weekStartStr = formatDateISO(overviewSunday);
       const records = [];
-
       for (let i = 0; i < 7; i++) {
         const status = document.getElementById(`admin-avail-status-${i}`).value;
         const note = document.getElementById(`admin-avail-note-${i}`).value.trim();
         const start_time = status === 'Custom Hours' ? document.getElementById(`admin-avail-start-${i}`).value : '';
         const end_time = status === 'Custom Hours' ? document.getElementById(`admin-avail-end-${i}`).value : '';
-
-        records.push({
-          employee_id: targetEmp.id,
-          employee_name: targetEmp.name,
-          week_start_date: weekStartStr,
-          day_index: i,
-          status,
-          note,
-          start_time,
-          end_time
-        });
+        records.push({ employee_id: targetEmp.id, employee_name: targetEmp.name, week_start_date: weekStartStr, day_index: i, status, note, start_time, end_time });
       }
-
       try {
         await _supabase.from('availabilities').delete().eq('employee_id', targetEmp.id).eq('week_start_date', weekStartStr);
         const { error } = await _supabase.from('availabilities').insert(records);
@@ -1170,20 +1265,19 @@
         isDataModified = false;
         alert(`Successfully updated availability for ${targetEmp.name}!`);
         await loadOverviewAvailability();
-      } catch (e) { alert("Failed to save override: " + e.message); }
+      } catch (e) { alert("Failed: " + e.message); }
     }
 
     function updateDropdowns(dayIndex) {
       const cells = document.querySelectorAll(`td[data-day="${dayIndex}"]`);
       const selectedValues = [];
       cells.forEach(cell => { const val = cell.querySelector('.emp-select')?.value; if (val) selectedValues.push(val); });
-
       cells.forEach(cell => {
         const select = cell.querySelector('.emp-select');
         if (!select) return;
         const cur = select.value;
         Array.from(select.options).forEach(opt => {
-          if (!opt.value || (opt.disabled && opt.textContent.includes('──────'))) return;
+          if (!opt.value || opt.disabled) return;
           if (opt.value !== cur && selectedValues.includes(opt.value)) {
             opt.disabled = true; opt.textContent = `${opt.value} (Selected)`;
           } else if (!opt.textContent.includes('Unavailable')) {
@@ -1196,30 +1290,16 @@
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       const isAdmin = currentUser.role === 'admin';
-
       tbody.innerHTML = dbEmployees.map((emp, index) => `
         <tr id="emp-row-${emp.id}" class="hover:bg-gray-50">
           <td class="p-3 text-center text-gray-400 text-xs">${index + 1}</td>
-          <td class="p-3 font-semibold text-gray-800" id="name-${emp.id}">${emp.name}</td>
-          <td class="p-3" id="role-${emp.id}">
-            <span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role === 'admin' ? 'bg-purple-100 text-purple-800' : emp.role === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}">
-              ${getRoleLabel(emp.role)}
-            </span>
-          </td>
-          ${isAdmin ? `<td class="p-3 text-gray-500 font-mono text-xs" id="pin-${emp.id}">••••</td>` : ''}
-          <td class="p-3 text-gray-600" id="email-${emp.id}">${emp.email || '-'}</td>
-          <td class="p-3 text-gray-600 font-medium" id="phone-${emp.id}">${emp.phone || '-'}</td>
-          <td class="p-3 text-center" id="status-${emp.id}">
-            <span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.status === 'inactive' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}">
-              ${emp.status === 'inactive' ? 'Terminated' : 'Active'}
-            </span>
-          </td>
-          ${isAdmin ? `
-            <td class="p-3 text-center space-x-1" id="action-${emp.id}">
-              <button onclick="enableEdit('${emp.id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border">Edit</button>
-              <button onclick="deleteEmployee('${emp.id}')" class="px-2 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 rounded border border-red-200">Delete</button>
-            </td>
-          ` : ''}
+          <td class="p-3 font-semibold text-gray-800">${emp.name}</td>
+          <td class="p-3"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role === 'admin' ? 'bg-purple-100 text-purple-800' : emp.role === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}">${getRoleLabel(emp.role)}</span></td>
+          ${isAdmin ? `<td class="p-3 text-gray-500 font-mono text-xs">••••</td>` : ''}
+          <td class="p-3 text-gray-600">${emp.email || '-'}</td>
+          <td class="p-3 text-gray-600 font-medium">${emp.phone || '-'}</td>
+          <td class="p-3 text-center"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.status === 'inactive' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}">${emp.status === 'inactive' ? 'Terminated' : 'Active'}</span></td>
+          ${isAdmin ? `<td class="p-3 text-center space-x-1"><button onclick="enableEdit('${emp.id}')" class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border">Edit</button><button onclick="deleteEmployee('${emp.id}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded border border-red-200">Delete</button></td>` : ''}
         </tr>
       `).join('');
     }
@@ -1228,35 +1308,18 @@
       markModified();
       const tbody = document.getElementById('employee-table-body');
       const tempId = 'new_' + Date.now();
-      const newTr = document.createElement('tr');
-      newTr.id = `emp-row-${tempId}`;
-      newTr.className = 'bg-blue-50/50';
-
-      newTr.innerHTML = `
-        <td class="p-3 text-center text-blue-500 text-xs font-bold">NEW</td>
-        <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="Name" class="w-full p-1 text-xs border rounded bg-white"></td>
-        <td class="p-2">
-          <select id="input-role-${tempId}" class="w-full p-1 text-xs border rounded bg-white">
-            <option value="employee">Staff</option>
-            <option value="manager">Manager</option>
-            <option value="admin">Master Admin</option>
-          </select>
-        </td>
-        <td class="p-2"><input type="text" id="input-pin-${tempId}" placeholder="Assign PIN" class="w-full p-1 text-xs border rounded bg-white"></td>
-        <td class="p-2"><input type="email" id="input-email-${tempId}" placeholder="Email" class="w-full p-1 text-xs border rounded bg-white"></td>
-        <td class="p-2"><input type="tel" id="input-phone-${tempId}" placeholder="Phone" class="w-full p-1 text-xs border rounded bg-white"></td>
-        <td class="p-2 text-center">
-          <select id="input-status-${tempId}" class="p-1 text-xs border rounded bg-white">
-            <option value="active">Active</option>
-            <option value="inactive">Terminated</option>
-          </select>
-        </td>
-        <td class="p-2 text-center space-x-1">
-          <button onclick="saveNewEmployee('${tempId}')" class="px-2 py-1 text-xs bg-blue-600 hover:bg-blue-700 text-white font-medium rounded shadow-sm">Save</button>
-          <button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 rounded">Cancel</button>
-        </td>
-      `;
-      tbody.insertBefore(newTr, tbody.firstChild);
+      tbody.insertAdjacentHTML('afterbegin', `
+        <tr id="emp-row-${tempId}" class="bg-blue-50/50">
+          <td class="p-3 text-center text-blue-500 text-xs font-bold">NEW</td>
+          <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="Name" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><select id="input-role-${tempId}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee">Staff</option><option value="manager">Manager</option><option value="admin">Master Admin</option></select></td>
+          <td class="p-2"><input type="text" id="input-pin-${tempId}" placeholder="Assign PIN" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><input type="email" id="input-email-${tempId}" placeholder="Email" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><input type="tel" id="input-phone-${tempId}" placeholder="Phone" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2 text-center"><select id="input-status-${tempId}" class="p-1 text-xs border rounded bg-white"><option value="active">Active</option><option value="inactive">Terminated</option></select></td>
+          <td class="p-2 text-center space-x-1"><button onclick="saveNewEmployee('${tempId}')" class="px-2 py-1 text-xs bg-blue-600 text-white rounded">Save</button><button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 rounded">Cancel</button></td>
+        </tr>
+      `);
     }
 
     async function saveNewEmployee(tempId) {
@@ -1266,19 +1329,11 @@
       const email = document.getElementById(`input-email-${tempId}`).value.trim();
       const phone = document.getElementById(`input-phone-${tempId}`).value.trim();
       const status = document.getElementById(`input-status-${tempId}`).value;
-
-      if (!name) return alert('Please enter a name.');
-      if (!pin_code) return alert('Please assign a PIN code.');
+      if (!name || !pin_code) return alert('Name and PIN required.');
 
       if (_supabase) {
-        try {
-          const { error } = await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
-          if (error) return alert('Failed to save staff: ' + error.message);
-          isDataModified = false;
-          alert('New staff member added successfully!');
-        } catch (e) { return alert('Unexpected error: ' + e.message); }
+        await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
       }
-
       await initApp();
       renderEmployeeTable();
     }
@@ -1286,20 +1341,15 @@
     function enableEdit(id) {
       const emp = dbEmployees.find(e => e.id === id);
       if (!emp) return;
-
-      document.getElementById(`name-${id}`).innerHTML = `<input type="text" id="edit-name-${id}" value="${emp.name}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()">`;
-      document.getElementById(`role-${id}`).innerHTML = `
-        <select id="edit-role-${id}" class="w-full p-1 text-xs border rounded bg-white" onchange="markModified()">
-          <option value="employee" ${emp.role === 'employee' ? 'selected' : ''}>Staff</option>
-          <option value="manager" ${emp.role === 'manager' ? 'selected' : ''}>Manager</option>
-          <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>Master</option>
-        </select>`;
-      document.getElementById(`pin-${id}`).innerHTML = `<input type="text" id="edit-pin-${id}" value="${emp.pin_code || ''}" placeholder="Set PIN" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()">`;
-      document.getElementById(`email-${id}`).innerHTML = `<input type="email" id="edit-email-${id}" value="${emp.email || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()">`;
-      document.getElementById(`phone-${id}`).innerHTML = `<input type="tel" id="edit-phone-${id}" value="${emp.phone || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()">`;
-      document.getElementById(`action-${id}`).innerHTML = `
-        <button onclick="saveEdit('${id}')" class="px-2 py-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded">Done</button>
-        <button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">Cancel</button>
+      document.getElementById(`emp-row-${id}`).innerHTML = `
+        <td class="p-3 text-center text-xs">Edit</td>
+        <td class="p-2"><input type="text" id="edit-name-${id}" value="${emp.name}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
+        <td class="p-2"><select id="edit-role-${id}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee" ${emp.role==='employee'?'selected':''}>Staff</option><option value="manager" ${emp.role==='manager'?'selected':''}>Manager</option><option value="admin" ${emp.role==='admin'?'selected':''}>Master</option></select></td>
+        <td class="p-2"><input type="text" id="edit-pin-${id}" value="${emp.pin_code||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="email" id="edit-email-${id}" value="${emp.email||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="tel" id="edit-phone-${id}" value="${emp.phone||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2 text-center">-</td>
+        <td class="p-2 text-center space-x-1"><button onclick="saveEdit('${id}')" class="px-2 py-1 text-xs bg-emerald-600 text-white rounded">Done</button><button onclick="renderEmployeeTable()" class="px-2 py-1 text-xs bg-gray-200 rounded">Cancel</button></td>
       `;
     }
 
@@ -1309,60 +1359,34 @@
       const pin_code = document.getElementById(`edit-pin-${id}`).value.trim();
       const email = document.getElementById(`edit-email-${id}`).value.trim();
       const phone = document.getElementById(`edit-phone-${id}`).value.trim();
-
-      if (!name) return alert('Please enter a name.');
-      if (!pin_code) return alert('Please enter a PIN code.');
-
       if (_supabase) {
-        try {
-          if (id === defaultAdmin.id) {
-            const { error } = await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status: 'active' }]);
-            if (error) return alert('Failed to update: ' + error.message);
-          } else {
-            const { error } = await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
-            if (error) return alert('Failed to update: ' + error.message);
-          }
-          isDataModified = false;
-          alert('Updated successfully!');
-        } catch (e) { return alert('Error: ' + e.message); }
+        if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status: 'active' }]);
+        else await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
       }
-
       await initApp();
       renderEmployeeTable();
     }
 
     async function deleteEmployee(id) {
-      if (!confirm('Are you sure you want to delete this employee?')) return;
-      if (_supabase && id !== defaultAdmin.id) {
-        try {
-          const { error } = await _supabase.from('employees').delete().eq('id', id);
-          if (error) return alert('Failed to delete: ' + error.message);
-          alert('Deleted successfully!');
-        } catch (e) { return alert('Error: ' + e.message); }
-      }
+      if (!confirm('Delete employee?')) return;
+      if (_supabase && id !== defaultAdmin.id) await _supabase.from('employees').delete().eq('id', id);
       await initApp();
       renderEmployeeTable();
     }
 
-    function markModified() {
-      isDataModified = true;
-    }
+    function markModified() { isDataModified = true; }
 
     function switchTab(tabName) {
       if (isDataModified && tabName !== currentActiveTab) {
-        if (!confirm("You have unsaved changes. Do you want to leave without saving?")) {
-          return;
-        }
+        if (!confirm("You have unsaved changes. Leave without saving?")) return;
         isDataModified = false;
       }
-
       currentActiveTab = tabName;
-      ['hub', 'scheduler', 'submit-avail', 'view-avail', 'employees', 'actuals'].forEach(t => {
+      ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'employees', 'actuals'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const navBtn = document.getElementById(`nav-${t}`);
         if (view) {
-          if (t === tabName) view.classList.remove('hidden');
-          else view.classList.add('hidden');
+          if (t === tabName) view.classList.remove('hidden'); else view.classList.add('hidden');
         }
         if (navBtn) {
           if (t === tabName) navBtn.className = 'px-2.5 py-1.5 rounded-md bg-white shadow-sm text-indigo-700 font-bold transition';
@@ -1373,6 +1397,8 @@
       if (tabName === 'scheduler') loadWeeklySchedule();
       if (tabName === 'submit-avail') loadMyAvailability();
       if (tabName === 'view-avail') loadOverviewAvailability();
+      if (tabName === 'my-actuals') loadMyActualHoursForm();
+      if (tabName === 'actuals') loadAdminActualHoursMaster();
     }
 
     function formatTime12h(timeStr) {
@@ -1380,72 +1406,36 @@
       const [hStr, mStr] = timeStr.split(':');
       let h = parseInt(hStr, 10);
       const period = h >= 12 ? 'PM' : 'AM';
-      h = h % 12;
-      if (h === 0) h = 12;
+      h = h % 12; if (h === 0) h = 12;
       return `${h}:${mStr} ${period}`;
     }
 
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
-      const saturday = new Date(currentSunday);
-      saturday.setDate(saturday.getDate() + 6);
-
+      const saturday = new Date(currentSunday); saturday.setDate(saturday.getDate() + 6);
       const startDateStr = `${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()} (${dayNames[0]})`;
       const endDateStr = `${saturday.toLocaleString('en-US', { month: 'short' })} ${saturday.getDate()} (${dayNames[6]})`;
-
       let fullMessages = "";
 
       activeEmployees.forEach(emp => {
         let staffShifts = [];
-        const activeShifts = shifts.filter(s => s.key !== 'divider');
-
-        for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
-          const d = new Date(currentSunday);
-          d.setDate(d.getDate() + dayIndex);
-          const dayStr = `${d.getMonth() + 1}/${d.getDate()} (${dayNames[dayIndex]})`;
-
-          let dayShiftEntries = [];
-          activeShifts.forEach(shift => {
+        shifts.filter(s => s.key !== 'divider').forEach(shift => {
+          for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+            const d = new Date(currentSunday); d.setDate(d.getDate() + dayIndex);
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
             if (savedItem && savedItem.employee_name === emp.name) {
-              let timeDisplay = "";
-              if (savedItem.start_time && savedItem.end_time) {
-                timeDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
-              } else {
-                if (shift.key === 'open') {
-                  timeDisplay = "10:00 AM ~ 5:00 PM";
-                } else if (shift.key === 'day') {
-                  timeDisplay = "11:30 AM ~ 5:00 PM";
-                } else if (shift.key.startsWith('closing')) {
-                  timeDisplay = "5:00 PM ~ 11:30 PM";
-                } else {
-                  timeDisplay = "10:00 AM ~ 5:00 PM";
-                }
-              }
-              dayShiftEntries.push(`${shift.name} (${timeDisplay})`);
+              let timeDisplay = (savedItem.start_time && savedItem.end_time) ? `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}` : "10:00 AM ~ 5:00 PM";
+              staffShifts.push(`- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${shift.name} (${timeDisplay})`);
             }
-          });
-
-          if (dayShiftEntries.length > 0) {
-            staffShifts.push(`- ${dayStr} : ${dayShiftEntries.join(', ')}`);
           }
-        }
-
+        });
         if (staffShifts.length > 0) {
-          const msg = `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${staffShifts.join('\n')}\n\nPlease check your schedule and send a confirmation message.\nIf you notice any issues or have questions, please contact Tammy as soon as possible.\nThank you always for your hard work.\n\n-----------------------------------------\n`;
-          fullMessages += msg;
+          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${staffShifts.join('\n')}\n\nPlease check your schedule.\n-----------------------------------------\n`;
         }
       });
 
-      if (!fullMessages) {
-        return alert("No shifts are scheduled for this week yet.");
-      }
-
-      navigator.clipboard.writeText(fullMessages).then(() => {
-        alert("Weekly schedule announcement messages for all staff copied to clipboard!");
-      }).catch(err => {
-        alert("Failed to copy: " + err);
-      });
+      if (!fullMessages) return alert("No shifts scheduled.");
+      navigator.clipboard.writeText(fullMessages).then(() => alert("Schedule text copied to clipboard!"));
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
