@@ -774,16 +774,12 @@
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
           const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`] || {};
           const selectedEmp = savedItem.employee_name || '';
-          const { availableList, unavailableList } = getFilteredEmployees(activeEmployees, dayIndex, shift.type);
-          const colorClass = getStaffColorClass(selectedEmp);
 
           html += `
-            <td class="p-2 border-r" data-day="${dayIndex}">
+            <td class="p-2 border-r" data-day="${dayIndex}" data-shift-key="${shift.key}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition ${colorClass || 'bg-white'}" ${!canEdit ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
-                  ${availableList.map(e => `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${getAvailNoteStr(e.name, dayIndex)}</option>`).join('')}
-                  ${unavailableList.length > 0 ? `<option disabled>────── Unavailable ──────</option>${unavailableList.map(e => `<option value="${e.name}" class="text-gray-400" ${e.name === selectedEmp ? 'selected' : ''}>⚠️ ${e.name} (Unavailable)</option>`).join('')}` : ''}
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
                   <select class="start-time-select w-1/2 p-0.5 border rounded text-gray-700 bg-gray-50" ${!canEdit ? 'disabled' : ''} onchange="markModified()">${generateTimeOptionsSelected(savedItem.start_time)}</select>
@@ -801,29 +797,78 @@
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
-    function getFilteredEmployees(employees, dayIndex, shiftType) {
-      const availableList = [];
-      const unavailableList = [];
-      employees.forEach(emp => {
-        const empAvail = weekAvailMap[emp.name]?.[dayIndex];
-        const status = empAvail?.status || 'Available (Anytime)';
-        if (status === 'Unavailable') unavailableList.push(emp);
-        else if (shiftType === 'open' && (status === 'Open' || status === 'Available (Anytime)' || status === 'Custom Hours')) availableList.push(emp);
-        else if (shiftType === 'day' && (status === 'Open' || status === 'Day Only' || status === 'Available (Anytime)' || status === 'Custom Hours')) availableList.push(emp);
-        else if (shiftType === 'closing' && (status === 'Closing Only' || status === 'Available (Anytime)' || status === 'Custom Hours')) availableList.push(emp);
-        else availableList.push(emp);
+    function updateDropdowns(dayIndex) {
+      const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
+      
+      const dayCells = [];
+      document.querySelectorAll(`#schedule-tbody td[data-day="${dayIndex}"]`).forEach(cell => {
+        const select = cell.querySelector('.emp-select');
+        if (select) dayCells.push({ cell, select, currentVal: select.value });
       });
-      return { availableList, unavailableList };
-    }
 
-    function getAvailNoteStr(empName, dayIndex) {
-      const item = weekAvailMap[empName]?.[dayIndex];
-      if (!item) return '';
-      if (item.status === 'Custom Hours' && item.start_time && item.end_time) return ` (${item.start_time}~${item.end_time})`;
-      if (item.status === 'Open') return ` (Open)`;
-      if (item.status === 'Day Only') return ` (Day Only)`;
-      if (item.status === 'Closing Only') return ` (Closing)`;
-      return '';
+      const selectedNamesOnThisDay = dayCells.map(c => c.currentVal).filter(v => v !== "");
+
+      dayCells.forEach(({ cell, select, currentVal }) => {
+        const shiftKey = cell.getAttribute('data-shift-key');
+        const isClosingShift = shiftKey.startsWith('closing');
+        const isDayOrOpenShift = shiftKey === 'open' || shiftKey === 'day';
+
+        let optionsHtml = '<option value="">Select Staff</option>';
+        let unavailableOptionsHtml = '';
+        let hasUnavailable = false;
+
+        activeEmployees.forEach(emp => {
+          const empAvail = weekAvailMap[emp.name]?.[dayIndex];
+          const status = empAvail?.status || 'Available (Anytime)';
+
+          if (currentVal !== emp.name && selectedNamesOnThisDay.includes(emp.name)) {
+            return;
+          }
+
+          let isEligible = false;
+          let noteStr = '';
+
+          if (status === 'Unavailable') {
+            hasUnavailable = true;
+            unavailableOptionsHtml += `<option value="${emp.name}" class="text-gray-400 bg-gray-100" ${currentVal === emp.name ? 'selected' : ''}>⚠️ ${emp.name} (Unavailable)</option>`;
+            return;
+          } else if (status === 'Available (Anytime)' || status === 'Custom Hours') {
+            isEligible = true;
+            if (status === 'Custom Hours' && empAvail.start_time && empAvail.end_time) {
+              noteStr = ` (${empAvail.start_time}~${empAvail.end_time})`;
+            }
+          } else if (status === 'Open') {
+            isEligible = true;
+            noteStr = ' (Open)';
+          } else if (status === 'Day Only') {
+            if (isDayOrOpenShift) {
+              isEligible = true;
+              noteStr = ' (Day Only)';
+            }
+          } else if (status === 'Closing Only') {
+            if (isClosingShift) {
+              isEligible = true;
+              noteStr = ' (Closing)';
+            }
+          }
+
+          if (isEligible) {
+            optionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
+          }
+        });
+
+        if (hasUnavailable) {
+          optionsHtml += `<option disabled>────── Unavailable ──────</option>` + unavailableOptionsHtml;
+        }
+
+        select.innerHTML = optionsHtml;
+        if (currentVal) {
+          select.value = currentVal;
+          select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(currentVal)}`;
+        } else {
+          select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white`;
+        }
+      });
     }
 
     function renderStaffPersonalSchedule() {
@@ -876,12 +921,10 @@
           const startTime = cell.querySelector('.start-time-select')?.value || '';
           const endTime = cell.querySelector('.end-time-select')?.value || '';
           if (empName) {
-            const matchedEmp = dbEmployees.find(e => e.name === empName);
             records.push({
               week_start_date: weekStartStr,
               shift_key: shiftKey,
               day_index: dayIdx,
-              employee_id: matchedEmp ? matchedEmp.id : null,
               employee_name: empName,
               start_time: startTime || null,
               end_time: endTime || null
@@ -1047,7 +1090,7 @@
     }
 
     // ==========================================
-    // Staff Availability Overview & Master Admin Override (Fixed Schema Compatibility)
+    // Staff Availability Overview & Master Admin Override
     // ==========================================
     function changeOverviewWeek(offset) {
       overviewSunday.setDate(overviewSunday.getDate() + (offset * 7));
@@ -1854,7 +1897,7 @@
           for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
             const d = new Date(currentSunday); d.setDate(d.getDate() + dayIndex);
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
-            if (savedItem && (savedItem.employee_name === emp.name || savedItem.employee_id === emp.id)) {
+            if (savedItem && savedItem.employee_name === emp.name) {
               let timeDisplay = (savedItem.start_time && savedItem.end_time) ? `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}` : "10:00 AM ~ 5:00 PM";
               staffShifts.push(`- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${shift.name} (${timeDisplay})`);
             }
