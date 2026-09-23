@@ -132,7 +132,7 @@
           <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
           <div>
             <h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3>
-            <p class="text-xs text-gray-500 mt-1">Bi-weekly master payroll view (2-tier layout).</p>
+            <p class="text-xs text-gray-500 mt-1">Summary table & weekly detailed tables.</p>
           </div>
         </button>
       </div>
@@ -278,7 +278,7 @@
       </div>
     </main>
 
-    <!-- 4. Employee Management Tab (With First/Last Name Inputs) -->
+    <!-- 4. Employee Management Tab -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
@@ -313,13 +313,13 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours (Admin) - Sorted by Staff No. with Direct 2-Tier Stacked Layout -->
+    <!-- 5. ADP Hours (Admin) - Summary Table on Top + Week 1 and Week 2 Detailed Tables Below -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
           <div>
             <h2 class="text-lg font-bold text-gray-900">ADP Payroll - Bi-Weekly Actual Hours</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Review staff listed by Staff No. with stacked weekly hours and daily detail rows.</p>
+            <p class="text-xs text-gray-500 mt-0.5">Bi-weekly master hours summary and detailed daily tables sorted by Staff No.</p>
           </div>
           <div class="flex items-center gap-3">
             <button onclick="changeAdminPayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
@@ -328,8 +328,53 @@
           </div>
         </div>
 
-        <!-- Master Bi-Weekly Stacked View Container -->
-        <div id="admin-biweekly-container" class="space-y-6"></div>
+        <!-- 1. Top Summary Table -->
+        <div class="space-y-2">
+          <h3 class="font-bold text-sm text-gray-800">📊 Bi-Weekly Summary Table (Sorted by Staff No.)</h3>
+          <div class="overflow-x-auto border rounded-xl shadow-sm">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
+                  <th class="p-3 w-24 text-center">Staff NO.</th>
+                  <th class="p-3 w-36">First Name</th>
+                  <th class="p-3 w-36">Last Name</th>
+                  <th class="p-3 w-36">ENG Name</th>
+                  <th class="p-3 w-28 text-center">Week 1 Hours</th>
+                  <th class="p-3 w-28 text-center">Week 2 Hours</th>
+                  <th class="p-3 w-32 text-center bg-indigo-50 text-indigo-900 font-bold">Total Hours</th>
+                </tr>
+              </thead>
+              <tbody id="admin-summary-tbody" class="text-sm divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 2. Bottom Detailed Tables (Week 1 & Week 2 Stacked) -->
+        <div class="space-y-6 pt-4 border-t">
+          <div class="space-y-2">
+            <h3 class="font-bold text-sm text-gray-800">📅 Week 1 Detailed Daily Table (Sun ~ Sat)</h3>
+            <div class="overflow-x-auto border rounded-xl shadow-sm bg-white">
+              <table class="w-full text-left border-collapse min-w-[1000px]">
+                <thead>
+                  <tr id="admin-week1-header" class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center"></tr>
+                </thead>
+                <tbody id="admin-week1-tbody" class="text-xs divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <h3 class="font-bold text-sm text-gray-800">📅 Week 2 Detailed Daily Table (Sun ~ Sat)</h3>
+            <div class="overflow-x-auto border rounded-xl shadow-sm bg-white">
+              <table class="w-full text-left border-collapse min-w-[1000px]">
+                <thead>
+                  <tr id="admin-week2-header" class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center"></tr>
+                </thead>
+                <tbody id="admin-week2-tbody" class="text-xs divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -937,7 +982,7 @@
     }
 
     // ==========================================
-    // Admin ADP Bi-Weekly Master Sheet (Stacked 2-Tier Direct Layout)
+    // Admin ADP Bi-Weekly Master Sheet (Top Summary + Week 1 & Week 2 Detailed Tables)
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -957,11 +1002,10 @@
           if (data) allActualsData = data;
         } catch (e) { console.error(e); }
       }
-      renderAdminBiWeeklyStackedView(allActualsData);
+      renderAdminBiWeeklyMaster(allActualsData);
     }
 
-    function renderAdminBiWeeklyStackedView(allData) {
-      const container = document.getElementById('admin-biweekly-container');
+    function renderAdminBiWeeklyMaster(allData) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
 
       // 사번(Staff No.) 기준 오름차순 정렬
@@ -972,89 +1016,105 @@
         return (a.first_name || '').localeCompare(b.first_name || '');
       });
 
-      let html = '';
+      // 1. Render Top Summary Table
+      const summaryTbody = document.getElementById('admin-summary-tbody');
+      let summaryHtml = '';
 
-      activeEmployees.forEach((emp, idx) => {
+      activeEmployees.forEach(emp => {
         const staffNo = emp.staff_no || '-';
         const firstName = emp.first_name || emp.name.split(' ')[0] || '';
         const lastName = emp.last_name || emp.name.split(' ')[1] || 'Staff';
         const engName = emp.name;
 
-        // 직원별 14일 데이터 맵핑
-        let detailMap = {};
-        allData.filter(a => a.employee_id === emp.id).forEach(item => {
-          detailMap[item.day_offset] = item;
-        });
+        let w1Sum = 0;
+        let w2Sum = 0;
 
-        html += `
-          <div class="border rounded-2xl overflow-hidden shadow-sm bg-white border-indigo-100">
-            <!-- 직원 정보 상단 헤더 바 -->
-            <div class="bg-gradient-to-r from-indigo-900 to-purple-900 text-white px-4 py-2.5 flex flex-wrap justify-between items-center text-xs font-bold gap-4">
-              <div class="flex items-center gap-3">
-                <span class="bg-white/20 px-2.5 py-1 rounded-md font-mono text-amber-300">No. ${staffNo}</span>
-                <span class="text-sm font-extrabold">${firstName} ${lastName}</span>
-                <span class="px-2 py-0.5 rounded-full bg-white/10 text-[11px] font-normal text-indigo-200">(${engName})</span>
-              </div>
-              <div class="flex items-center gap-4 text-xs">
-                <span>Role: <strong class="text-indigo-200">${getRoleLabel(emp.role)}</strong></span>
-              </div>
-            </div>
+        for (let i = 0; i < 7; i++) {
+          const m1 = allData.find(a => a.employee_id === emp.id && a.day_offset === i);
+          if (m1 && m1.hours) w1Sum += Number(m1.hours);
 
-            <!-- 주별 2단 상세 테이블 배치 -->
-            <div class="p-4 space-y-4 bg-gray-50/50">
+          const m2 = allData.find(a => a.employee_id === emp.id && a.day_offset === i + 7);
+          if (m2 && m2.hours) w2Sum += Number(m2.hours);
+        }
+
+        const totalSum = w1Sum + w2Sum;
+
+        summaryHtml += `
+          <tr class="hover:bg-gray-50 transition">
+            <td class="p-3 text-center font-mono font-bold text-gray-700">${staffNo}</td>
+            <td class="p-3 font-semibold">${firstName}</td>
+            <td class="p-3 font-semibold">${lastName}</td>
+            <td class="p-3 ${getStaffColorClass(emp.name)}">${engName}</td>
+            <td class="p-3 text-center font-semibold text-gray-800">${w1Sum.toFixed(2)}h</td>
+            <td class="p-3 text-center font-semibold text-gray-800">${w2Sum.toFixed(2)}h</td>
+            <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/30">${totalSum.toFixed(2)}h</td>
+          </tr>
+        `;
+      });
+      summaryTbody.innerHTML = summaryHtml || `<tr><td colspan="7" class="p-6 text-center text-gray-400">No active staff found.</td></tr>`;
+
+      // 2. Render Week 1 & Week 2 Detailed Tables (Column = Days, Row = Staff)
+      renderDetailedWeeklyTable('admin-week1-header', 'admin-week1-tbody', activeEmployees, allData, 0);
+      renderDetailedWeeklyTable('admin-week2-header', 'admin-week2-tbody', activeEmployees, allData, 7);
+    }
+
+    function renderDetailedWeeklyTable(headerId, tbodyId, employees, allData, weekOffset) {
+      const headerRow = document.getElementById(headerId);
+      const tbody = document.getElementById(tbodyId);
+
+      // 헤더 생성 (Staff No., First Name, Last Name, ENG Name + 7일치 날짜/요일 + Weekly Total)
+      let hHtml = `
+        <th class="p-2 border-r w-20 text-center bg-gray-200">Staff No.</th>
+        <th class="p-2 border-r w-32 bg-gray-200">First Name</th>
+        <th class="p-2 border-r w-32 bg-gray-200">Last Name</th>
+        <th class="p-2 border-r w-32 bg-gray-200">ENG Name</th>
+      `;
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(adminPayPeriodStart);
+        d.setDate(d.getDate() + weekOffset + i);
+        hHtml += `<th class="p-2 border-r text-center">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
+      }
+      hHtml += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Total</th>`;
+      headerRow.innerHTML = hHtml;
+
+      // 바디 생성 (각 직원별 행)
+      let tbodyHtml = '';
+      employees.forEach(emp => {
+        const staffNo = emp.staff_no || '-';
+        const firstName = emp.first_name || emp.name.split(' ')[0] || '';
+        const lastName = emp.last_name || emp.name.split(' ')[1] || 'Staff';
+        const engName = emp.name;
+
+        let rowHtml = `
+          <td class="p-2 border-r text-center font-mono font-bold text-gray-700 bg-gray-50">${staffNo}</td>
+          <td class="p-2 border-r font-semibold">${firstName}</td>
+          <td class="p-2 border-r font-semibold">${lastName}</td>
+          <td class="p-2 border-r font-bold ${getStaffColorClass(engName)}">${engName}</td>
         `;
 
-        ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
-          const startIdx = wIdx * 7;
-          let weekSum = 0;
+        let weekSum = 0;
+        for (let i = 0; i < 7; i++) {
+          const globalDayIdx = weekOffset + i;
+          const match = allData.find(a => a.employee_id === emp.id && a.day_offset === globalDayIdx) || {};
+          const st = match.start_time ? formatTime12hShort(match.start_time) : '-';
+          const et = match.end_time ? formatTime12hShort(match.end_time) : '-';
+          const hrs = match.hours ? Number(match.hours).toFixed(2) : '0.00';
+          weekSum += Number(hrs);
 
-          html += `
-            <div class="border rounded-xl overflow-hidden bg-white shadow-xs">
-              <div class="bg-indigo-50/80 px-3 py-1.5 font-bold text-xs text-indigo-950 border-b flex justify-between items-center">
-                <span>${weekTitle}</span>
-              </div>
-              <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[900px]">
-                  <thead>
-                    <tr class="bg-gray-100/70 border-b text-[11px] font-semibold text-gray-700 uppercase text-center">
-                      <th class="p-2 border-r w-32">Day / Date</th>
+          rowHtml += `
+            <td class="p-2 border-r text-center align-middle">
+              <div class="text-[11px] text-gray-600">${st} ~ ${et}</div>
+              <div class="text-xs font-bold text-indigo-700 mt-0.5">${hrs}h</div>
+            </td>
           `;
+        }
 
-          for (let i = 0; i < 7; i++) {
-            const d = new Date(adminPayPeriodStart);
-            d.setDate(d.getDate() + startIdx + i);
-            html += `<th class="p-1.5 border-r text-center">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
-          }
-          html += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Hours</th>`;
-          html += `</tr></thead><tbody class="text-xs"><tr>`;
-          html += `<td class="p-2 font-semibold border-r bg-gray-50 text-center">Start ~ End / Hours</td>`;
-
-          for (let i = 0; i < 7; i++) {
-            const globalDayIdx = startIdx + i;
-            const item = detailMap[globalDayIdx] || {};
-            const st = item.start_time ? formatTime12hShort(item.start_time) : '-';
-            const et = item.end_time ? formatTime12hShort(item.end_time) : '-';
-            const hrs = item.hours ? Number(item.hours).toFixed(2) : '0.00';
-            weekSum += Number(hrs);
-
-            html += `
-              <td class="p-2 border-r text-center align-middle">
-                <div class="font-medium text-gray-600">${st} ~ ${et}</div>
-                <div class="font-bold text-indigo-700 mt-0.5">${hrs}h</div>
-              </td>
-            `;
-          }
-
-          html += `
-              <td class="p-2 text-center font-black bg-gray-100 text-indigo-900 text-sm">${weekSum.toFixed(2)}h</td>
-            </tr></tbody></table></div></div>
-          `;
-        });
-
-        html += `</div></div>`;
+        rowHtml += `<td class="p-2 text-center font-black bg-gray-100 text-indigo-900">${weekSum.toFixed(2)}h</td>`;
+        tbodyHtml += `<tr class="hover:bg-gray-50">${rowHtml}</tr>`;
       });
 
-      container.innerHTML = html || `<div class="p-8 text-center text-gray-400 bg-white rounded-xl border">No active staff found.</div>`;
+      tbody.innerHTML = tbodyHtml || `<tr><td colspan="12" class="p-6 text-center text-gray-400">No data found.</td></tr>`;
     }
 
     function formatTime12hShort(timeStr) {
@@ -1097,7 +1157,6 @@
     }
 
     function addNewRow() {
-      markModified();
       const tbody = document.getElementById('employee-table-body');
       const tempId = 'new_' + Date.now();
       tbody.insertAdjacentHTML('afterbegin', `
@@ -1132,6 +1191,7 @@
       if (_supabase) {
         await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status }]);
       }
+      isDataModified = false;
       await initApp();
       renderEmployeeTable();
     }
@@ -1140,10 +1200,10 @@
       const emp = dbEmployees.find(e => e.id === id);
       if (!emp) return;
       document.getElementById(`emp-row-${id}`).innerHTML = `
-        <td class="p-2"><input type="text" id="edit-staffno-${id}" value="${emp.staff_no || ''}" class="w-full p-1 text-xs border rounded bg-white text-center font-mono" oninput="markModified()"></td>
-        <td class="p-2"><input type="text" id="edit-firstname-${id}" value="${emp.first_name || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
-        <td class="p-2"><input type="text" id="edit-lastname-${id}" value="${emp.last_name || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
-        <td class="p-2"><input type="text" id="edit-name-${id}" value="${emp.name || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
+        <td class="p-2"><input type="text" id="edit-staffno-${id}" value="${emp.staff_no || ''}" class="w-full p-1 text-xs border rounded bg-white text-center font-mono"></td>
+        <td class="p-2"><input type="text" id="edit-firstname-${id}" value="${emp.first_name || ''}" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="text" id="edit-lastname-${id}" value="${emp.last_name || ''}" class="w-full p-1 text-xs border rounded bg-white"></td>
+        <td class="p-2"><input type="text" id="edit-name-${id}" value="${emp.name || ''}" class="w-full p-1 text-xs border rounded bg-white"></td>
         <td class="p-2"><select id="edit-role-${id}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee" ${emp.role==='employee'?'selected':''}>Staff</option><option value="manager" ${emp.role==='manager'?'selected':''}>Manager</option><option value="admin" ${emp.role==='admin'?'selected':''}>Master</option></select></td>
         <td class="p-2"><input type="text" id="edit-pin-${id}" value="${emp.pin_code||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
         <td class="p-2"><input type="email" id="edit-email-${id}" value="${emp.email||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
@@ -1161,12 +1221,13 @@
       const role = document.getElementById(`edit-role-${id}`).value;
       const pin_code = document.getElementById(`edit-pin-${id}`).value.trim();
       const email = document.getElementById(`edit-email-${id}`).value.trim();
-      const phone = document.getElementById(`edit-phone-${id}`).value.trim();
+      const phone = document.getElementById(`edit-phone-${id}`)? document.getElementById(`edit-phone-${id}`).value.trim() : '';
 
       if (_supabase) {
         if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status: 'active' }]);
         else await _supabase.from('employees').update({ staff_no, first_name, last_name, name, role, pin_code, email, phone }).eq('id', id);
       }
+      isDataModified = false;
       await initApp();
       renderEmployeeTable();
     }
@@ -1174,6 +1235,7 @@
     async function deleteEmployee(id) {
       if (!confirm('Delete employee?')) return;
       if (_supabase && id !== defaultAdmin.id) await _supabase.from('employees').delete().eq('id', id);
+      isDataModified = false;
       await initApp();
       renderEmployeeTable();
     }
