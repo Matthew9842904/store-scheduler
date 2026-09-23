@@ -809,10 +809,23 @@
       const cell = selectEl.closest('td');
       const startSelect = cell.querySelector('.start-time-select');
       const endSelect = cell.querySelector('.end-time-select');
-      
+      const shiftKey = cell.getAttribute('data-shift-key');
+
       if (!selectEl.value) {
         if (startSelect) startSelect.value = "";
         if (endSelect) endSelect.value = "";
+      } else {
+        // 기본 근무 시간 자동 설정 (사용자가 직접 바꾸지 않은 경우)
+        if (shiftKey === 'open') {
+          if (startSelect) startSelect.value = "10:00";
+          if (endSelect) endSelect.value = "17:00";
+        } else if (shiftKey.startsWith('day')) {
+          if (startSelect) startSelect.value = "11:30";
+          if (endSelect) endSelect.value = "17:00";
+        } else if (shiftKey.startsWith('closing')) {
+          if (startSelect) startSelect.value = "17:00";
+          if (endSelect) endSelect.value = "23:30";
+        }
       }
     }
 
@@ -1798,7 +1811,7 @@
       const pin_code = document.getElementById(`input-pin-${tempId}`).value.trim();
       const email = document.getElementById(`input-email-${tempId}`).value.trim();
       const phone = document.getElementById(`input-phone-${tempId}`).value.trim();
-      const status = document.getElementById(`input-status-${tempId}`).value;
+      const status = document.getElementById(`input-status-${tempId}` ).value;
 
       if (!first_name || !pin_code) return alert('First Name and PIN required.');
 
@@ -1908,7 +1921,7 @@
       return `${h}:${mStr} ${period}`;
     }
 
-    // 날짜 오름차순 정렬 및 명확한 답장 요구 문구가 포함된 문자열 생성 함수
+    // 조건에 맞게 숫자 제거, 기본/지정 시간 처리 및 날짜 오름차순 정렬 문자열 생성 함수
     function generateSmsText() {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const saturday = new Date(currentSunday); saturday.setDate(saturday.getDate() + 6);
@@ -1923,10 +1936,30 @@
             const d = new Date(currentSunday); d.setDate(d.getDate() + dayIndex);
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
             if (savedItem && savedItem.employee_name === emp.name) {
-              let timeDisplay = (savedItem.start_time && savedItem.end_time) ? `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}` : "10:00 AM ~ 5:00 PM";
+              
+              // 1 & 3 조건: 입력된 지정 시간이 있으면 우선 적용, 없으면 기본 근무 시간 규칙 적용
+              let timeDisplay = "";
+              if (savedItem.start_time && savedItem.end_time) {
+                timeDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
+              } else {
+                if (shift.key === 'open') {
+                  timeDisplay = "10:00 AM ~ 5:00 PM";
+                } else if (shift.key.startsWith('day')) {
+                  timeDisplay = "11:30 AM ~ 5:00 PM";
+                } else if (shift.key.startsWith('closing')) {
+                  timeDisplay = "5:00 PM ~ 11:30 PM";
+                }
+              }
+
+              // 2 조건: 숫자 제거 (Open, Day, Closing)
+              let cleanShiftName = "Open";
+              if (shift.key === 'open') cleanShiftName = "Open";
+              else if (shift.key.startsWith('day')) cleanShiftName = "Day";
+              else if (shift.key.startsWith('closing')) cleanShiftName = "Closing";
+
               staffShifts.push({
                 dayIndex: dayIndex,
-                text: `- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${shift.name} (${timeDisplay})`
+                text: `- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${cleanShiftName} (${timeDisplay})`
               });
             }
           }
@@ -1937,7 +1970,7 @@
 
         if (staffShifts.length > 0) {
           const shiftLines = staffShifts.map(s => s.text).join('\n');
-          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease review and reply to confirm your schedule, and if you have any questions or changes, please contact Tammy as soon as possible. Always appreciate your hard work.\n-----------------------------------------\n`;
+          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease review your schedule and reply to this message to confirm receipt, and if you have any questions or changes, please contact Tammy as soon as possible. Always appreciate your hard work.\n-----------------------------------------\n`;
         }
       });
 
