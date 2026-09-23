@@ -132,7 +132,7 @@
           <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
           <div>
             <h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3>
-            <p class="text-xs text-gray-500 mt-1">2-week payroll summary matching ADP sheet.</p>
+            <p class="text-xs text-gray-500 mt-1">2-week payroll summary & clean detail view.</p>
           </div>
         </button>
       </div>
@@ -156,7 +156,6 @@
         </div>
       </div>
 
-      <!-- Staff Shift Count Summary Bar with Staff Colors -->
       <div id="shift-count-summary" class="hidden bg-white p-4 rounded-xl shadow-sm border flex flex-wrap items-center gap-3">
         <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">📊 Shift Count (This Week):</span>
         <div id="shift-count-badges" class="flex flex-wrap gap-2"></div>
@@ -254,7 +253,7 @@
       </div>
     </main>
 
-    <!-- NEW: My Actual Hours Tab (Staff 2-Week Payroll Entry - Split Weekly Rows) -->
+    <!-- My Actual Hours Tab (Staff Entry) -->
     <main id="view-my-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -275,7 +274,6 @@
           <button onclick="changePayPeriod(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next 2 Weeks &gt;</button>
         </div>
 
-        <!-- 1주일씩 상하 분리된 테이블 컨테이너 -->
         <div id="my-actuals-tables-container" class="space-y-6"></div>
       </div>
     </main>
@@ -297,7 +295,7 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
-                <th class="p-3 w-10 text-center">No</th>
+                <th class="p-3 w-16 text-center">Staff NO.</th>
                 <th class="p-3 w-32">Name</th>
                 <th class="p-3 w-32">Role</th>
                 <th class="p-3 role-admin-only w-24">PIN</th>
@@ -313,13 +311,13 @@
       </div>
     </main>
 
-    <!-- 5. Actual Hours (ADP) Admin Tab matching user screenshot -->
+    <!-- 5. ADP Hours (Admin) - Clean 2-Tier Layout with Staff NO. Sort -->
     <main id="view-actuals" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
           <div>
             <h2 class="text-lg font-bold text-gray-900">ADP Payroll - Bi-Weekly Actual Hours</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Review 2-week actual hours submitted by all staff members for ADP payroll entry.</p>
+            <p class="text-xs text-gray-500 mt-0.5">Review staff summaries sorted by ADP Staff No. Click any staff row to inspect their 14-day detail below.</p>
           </div>
           <div class="flex items-center gap-3">
             <button onclick="changeAdminPayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
@@ -328,14 +326,38 @@
           </div>
         </div>
 
-        <!-- Admin 2-Week Master Excel Sheet View matching screenshot -->
-        <div class="overflow-x-auto border rounded-xl shadow-sm">
-          <table class="w-full text-left border-collapse min-w-[1300px]" border="1">
-            <thead>
-              <tr id="admin-actuals-header" class="bg-gray-100 border-b text-[11px] font-semibold text-gray-700 uppercase text-center"></tr>
-            </thead>
-            <tbody id="admin-actuals-tbody" class="text-xs divide-y"></tbody>
-          </table>
+        <!-- Upper Table: Staff Summary Sorted by Staff No. -->
+        <div class="space-y-2">
+          <h3 class="font-bold text-sm text-gray-800">📋 Staff Summary & Weekly Hours (Sorted by Staff No.)</h3>
+          <div class="overflow-x-auto border rounded-xl shadow-sm">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
+                  <th class="p-3 w-24 text-center">Staff NO.</th>
+                  <th class="p-3 w-40">First Name</th>
+                  <th class="p-3 w-40">Last Name</th>
+                  <th class="p-3 w-36">ENG Name</th>
+                  <th class="p-3 w-32 text-center">Role</th>
+                  <th class="p-3 w-32 text-center">Week 1 Hours</th>
+                  <th class="p-3 w-32 text-center">Week 2 Hours</th>
+                  <th class="p-3 w-32 text-center bg-indigo-50 text-indigo-900 font-bold">Total Hours</th>
+                  <th class="p-3 text-center w-28">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-summary-tbody" class="text-sm divide-y"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Lower Table: Selected Staff 14-Day Detail View -->
+        <div class="space-y-2 pt-4 border-t">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-sm text-gray-800">🔍 14-Day Detail View for: <span id="selected-staff-detail-title" class="text-indigo-600 font-extrabold">--</span></h3>
+            <span class="text-xs text-gray-400 italic">Click 'Select' on any staff above to view their daily start/end times.</span>
+          </div>
+          <div id="admin-detail-container" class="space-y-4">
+            <div class="p-8 text-center border border-dashed rounded-xl text-gray-400 text-xs">Please select a staff member from the summary table above to inspect their daily time entries.</div>
+          </div>
         </div>
       </div>
     </main>
@@ -350,7 +372,7 @@
       _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    let defaultAdmin = { id: 'default_admin_001', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active' };
+    let defaultAdmin = { id: 'default_admin_001', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active', staff_no: '1' };
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
 
@@ -359,6 +381,7 @@
     let overviewSunday = new Date(2026, 8, 20);
     let myPayPeriodStart = new Date(2026, 8, 13); // 2026-09-13
     let adminPayPeriodStart = new Date(2026, 8, 13);
+    let selectedAdminStaffId = null;
 
     let currentScheduleData = {};
     let weekAvailMap = {};
@@ -367,7 +390,6 @@
 
     let currentActiveTab = 'hub';
     let isDataModified = false;
-
     let realVancouverWeatherCache = {};
 
     const bcStatHolidays2026 = {
@@ -561,7 +583,7 @@
 
       const descEl = document.getElementById('employee-tab-desc');
       if (isAdmin) {
-        descEl.textContent = 'Manage staff information, PIN codes, and permissions (Master / Manager / Staff).';
+        descEl.textContent = 'Manage staff information, Staff No., PIN codes, and permissions.';
       } else if (isManager) {
         descEl.textContent = 'View contact information (Phone and Email) for all active staff members.';
       }
@@ -651,7 +673,6 @@
 
         const weather = realVancouverWeatherCache[isoDate] || { temp: '--', icon: '🌡️' };
         const statHolidayName = bcStatHolidays2026[isoDate];
-
         let statBadge = statHolidayName ? `<div class="mt-0.5"><span class="px-1.5 py-0.5 text-[9px] bg-red-100 text-red-700 font-extrabold rounded border border-red-200">★ Stat: ${statHolidayName}</span></div>` : '';
 
         headerHtml += `
@@ -692,10 +713,7 @@
               <div class="space-y-1">
                 <select class="emp-select w-full p-1 text-xs border rounded font-medium transition ${colorClass || 'bg-white'}" ${!isAdmin ? 'disabled' : ''} onchange="markModified(); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
-                  ${availableList.map(e => {
-                    const noteInfo = getAvailNoteStr(e.name, dayIndex);
-                    return `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${noteInfo}</option>`;
-                  }).join('')}
+                  ${availableList.map(e => `<option value="${e.name}" ${e.name === selectedEmp ? 'selected' : ''}>${e.name}${getAvailNoteStr(e.name, dayIndex)}</option>`).join('')}
                   ${unavailableList.length > 0 ? `<option disabled>────── Unavailable ──────</option>${unavailableList.map(e => `<option value="${e.name}" class="text-gray-400" ${e.name === selectedEmp ? 'selected' : ''}>⚠️ ${e.name} (Unavailable)</option>`).join('')}` : ''}
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
@@ -806,7 +824,7 @@
     }
 
     // ==========================================
-    // UPDATED: Staff 2-Week Actual Hours (Split 1-Week per Row Layout)
+    // My Actual Hours (Staff Entry)
     // ==========================================
     function changePayPeriod(offset) {
       myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (offset * 14));
@@ -837,7 +855,6 @@
 
       ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
         const startIdx = wIdx * 7;
-        
         html += `
           <div class="border rounded-xl overflow-hidden shadow-sm">
             <div class="bg-indigo-50 px-4 py-2 font-bold text-xs text-indigo-950 border-b">${weekTitle}</div>
@@ -855,23 +872,20 @@
         }
         html += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Total</th>`;
         html += `</tr></thead><tbody class="text-sm"><tr>`;
-
         html += `<td class="p-3 font-semibold border-r bg-gray-50 text-xs">Actual Hours</td>`;
 
         let weekTotal = 0;
         for (let i = 0; i < 7; i++) {
           const globalDayIdx = startIdx + i;
           const item = savedMap[globalDayIdx] || {};
-          const startVal = item.start_time || '';
-          const endVal = item.end_time || '';
           const hoursVal = item.hours || 0;
           weekTotal += Number(hoursVal);
 
           html += `
             <td class="p-2 border-r text-center align-middle" data-day-offset="${globalDayIdx}">
               <div class="space-y-1">
-                <select class="my-start w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(startVal)}</select>
-                <select class="my-end w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(endVal)}</select>
+                <select class="my-start w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(item.start_time)}</select>
+                <select class="my-end w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(item.end_time)}</select>
                 <div class="text-xs font-bold text-indigo-700"><span id="my-hrs-display-${globalDayIdx}">${Number(hoursVal).toFixed(2)}</span>h</div>
               </div>
             </td>
@@ -947,7 +961,7 @@
     }
 
     // ==========================================
-    // Admin ADP Bi-Weekly Actual Hours Master Sheet
+    // Admin ADP Master Sheet (2-Tier Layout + Staff No. Sorting)
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -967,67 +981,143 @@
           if (data) allActualsData = data;
         } catch (e) { console.error(e); }
       }
-      renderAdminActualHoursTable(allActualsData);
+      renderAdminActualHoursMasterView(allActualsData);
     }
 
-    function renderAdminActualHoursTable(allData) {
-      const headerRow = document.getElementById('admin-actuals-header');
-      const tbody = document.getElementById('admin-actuals-tbody');
+    function renderAdminActualHoursMasterView(allData) {
+      const summaryTbody = document.getElementById('admin-summary-tbody');
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
 
-      let h1 = `<th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-16">Staff NO.</th>
-                <th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-28">First Name</th>
-                <th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-28">Last Name</th>
-                <th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-24">ENG Name</th>`;
-
-      for (let w = 0; w < 2; w++) {
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(adminPayPeriodStart);
-          d.setDate(d.getDate() + (w * 7) + i);
-          h1 += `<th colspan="3" class="p-1 border-r text-center">${formatDateISO(d)}<br>${dayNames[d.getDay()]}</th>`;
-        }
-        h1 += `<th rowspan="2" class="p-2 border-r bg-gray-200 text-center w-20">Weekly Hours</th>`;
-      }
-      headerRow.innerHTML = h1;
-
-      let tbodyHtml = '';
-      activeEmployees.forEach((emp, idx) => {
-        let rowHtml = `
-          <td class="p-2 border-r text-center font-bold text-gray-600">${idx + 1}</td>
-          <td class="p-2 border-r font-semibold">${emp.name.split(' ')[0] || emp.name}</td>
-          <td class="p-2 border-r font-semibold">${emp.name.split(' ')[1] || 'Staff'}</td>
-          <td class="p-2 border-r font-bold ${getStaffColorClass(emp.name)}">${emp.name}</td>
-        `;
-
-        let week1Total = 0;
-        let week2Total = 0;
-
-        for (let w = 0; w < 2; w++) {
-          let currentWeekSum = 0;
-          for (let i = 0; i < 7; i++) {
-            const dayOffset = (w * 7) + i;
-            const match = allData.find(a => a.employee_id === emp.id && a.day_offset === dayOffset) || {};
-            const st = match.start_time ? formatTime12hShort(match.start_time) : '';
-            const et = match.end_time ? formatTime12hShort(match.end_time) : '';
-            const hrs = match.hours ? Number(match.hours).toFixed(2) : '';
-            if (match.hours) currentWeekSum += Number(match.hours);
-
-            rowHtml += `
-              <td class="p-1 border-r text-center text-gray-600">${st}</td>
-              <td class="p-1 border-r text-center text-gray-600">${et}</td>
-              <td class="p-1 border-r text-center font-bold text-indigo-800 bg-gray-50/50">${hrs}</td>
-            `;
-          }
-          if (w === 0) week1Total = currentWeekSum;
-          else week2Total = currentWeekSum;
-
-          rowHtml += `<td class="p-2 border-r text-center font-black text-gray-900 bg-gray-100">${currentWeekSum.toFixed(2)}</td>`;
-        }
-
-        tbodyHtml += `<tr class="hover:bg-gray-50">${rowHtml}</tr>`;
+      // 사번(Staff No.) 기준 오름차순 정렬 (숫자 변환 정렬 지원)
+      activeEmployees.sort((a, b) => {
+        let numA = parseInt(a.staff_no || '999', 10);
+        let numB = parseInt(b.staff_no || '999', 10);
+        if (numA !== numB) return numA - numB;
+        return a.name.localeCompare(b.name);
       });
 
-      tbody.innerHTML = tbodyHtml || `<tr><td colspan="36" class="p-6 text-center text-gray-400">No actual hours submitted for this pay period.</td></tr>`;
+      let summaryHtml = '';
+      let firstEmpIdToSelect = null;
+
+      activeEmployees.forEach((emp, idx) => {
+        if (idx === 0) firstEmpIdToSelect = emp.id;
+        const staffNo = emp.staff_no || '-';
+        const nameParts = emp.name.split(' ');
+        const firstName = nameParts[0] || emp.name;
+        const lastName = nameParts[1] || 'Staff';
+
+        let w1Sum = 0;
+        let w2Sum = 0;
+
+        for (let i = 0; i < 7; i++) {
+          const m1 = allData.find(a => a.employee_id === emp.id && a.day_offset === i);
+          if (m1 && m1.hours) w1Sum += Number(m1.hours);
+
+          const m2 = allData.find(a => a.employee_id === emp.id && a.day_offset === i + 7);
+          if (m2 && m2.hours) w2Sum += Number(m2.hours);
+        }
+
+        const totalSum = w1Sum + w2Sum;
+        const isSelected = selectedAdminStaffId === emp.id;
+
+        summaryHtml += `
+          <tr class="hover:bg-indigo-50/40 transition ${isSelected ? 'bg-indigo-50/80 font-bold' : ''}">
+            <td class="p-3 text-center font-mono font-bold text-gray-700">${staffNo}</td>
+            <td class="p-3 font-semibold">${firstName}</td>
+            <td class="p-3 font-semibold">${lastName}</td>
+            <td class="p-3 ${getStaffColorClass(emp.name)}">${emp.name}</td>
+            <td class="p-3 text-center"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role==='admin'?'bg-purple-100 text-purple-800':'bg-gray-100 text-gray-700'}">${getRoleLabel(emp.role)}</span></td>
+            <td class="p-3 text-center font-semibold text-gray-800">${w1Sum.toFixed(2)}h</td>
+            <td class="p-3 text-center font-semibold text-gray-800">${w2Sum.toFixed(2)}h</td>
+            <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/30">${totalSum.toFixed(2)}h</td>
+            <td class="p-3 text-center">
+              <button onclick="selectAdminStaffDetail('${emp.id}', '${emp.name}')" class="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded shadow-sm transition">
+                Select
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+
+      summaryTbody.innerHTML = summaryHtml || `<tr><td colspan="9" class="p-6 text-center text-gray-400">No active staff found.</td></tr>`;
+
+      if (!selectedAdminStaffId && firstEmpIdToSelect) {
+        selectAdminStaffDetail(firstEmpIdToSelect, activeEmployees[0].name);
+      } else if (selectedAdminStaffId) {
+        const selEmp = activeEmployees.find(e => e.id === selectedAdminStaffId);
+        if (selEmp) selectAdminStaffDetail(selEmp.id, selEmp.name);
+      }
+    }
+
+    function selectAdminStaffDetail(empId, empName) {
+      selectedAdminStaffId = empId;
+      document.getElementById('selected-staff-detail-title').textContent = empName;
+
+      // 요약 테이블 하이라이트 갱신을 위해 다시 렌더링 호출
+      loadAdminActualHoursMaster();
+
+      // 해당 직원의 14일치 상세 데이터 가져오기
+      const periodStartStr = formatDateISO(adminPayPeriodStart);
+      if (_supabase) {
+        _supabase.from('actual_hours').select('*').eq('employee_id', empId).eq('period_start_date', periodStartStr).then(({ data }) => {
+          renderAdminDetailTables(data || []);
+        });
+      }
+    }
+
+    function renderAdminDetailTables(staffDataMap) {
+      const container = document.getElementById('admin-detail-container');
+      let detailMap = {};
+      staffDataMap.forEach(item => { detailMap[item.day_offset] = item; });
+
+      let html = '';
+      ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
+        const startIdx = wIdx * 7;
+        html += `
+          <div class="border rounded-xl overflow-hidden shadow-sm bg-white">
+            <div class="bg-gray-100 px-4 py-2 font-bold text-xs text-gray-800 border-b flex justify-between items-center">
+              <span>${weekTitle}</span>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase text-center">
+                    <th class="p-2 border-r w-32">Day</th>
+        `;
+
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(adminPayPeriodStart);
+          d.setDate(d.getDate() + startIdx + i);
+          html += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
+        }
+        html += `<th class="p-2 text-center bg-gray-100 w-28">Weekly Total</th>`;
+        html += `</tr></thead><tbody class="text-sm"><tr>`;
+        html += `<td class="p-3 font-semibold border-r bg-gray-50 text-xs">Logged Hours</td>`;
+
+        let weekSum = 0;
+        for (let i = 0; i < 7; i++) {
+          const globalDayIdx = startIdx + i;
+          const item = detailMap[globalDayIdx] || {};
+          const st = item.start_time ? formatTime12hShort(item.start_time) : '-';
+          const et = item.end_time ? formatTime12hShort(item.end_time) : '-';
+          const hrs = item.hours ? Number(item.hours).toFixed(2) : '0.00';
+          weekSum += Number(hrs);
+
+          html += `
+            <td class="p-2 border-r text-center align-middle">
+              <div class="text-xs font-medium text-gray-700">${st} ~ ${et}</div>
+              <div class="text-xs font-bold text-indigo-700 mt-0.5">${hrs}h</div>
+            </td>
+          `;
+        }
+
+        html += `
+            <td class="p-3 text-center font-bold bg-gray-50 text-indigo-900 text-base">${weekSum.toFixed(2)}h</td>
+          </tr></tbody></table></div></div>
+        `;
+      });
+
+      container.innerHTML = html;
     }
 
     function formatTime12hShort(timeStr) {
@@ -1040,258 +1130,23 @@
     }
 
     // ==========================================
-    // Existing Availability & Employee Modules
+    // Employee Management (With Staff No. Field)
     // ==========================================
-    function checkAvailabilityDeadline() {
-      const today = new Date();
-      const targetDeadline = new Date(availSunday);
-      targetDeadline.setDate(targetDeadline.getDate() + 4); 
-      targetDeadline.setHours(23, 59, 59, 999);
-      isAvailDeadlinePassed = (currentUser && currentUser.role !== 'admin' && today > targetDeadline);
-
-      const warningBox = document.getElementById('deadline-warning-box');
-      const saveBtn = document.getElementById('btn-save-avail');
-      if (isAvailDeadlinePassed) {
-        warningBox.classList.remove('hidden');
-        saveBtn.disabled = true;
-        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      } else {
-        warningBox.classList.add('hidden');
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-      }
-    }
-
-    function changeAvailWeek(offset) { availSunday.setDate(availSunday.getDate() + (offset * 7)); loadMyAvailability(); }
-    async function loadMyAvailability() {
-      const weekStartStr = formatDateISO(availSunday);
-      const sat = new Date(availSunday); sat.setDate(sat.getDate() + 6);
-      document.getElementById('avail-week-label').textContent = `Week of ${availSunday.toLocaleString('en-US', { month: 'short' })} ${availSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
-      checkAvailabilityDeadline();
-      let myAvailData = {};
-      if (_supabase && currentUser) {
-        try {
-          const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
-          if (data) data.forEach(item => { myAvailData[item.day_index] = item; });
-        } catch (e) { console.error(e); }
-      }
-      renderSubmitAvailGrid(myAvailData);
-    }
-
-    function renderSubmitAvailGrid(myAvailData) {
-      const container = document.getElementById('submit-avail-grid');
-      container.innerHTML = '';
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(availSunday); d.setDate(d.getDate() + i);
-        const item = myAvailData[i] || {};
-        const savedStatus = item.status || 'Available (Anytime)';
-        const savedNote = item.note || '';
-        const disabledAttr = isAvailDeadlinePassed ? 'disabled' : '';
-
-        container.innerHTML += `
-          <div class="border rounded-xl p-3 bg-gray-50 flex flex-col justify-between space-y-2">
-            <div>
-              <div class="font-bold text-sm text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
-              <select id="avail-status-${i}" ${disabledAttr} class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="markModified(); toggleCustomTimeFields(${i})">
-                ${availOptions.map(opt => `<option value="${opt}" ${opt === savedStatus ? 'selected' : ''}>${opt}</option>`).join('')}
-              </select>
-              <div id="custom-time-container-${i}" class="${savedStatus === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
-                <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
-                <div class="flex items-center gap-1">
-                  <select id="avail-start-${i}" ${disabledAttr} class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.start_time)}</select>
-                  <span class="text-xs">~</span>
-                  <select id="avail-end-${i}" ${disabledAttr} class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.end_time)}</select>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
-              <input type="text" id="avail-note-${i}" ${disabledAttr} value="${savedNote}" placeholder="e.g. Class until 5pm" class="w-full p-1.5 text-xs border rounded bg-white" oninput="markModified()">
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    function toggleCustomTimeFields(index) {
-      const status = document.getElementById(`avail-status-${index}`).value;
-      const container = document.getElementById(`custom-time-container-${index}`);
-      if (status === 'Custom Hours') container.classList.remove('hidden'); else container.classList.add('hidden');
-    }
-
-    async function saveMyAvailability() {
-      if (isAvailDeadlinePassed && currentUser.role !== 'admin') return alert("Deadline passed.");
-      if (!_supabase || !currentUser) return alert("Database not connected.");
-      const weekStartStr = formatDateISO(availSunday);
-      const records = [];
-      for (let i = 0; i < 7; i++) {
-        const status = document.getElementById(`avail-status-${i}`).value;
-        const note = document.getElementById(`avail-note-${i}`).value.trim();
-        const start_time = status === 'Custom Hours' ? document.getElementById(`avail-start-${i}`).value : '';
-        const end_time = status === 'Custom Hours' ? document.getElementById(`avail-end-${i}`).value : '';
-        records.push({ employee_id: currentUser.id, employee_name: currentUser.name, week_start_date: weekStartStr, day_index: i, status, note, start_time, end_time });
-      }
-      try {
-        await _supabase.from('availabilities').delete().eq('employee_id', currentUser.id).eq('week_start_date', weekStartStr);
-        const { error } = await _supabase.from('availabilities').insert(records);
-        if (error) throw error;
-        isDataModified = false;
-        alert("Availability saved successfully!");
-      } catch (e) { alert("Failed: " + e.message); }
-    }
-
-    function changeOverviewWeek(offset) { overviewSunday.setDate(overviewSunday.getDate() + (offset * 7)); loadOverviewAvailability(); }
-    async function loadOverviewAvailability() {
-      const weekStartStr = formatDateISO(overviewSunday);
-      const sat = new Date(overviewSunday); sat.setDate(sat.getDate() + 6);
-      document.getElementById('overview-week-label').textContent = `Week of ${overviewSunday.toLocaleString('en-US', { month: 'short' })} ${overviewSunday.getDate()} (${weekStartStr} ~ ${formatDateISO(sat)})`;
-      let overviewAvailData = [];
-      if (_supabase) {
-        try {
-          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr);
-          if (data) overviewAvailData = data;
-        } catch (e) { console.error(e); }
-      }
-      renderOverviewAvailabilityTable(overviewAvailData);
-      populateAdminOverrideSelect();
-    }
-
-    function renderOverviewAvailabilityTable(overviewAvailData) {
-      const header = document.getElementById('avail-overview-header');
-      let hHtml = `<th class="p-3 w-36 border-r">Staff Name</th>`;
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
-        hHtml += `<th class="p-3 border-r text-center w-36">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</th>`;
-      }
-      header.innerHTML = hHtml;
-
-      const tbody = document.getElementById('avail-overview-tbody');
-      tbody.innerHTML = '';
-      dbEmployees.filter(e => e.status !== 'inactive').forEach(emp => {
-        let rHtml = `<td class="p-3 font-semibold text-gray-800 border-r bg-gray-50">${emp.name}</td>`;
-        for (let i = 0; i < 7; i++) {
-          const match = overviewAvailData.find(a => a.employee_id === emp.id && a.day_index === i);
-          if (match) {
-            const isUnavail = match.status === 'Unavailable';
-            const isCustom = match.status === 'Custom Hours';
-            const bgClass = isUnavail ? 'bg-red-50 text-red-700' : isCustom ? 'bg-amber-50 text-amber-800' : 'bg-emerald-50 text-emerald-800';
-            rHtml += `<td class="p-2 border-r text-center ${bgClass}"><div class="font-bold text-xs">${isCustom && match.start_time ? match.start_time+'~'+match.end_time : match.status}</div>${match.note ? `<div class="text-[10px] opacity-80 mt-0.5">${match.note}</div>` : ''}</td>`;
-          } else {
-            rHtml += `<td class="p-2 border-r text-center text-gray-400 text-xs font-light">Not Submitted</td>`;
-          }
-        }
-        tbody.innerHTML += `<tr>${rHtml}</tr>`;
-      });
-    }
-
-    function populateAdminOverrideSelect() {
-      const select = document.getElementById('admin-override-user');
-      select.innerHTML = '<option value="">-- Click here to select staff to edit --</option>' +
-        dbEmployees.filter(e => e.status !== 'inactive').map(e => `<option value="${e.id}">${e.name}</option>`).join('');
-      document.getElementById('admin-override-form-box').classList.add('hidden');
-    }
-
-    async function loadAdminSelectedAvail() {
-      const empId = document.getElementById('admin-override-user').value;
-      const formBox = document.getElementById('admin-override-form-box');
-      if (!empId) { formBox.classList.add('hidden'); return; }
-      const targetEmp = dbEmployees.find(e => e.id === empId);
-      document.getElementById('admin-target-name').textContent = targetEmp.name;
-      formBox.classList.remove('hidden');
-
-      const weekStartStr = formatDateISO(overviewSunday);
-      adminTargetAvailData = {};
-      if (_supabase) {
-        const { data } = await _supabase.from('availabilities').select('*').eq('employee_id', empId).eq('week_start_date', weekStartStr);
-        if (data) data.forEach(item => { adminTargetAvailData[item.day_index] = item; });
-      }
-      renderAdminOverrideGrid();
-    }
-
-    function renderAdminOverrideGrid() {
-      const container = document.getElementById('admin-override-grid');
-      container.innerHTML = '';
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
-        const item = adminTargetAvailData[i] || {};
-        container.innerHTML += `
-          <div class="border rounded-xl p-3 bg-white flex flex-col justify-between space-y-2 shadow-sm">
-            <div>
-              <div class="font-bold text-xs text-gray-800">${dayNames[i]} (${d.getMonth() + 1}/${d.getDate()})</div>
-              <select id="admin-avail-status-${i}" class="w-full mt-2 p-1.5 text-xs border rounded bg-white font-medium" onchange="markModified(); toggleAdminCustomTimeFields(${i})">
-                ${availOptions.map(opt => `<option value="${opt}" ${opt === item.status ? 'selected' : ''}>${opt}</option>`).join('')}
-              </select>
-              <div id="admin-custom-container-${i}" class="${item.status === 'Custom Hours' ? '' : 'hidden'} mt-2 space-y-1">
-                <label class="block text-[10px] text-gray-500 font-semibold">Available Hours</label>
-                <div class="flex items-center gap-1">
-                  <select id="admin-avail-start-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.start_time)}</select>
-                  <span>~</span>
-                  <select id="admin-avail-end-${i}" class="w-1/2 p-1 text-[11px] border rounded bg-white" onchange="markModified()">${generateTimeOptionsSelected(item.end_time)}</select>
-                </div>
-              </div>
-            </div>
-            <div>
-              <label class="block text-[11px] text-gray-500 mb-1">Note / Reason</label>
-              <input type="text" id="admin-avail-note-${i}" value="${item.note || ''}" class="w-full p-1.5 text-xs border rounded bg-white" oninput="markModified()">
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    function toggleAdminCustomTimeFields(index) {
-      const status = document.getElementById(`admin-avail-status-${index}`).value;
-      const container = document.getElementById(`admin-custom-container-${index}`);
-      if (status === 'Custom Hours') container.classList.remove('hidden'); else container.classList.add('hidden');
-    }
-
-    async function saveAdminOverrideAvail() {
-      const empId = document.getElementById('admin-override-user').value;
-      const targetEmp = dbEmployees.find(e => e.id === empId);
-      const weekStartStr = formatDateISO(overviewSunday);
-      const records = [];
-      for (let i = 0; i < 7; i++) {
-        const status = document.getElementById(`admin-avail-status-${i}`).value;
-        const note = document.getElementById(`admin-avail-note-${i}`).value.trim();
-        const start_time = status === 'Custom Hours' ? document.getElementById(`admin-avail-start-${i}`).value : '';
-        const end_time = status === 'Custom Hours' ? document.getElementById(`admin-avail-end-${i}`).value : '';
-        records.push({ employee_id: targetEmp.id, employee_name: targetEmp.name, week_start_date: weekStartStr, day_index: i, status, note, start_time, end_time });
-      }
-      try {
-        await _supabase.from('availabilities').delete().eq('employee_id', targetEmp.id).eq('week_start_date', weekStartStr);
-        const { error } = await _supabase.from('availabilities').insert(records);
-        if (error) throw error;
-        isDataModified = false;
-        alert(`Successfully updated availability for ${targetEmp.name}!`);
-        await loadOverviewAvailability();
-      } catch (e) { alert("Failed: " + e.message); }
-    }
-
-    function updateDropdowns(dayIndex) {
-      const cells = document.querySelectorAll(`td[data-day="${dayIndex}"]`);
-      const selectedValues = [];
-      cells.forEach(cell => { const val = cell.querySelector('.emp-select')?.value; if (val) selectedValues.push(val); });
-      cells.forEach(cell => {
-        const select = cell.querySelector('.emp-select');
-        if (!select) return;
-        const cur = select.value;
-        Array.from(select.options).forEach(opt => {
-          if (!opt.value || opt.disabled) return;
-          if (opt.value !== cur && selectedValues.includes(opt.value)) {
-            opt.disabled = true; opt.textContent = `${opt.value} (Selected)`;
-          } else if (!opt.textContent.includes('Unavailable')) {
-            opt.disabled = false;
-          }
-        });
-      });
-    }
-
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       const isAdmin = currentUser.role === 'admin';
-      tbody.innerHTML = dbEmployees.map((emp, index) => `
+
+      // 사번 순서로 정렬
+      const sortedEmployees = [...dbEmployees].sort((a, b) => {
+        let numA = parseInt(a.staff_no || '999', 10);
+        let numB = parseInt(b.staff_no || '999', 10);
+        if (numA !== numB) return numA - numB;
+        return a.name.localeCompare(b.name);
+      });
+
+      tbody.innerHTML = sortedEmployees.map((emp) => `
         <tr id="emp-row-${emp.id}" class="hover:bg-gray-50">
-          <td class="p-3 text-center text-gray-400 text-xs">${index + 1}</td>
+          <td class="p-3 text-center font-mono font-bold text-indigo-700">${emp.staff_no || '-'}</td>
           <td class="p-3 font-semibold text-gray-800">${emp.name}</td>
           <td class="p-3"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role === 'admin' ? 'bg-purple-100 text-purple-800' : emp.role === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}">${getRoleLabel(emp.role)}</span></td>
           ${isAdmin ? `<td class="p-3 text-gray-500 font-mono text-xs">••••</td>` : ''}
@@ -1309,10 +1164,10 @@
       const tempId = 'new_' + Date.now();
       tbody.insertAdjacentHTML('afterbegin', `
         <tr id="emp-row-${tempId}" class="bg-blue-50/50">
-          <td class="p-3 text-center text-blue-500 text-xs font-bold">NEW</td>
+          <td class="p-2"><input type="text" id="input-staffno-${tempId}" placeholder="No." class="w-full p-1 text-xs border rounded bg-white text-center font-mono"></td>
           <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="Name" class="w-full p-1 text-xs border rounded bg-white"></td>
           <td class="p-2"><select id="input-role-${tempId}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee">Staff</option><option value="manager">Manager</option><option value="admin">Master Admin</option></select></td>
-          <td class="p-2"><input type="text" id="input-pin-${tempId}" placeholder="Assign PIN" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><input type="text" id="input-pin-${tempId}" placeholder="PIN" class="w-full p-1 text-xs border rounded bg-white"></td>
           <td class="p-2"><input type="email" id="input-email-${tempId}" placeholder="Email" class="w-full p-1 text-xs border rounded bg-white"></td>
           <td class="p-2"><input type="tel" id="input-phone-${tempId}" placeholder="Phone" class="w-full p-1 text-xs border rounded bg-white"></td>
           <td class="p-2 text-center"><select id="input-status-${tempId}" class="p-1 text-xs border rounded bg-white"><option value="active">Active</option><option value="inactive">Terminated</option></select></td>
@@ -1322,6 +1177,7 @@
     }
 
     async function saveNewEmployee(tempId) {
+      const staff_no = document.getElementById(`input-staffno-${tempId}`).value.trim();
       const name = document.getElementById(`input-name-${tempId}`).value.trim();
       const role = document.getElementById(`input-role-${tempId}`).value;
       const pin_code = document.getElementById(`input-pin-${tempId}`).value.trim();
@@ -1331,7 +1187,7 @@
       if (!name || !pin_code) return alert('Name and PIN required.');
 
       if (_supabase) {
-        await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status }]);
+        await _supabase.from('employees').insert([{ staff_no, name, role, pin_code, email, phone, status }]);
       }
       await initApp();
       renderEmployeeTable();
@@ -1341,7 +1197,7 @@
       const emp = dbEmployees.find(e => e.id === id);
       if (!emp) return;
       document.getElementById(`emp-row-${id}`).innerHTML = `
-        <td class="p-3 text-center text-xs">Edit</td>
+        <td class="p-2"><input type="text" id="edit-staffno-${id}" value="${emp.staff_no || ''}" class="w-full p-1 text-xs border rounded bg-white text-center font-mono" oninput="markModified()"></td>
         <td class="p-2"><input type="text" id="edit-name-${id}" value="${emp.name}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
         <td class="p-2"><select id="edit-role-${id}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee" ${emp.role==='employee'?'selected':''}>Staff</option><option value="manager" ${emp.role==='manager'?'selected':''}>Manager</option><option value="admin" ${emp.role==='admin'?'selected':''}>Master</option></select></td>
         <td class="p-2"><input type="text" id="edit-pin-${id}" value="${emp.pin_code||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
@@ -1353,14 +1209,15 @@
     }
 
     async function saveEdit(id) {
+      const staff_no = document.getElementById(`edit-staffno-${id}`).value.trim();
       const name = document.getElementById(`edit-name-${id}`).value.trim();
       const role = document.getElementById(`edit-role-${id}`).value;
       const pin_code = document.getElementById(`edit-pin-${id}`).value.trim();
       const email = document.getElementById(`edit-email-${id}`).value.trim();
       const phone = document.getElementById(`edit-phone-${id}`).value.trim();
       if (_supabase) {
-        if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ name, role, pin_code, email, phone, status: 'active' }]);
-        else await _supabase.from('employees').update({ name, role, pin_code, email, phone }).eq('id', id);
+        if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ staff_no, name, role, pin_code, email, phone, status: 'active' }]);
+        else await _supabase.from('employees').update({ staff_no, name, role, pin_code, email, phone }).eq('id', id);
       }
       await initApp();
       renderEmployeeTable();
