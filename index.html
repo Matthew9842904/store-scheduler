@@ -124,13 +124,13 @@
             <h2 class="text-lg font-bold">Submit Your Availability</h2>
             <p class="text-xs text-gray-500 mt-0.5">Select availability preference and set custom hours. Submissions close every Thursday at 11:59 PM.</p>
           </div>
-          <button id="btn-save-avail" onclick="saveMyAvailability()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm">
+          <button id="btn-save-avail" onclick="saveMyAvailability()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm transition">
             💾 Save Availability
           </button>
         </div>
 
-        <div id="deadline-warning-box" class="hidden mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs font-semibold">
-          ⚠️ <span id="deadline-warning-text">The deadline for submitting availability for this week has passed (Thursday 11:59 PM). Please contact the store manager directly.</span>
+        <div id="deadline-warning-box" class="mb-4 p-3 rounded-lg text-xs font-semibold">
+          ⚠️ <span id="deadline-warning-text"></span>
         </div>
 
         <div class="flex items-center gap-3 mb-4 bg-gray-50 p-3 rounded-lg border">
@@ -267,11 +267,11 @@
                 <th class="p-3 w-32">Last Name</th>
                 <th class="p-3 w-32">ENG Name (Display)</th>
                 <th class="p-3 w-28">Role</th>
-                <th class="p-3 pin-header w-20">PIN</th>
+                <th class="p-3 role-admin-only w-20">PIN</th>
                 <th class="p-3">Email</th>
                 <th class="p-3 w-32">Phone</th>
                 <th class="p-3 w-20 text-center">Status</th>
-                <th class="p-3 action-header w-28 text-center">Actions</th>
+                <th class="p-3 role-admin-only w-28 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="employee-table-body" class="divide-y text-sm"></tbody>
@@ -368,9 +368,12 @@
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
 
-    let currentSunday = new Date(2026, 8, 20); // 2026-09-20
-    let availSunday = new Date(2026, 8, 20);
-    let overviewSunday = new Date(2026, 8, 20);
+    // Dates for standard references
+    let currentSunday = new Date(2026, 8, 20); // 2026-09-20 (Current Week)
+    // Default Availability views point to NEXT week (Sept 27)
+    let availSunday = new Date(2026, 8, 27);   // 2026-09-27 
+    let overviewSunday = new Date(2026, 8, 27); // 2026-09-27
+    
     let myPayPeriodStart = new Date(2026, 8, 13); // 2026-09-13
     let adminPayPeriodStart = new Date(2026, 8, 13);
 
@@ -568,10 +571,8 @@
 
     function goHome() { switchTab('hub'); }
 
-    // 권한별 상단 네비게이션바 및 3x3 Hub 메뉴 동적 구성
     function setupNavigationAndHub() {
       const isAdminOrManager = currentUser.role === 'admin' || currentUser.role === 'manager';
-      const isAdmin = currentUser.role === 'admin';
 
       // 1. Top Nav Bar
       let navHtml = `<button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 font-semibold transition">🏠 Menu</button>`;
@@ -626,7 +627,6 @@
       const isAdmin = currentUser.role === 'admin';
       const isManager = currentUser.role === 'manager';
 
-      // 1. Weekly Schedule 쓰기 버튼 (Master Admin 전용)
       if (isAdmin) {
         document.getElementById('btn-save-schedule').classList.remove('hidden');
         document.getElementById('btn-copy-sms').classList.remove('hidden');
@@ -635,7 +635,6 @@
         document.getElementById('btn-copy-sms').classList.add('hidden');
       }
 
-      // 2. Staff Availability Override 권한 (Admin & Manager 모두 가능)
       const overrideBox = document.getElementById('override-section-box');
       if (isAdmin || isManager) {
         if (overrideBox) overrideBox.classList.remove('hidden');
@@ -643,7 +642,6 @@
         if (overrideBox) overrideBox.classList.add('hidden');
       }
 
-      // 3. Employee Management (Master Admin만 직원 추가/수정/삭제 가능, Manager는 읽기 전용)
       const addEmpBtn = document.getElementById('add-emp-btn');
       if (isAdmin) {
         if (addEmpBtn) addEmpBtn.classList.remove('hidden');
@@ -695,7 +693,6 @@
 
     function renderScheduler() {
       const isAdminOrManager = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager');
-      // 매니저는 읽기만 가능하도록 스케줄 테이블 컨트롤 제어
       const canEditSchedule = currentUser && currentUser.role === 'admin';
 
       if (isAdminOrManager) {
@@ -960,23 +957,45 @@
 
     function checkAvailabilityDeadline(sundayDate) {
       const thursday = new Date(sundayDate);
-      thursday.setDate(thursday.getDate() - 3); // 해당 주 수요일/목요일 계산 (일요일 기준 직전 목요일)
+      thursday.setDate(thursday.getDate() - 3); // 해당 주 일요일 기준 3일 전 목요일
       thursday.setHours(23, 59, 59, 999);
+
+      const thMonth = String(thursday.getMonth() + 1).padStart(2, '0');
+      const thDate = String(thursday.getDate()).padStart(2, '0');
 
       const now = new Date();
       isAvailDeadlinePassed = now > thursday;
 
       const warningBox = document.getElementById('deadline-warning-box');
+      const warningText = document.getElementById('deadline-warning-text');
       const saveBtn = document.getElementById('btn-save-avail');
 
-      if (isAvailDeadlinePassed && currentUser.role === 'employee') {
-        warningBox.classList.remove('hidden');
-        saveBtn.disabled = true;
-        saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      warningBox.classList.remove('hidden');
+
+      if (isAvailDeadlinePassed) {
+        warningBox.className = 'mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-xs font-semibold';
+        warningText.innerHTML = `The deadline for this week has passed (Thursday, ${thMonth}/${thDate} at 11:59 PM). Please contact the manager.`;
+        
+        if (currentUser.role === 'employee') {
+          if(saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          }
+        } else {
+          // Admin & Manager can override deadline for themselves
+          if(saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          }
+        }
       } else {
-        warningBox.classList.add('hidden');
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        warningBox.className = 'mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-xs font-semibold';
+        warningText.innerHTML = `Please submit your availability by Thursday, ${thMonth}/${thDate} at 11:59 PM.`;
+        
+        if(saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
       }
     }
 
