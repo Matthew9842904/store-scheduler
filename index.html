@@ -339,9 +339,10 @@
     let currentActiveTab = 'hub';
     let isDataModified = false;
 
-    // 밴쿠버 실시간 날씨 저장소
-    let vancouverWeatherCache = {};
+    // 밴쿠버 실제 실시간 날씨 캐시
+    let realVancouverWeatherCache = {};
 
+    // BC주 스탯 홀리데이 목록 (2026 기준)
     const bcStatHolidays2026 = {
       '2026-01-01': "New Year's Day",
       '2026-02-16': "Family Day",
@@ -420,39 +421,40 @@
       return `${year}-${month}-${day}`;
     }
 
-    // 밴쿠버 실제 날씨 데이터 연동 함수 (실시간 API 동적 매핑)
-    async function fetchVancouverWeather() {
+    // 밴쿠버 실제 실시간 날씨 데이터 페치 (무차단 전용 공개 기상 API 연동)
+    async function fetchRealVancouverWeather() {
       try {
-        const res = await fetch('https://api.openweathermap.org/data/2.5/forecast?q=Vancouver,CA&units=metric&appid=1635890035cbba097fd5c2648ea633a4');
-        const data = await res.json();
-        if (data && data.list) {
-          data.list.forEach(item => {
-            const dateStr = item.dt_txt.split(' ')[0]; // YYYY-MM-DD
-            // 낮 시간대(12:00 또는 가장 가까운 시간) 데이터를 우선 저장
-            if (!vancouverWeatherCache[dateStr] || item.dt_txt.includes('12:00:00')) {
-              vancouverWeatherCache[dateStr] = {
-                temp: Math.round(item.main.temp),
-                icon: getWeatherEmoji(item.weather[0].icon)
-              };
-            }
-          });
+        const response = await fetch('https://api.open-meteo.com/v1/forecast?latitude=49.2827&longitude=-123.1207&daily=temperature_2m_max,weathercode&timezone=America%2FVancouver');
+        const data = await response.json();
+        if (data && data.daily && data.daily.time) {
+          for (let i = 0; i < data.daily.time.length; i++) {
+            const dateStr = data.daily.time[i]; // YYYY-MM-DD
+            const maxTemp = Math.round(data.daily.temperature_2m_max[i]);
+            const code = data.daily.weathercode[i];
+            realVancouverWeatherCache[dateStr] = {
+              temp: maxTemp,
+              icon: getWeatherEmojiByCode(code)
+            };
+          }
         }
-      } catch (e) {
-        console.log("Weather fetch error:", e);
+      } catch (err) {
+        console.log("Real weather fetch warning:", err);
       }
     }
 
-    function getWeatherEmoji(iconCode) {
-      if (iconCode.includes('01')) return '☀️';
-      if (iconCode.includes('02') || iconCode.includes('03')) return '⛅';
-      if (iconCode.includes('04')) return '☁️';
-      if (iconCode.includes('09') || iconCode.includes('10')) return '🌧️';
-      if (iconCode.includes('13')) return '❄️';
+    function getWeatherEmojiByCode(code) {
+      if (code === 0) return '☀️'; // 맑음
+      if (code >= 1 && code <= 3) return '⛅'; // 구름 조금 / 구름 많음
+      if (code >= 45 && code <= 48) return '🌫️'; // 안개
+      if (code >= 51 && code <= 67) return '🌧️'; // 비 / 이슬비 (폭우 대응 가능)
+      if (code >= 71 && code <= 77) return '❄️'; // 눈
+      if (code >= 80 && code <= 82) return '🌧️'; // 소나기
+      if (code >= 95) return '⛈️'; // 천둥번개
       return '🌤️';
     }
 
     async function initApp() {
-      await fetchVancouverWeather();
+      await fetchRealVancouverWeather();
       if (_supabase) {
         try {
           const { data } = await _supabase.from('employees').select('*').order('name');
@@ -627,7 +629,7 @@
       document.getElementById('shift-count-summary').classList.remove('hidden');
     }
 
-    // 밴쿠버 실제 날씨와 스탯 홀리데이가 정확히 동적 매핑되도록 개선된 헤더 렌더링
+    // 실제 밴쿠버 날씨 및 스탯 홀리데이가 정확히 렌더링되는 헤더
     function renderAdminScheduleTable() {
       const headerRow = document.getElementById('schedule-header-row');
       let headerHtml = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
@@ -640,8 +642,7 @@
         const dd = String(d.getDate()).padStart(2, '0');
         const color = i === 0 ? 'text-red-600' : i === 6 ? 'text-blue-600' : 'text-gray-600';
 
-        // 밴쿠버 실시간 날씨 데이터 조회 (없을 경우 기본값 대신 날짜별 대체 정보 표시)
-        const weather = vancouverWeatherCache[isoDate] || { temp: '--', icon: '🌡️' };
+        const weather = realVancouverWeatherCache[isoDate] || { temp: '--', icon: '🌡️' };
         const statHolidayName = bcStatHolidays2026[isoDate];
 
         let statBadge = '';
@@ -652,7 +653,7 @@
         headerHtml += `
           <th class="p-2 border-r text-center w-36">
             <div class="${color} font-bold text-xs">${dayNames[i]} (${mm}/${dd})</div>
-            <div class="text-[11px] text-gray-500 font-medium mt-0.5">${weather.icon} ${weather.temp !== '--' ? weather.temp + '°C' : 'Loading...'}</div>
+            <div class="text-[11px] text-gray-600 font-bold mt-0.5">${weather.icon} ${weather.temp !== '--' ? weather.temp + '°C' : '--'}</div>
             ${statBadge}
           </th>
         `;
