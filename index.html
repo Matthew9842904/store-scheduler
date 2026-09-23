@@ -123,7 +123,7 @@
           <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
           <div>
             <h3 class="font-bold text-gray-900 text-base">Employee Management</h3>
-            <p class="text-xs text-gray-500 mt-1">Staff roster, roles, PIN codes & contacts.</p>
+            <p class="text-xs text-gray-500 mt-1">Staff roster, First/Last Name, PIN codes.</p>
           </div>
         </button>
 
@@ -132,7 +132,7 @@
           <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
           <div>
             <h3 class="font-bold text-gray-900 text-base">ADP Hours (Admin)</h3>
-            <p class="text-xs text-gray-500 mt-1">2-week payroll summary & clean detail view.</p>
+            <p class="text-xs text-gray-500 mt-1">Bi-weekly master payroll view (2-tier layout).</p>
           </div>
         </button>
       </div>
@@ -278,7 +278,7 @@
       </div>
     </main>
 
-    <!-- 4. Employee Management Tab -->
+    <!-- 4. Employee Management Tab (With First/Last Name Inputs) -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
@@ -296,13 +296,15 @@
             <thead>
               <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase">
                 <th class="p-3 w-16 text-center">Staff NO.</th>
-                <th class="p-3 w-32">Name</th>
-                <th class="p-3 w-32">Role</th>
-                <th class="p-3 role-admin-only w-24">PIN</th>
+                <th class="p-3 w-32">First Name</th>
+                <th class="p-3 w-32">Last Name</th>
+                <th class="p-3 w-32">ENG Name (Display)</th>
+                <th class="p-3 w-28">Role</th>
+                <th class="p-3 role-admin-only w-20">PIN</th>
                 <th class="p-3">Email</th>
-                <th class="p-3 w-36">Phone</th>
-                <th class="p-3 w-24 text-center">Status</th>
-                <th class="p-3 role-admin-only w-32 text-center">Actions</th>
+                <th class="p-3 w-32">Phone</th>
+                <th class="p-3 w-20 text-center">Status</th>
+                <th class="p-3 role-admin-only w-28 text-center">Actions</th>
               </tr>
             </thead>
             <tbody id="employee-table-body" class="divide-y text-sm"></tbody>
@@ -311,13 +313,13 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours (Admin) - Clean 2-Tier Layout with Staff NO. Sort -->
+    <!-- 5. ADP Hours (Admin) - Sorted by Staff No. with Direct 2-Tier Stacked Layout -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
           <div>
             <h2 class="text-lg font-bold text-gray-900">ADP Payroll - Bi-Weekly Actual Hours</h2>
-            <p class="text-xs text-gray-500 mt-0.5">Review staff summaries sorted by ADP Staff No. Click any staff row to inspect their 14-day detail below.</p>
+            <p class="text-xs text-gray-500 mt-0.5">Review staff listed by Staff No. with stacked weekly hours and daily detail rows.</p>
           </div>
           <div class="flex items-center gap-3">
             <button onclick="changeAdminPayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
@@ -326,39 +328,8 @@
           </div>
         </div>
 
-        <!-- Upper Table: Staff Summary Sorted by Staff No. -->
-        <div class="space-y-2">
-          <h3 class="font-bold text-sm text-gray-800">📋 Staff Summary & Weekly Hours (Sorted by Staff No.)</h3>
-          <div class="overflow-x-auto border rounded-xl shadow-sm">
-            <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
-                  <th class="p-3 w-24 text-center">Staff NO.</th>
-                  <th class="p-3 w-40">First Name</th>
-                  <th class="p-3 w-40">Last Name</th>
-                  <th class="p-3 w-36">ENG Name</th>
-                  <th class="p-3 w-32 text-center">Role</th>
-                  <th class="p-3 w-32 text-center">Week 1 Hours</th>
-                  <th class="p-3 w-32 text-center">Week 2 Hours</th>
-                  <th class="p-3 w-32 text-center bg-indigo-50 text-indigo-900 font-bold">Total Hours</th>
-                  <th class="p-3 text-center w-28">Action</th>
-                </tr>
-              </thead>
-              <tbody id="admin-summary-tbody" class="text-sm divide-y"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Lower Table: Selected Staff 14-Day Detail View -->
-        <div class="space-y-2 pt-4 border-t">
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold text-sm text-gray-800">🔍 14-Day Detail View for: <span id="selected-staff-detail-title" class="text-indigo-600 font-extrabold">--</span></h3>
-            <span class="text-xs text-gray-400 italic">Click 'Select' on any staff above to view their daily start/end times.</span>
-          </div>
-          <div id="admin-detail-container" class="space-y-4">
-            <div class="p-8 text-center border border-dashed rounded-xl text-gray-400 text-xs">Please select a staff member from the summary table above to inspect their daily time entries.</div>
-          </div>
-        </div>
+        <!-- Master Bi-Weekly Stacked View Container -->
+        <div id="admin-biweekly-container" class="space-y-6"></div>
       </div>
     </main>
   </div>
@@ -372,7 +343,7 @@
       _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     }
 
-    let defaultAdmin = { id: 'default_admin_001', name: 'Master Admin', role: 'admin', pin_code: '0000', status: 'active', staff_no: '1' };
+    let defaultAdmin = { id: 'default_admin_001', name: 'Master Admin', first_name: 'Master', last_name: 'Admin', role: 'admin', pin_code: '0000', status: 'active', staff_no: '1' };
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
 
@@ -381,7 +352,6 @@
     let overviewSunday = new Date(2026, 8, 20);
     let myPayPeriodStart = new Date(2026, 8, 13); // 2026-09-13
     let adminPayPeriodStart = new Date(2026, 8, 13);
-    let selectedAdminStaffId = null;
 
     let currentScheduleData = {};
     let weekAvailMap = {};
@@ -493,8 +463,14 @@
       await fetchRealVancouverWeather14Days();
       if (_supabase) {
         try {
-          const { data } = await _supabase.from('employees').select('*').order('name');
-          if (data && data.length > 0) dbEmployees = data;
+          const { data } = await _supabase.from('employees').select('*').order('staff_no');
+          if (data && data.length > 0) {
+            dbEmployees = data.map(e => ({
+              ...e,
+              first_name: e.first_name || e.name.split(' ')[0] || '',
+              last_name: e.last_name || e.name.split(' ')[1] || 'Staff'
+            }));
+          }
         } catch (e) { dbEmployees = [defaultAdmin]; }
       }
 
@@ -583,7 +559,7 @@
 
       const descEl = document.getElementById('employee-tab-desc');
       if (isAdmin) {
-        descEl.textContent = 'Manage staff information, Staff No., PIN codes, and permissions.';
+        descEl.textContent = 'Manage staff First/Last name, Staff No., PIN codes, and permissions.';
       } else if (isManager) {
         descEl.textContent = 'View contact information (Phone and Email) for all active staff members.';
       }
@@ -961,7 +937,7 @@
     }
 
     // ==========================================
-    // Admin ADP Master Sheet (2-Tier Layout + Staff No. Sorting)
+    // Admin ADP Bi-Weekly Master Sheet (Stacked 2-Tier Direct Layout)
     // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
@@ -981,143 +957,104 @@
           if (data) allActualsData = data;
         } catch (e) { console.error(e); }
       }
-      renderAdminActualHoursMasterView(allActualsData);
+      renderAdminBiWeeklyStackedView(allActualsData);
     }
 
-    function renderAdminActualHoursMasterView(allData) {
-      const summaryTbody = document.getElementById('admin-summary-tbody');
+    function renderAdminBiWeeklyStackedView(allData) {
+      const container = document.getElementById('admin-biweekly-container');
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
 
-      // 사번(Staff No.) 기준 오름차순 정렬 (숫자 변환 정렬 지원)
+      // 사번(Staff No.) 기준 오름차순 정렬
       activeEmployees.sort((a, b) => {
         let numA = parseInt(a.staff_no || '999', 10);
         let numB = parseInt(b.staff_no || '999', 10);
         if (numA !== numB) return numA - numB;
-        return a.name.localeCompare(b.name);
+        return (a.first_name || '').localeCompare(b.first_name || '');
       });
-
-      let summaryHtml = '';
-      let firstEmpIdToSelect = null;
-
-      activeEmployees.forEach((emp, idx) => {
-        if (idx === 0) firstEmpIdToSelect = emp.id;
-        const staffNo = emp.staff_no || '-';
-        const nameParts = emp.name.split(' ');
-        const firstName = nameParts[0] || emp.name;
-        const lastName = nameParts[1] || 'Staff';
-
-        let w1Sum = 0;
-        let w2Sum = 0;
-
-        for (let i = 0; i < 7; i++) {
-          const m1 = allData.find(a => a.employee_id === emp.id && a.day_offset === i);
-          if (m1 && m1.hours) w1Sum += Number(m1.hours);
-
-          const m2 = allData.find(a => a.employee_id === emp.id && a.day_offset === i + 7);
-          if (m2 && m2.hours) w2Sum += Number(m2.hours);
-        }
-
-        const totalSum = w1Sum + w2Sum;
-        const isSelected = selectedAdminStaffId === emp.id;
-
-        summaryHtml += `
-          <tr class="hover:bg-indigo-50/40 transition ${isSelected ? 'bg-indigo-50/80 font-bold' : ''}">
-            <td class="p-3 text-center font-mono font-bold text-gray-700">${staffNo}</td>
-            <td class="p-3 font-semibold">${firstName}</td>
-            <td class="p-3 font-semibold">${lastName}</td>
-            <td class="p-3 ${getStaffColorClass(emp.name)}">${emp.name}</td>
-            <td class="p-3 text-center"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role==='admin'?'bg-purple-100 text-purple-800':'bg-gray-100 text-gray-700'}">${getRoleLabel(emp.role)}</span></td>
-            <td class="p-3 text-center font-semibold text-gray-800">${w1Sum.toFixed(2)}h</td>
-            <td class="p-3 text-center font-semibold text-gray-800">${w2Sum.toFixed(2)}h</td>
-            <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/30">${totalSum.toFixed(2)}h</td>
-            <td class="p-3 text-center">
-              <button onclick="selectAdminStaffDetail('${emp.id}', '${emp.name}')" class="px-3 py-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded shadow-sm transition">
-                Select
-              </button>
-            </td>
-          </tr>
-        `;
-      });
-
-      summaryTbody.innerHTML = summaryHtml || `<tr><td colspan="9" class="p-6 text-center text-gray-400">No active staff found.</td></tr>`;
-
-      if (!selectedAdminStaffId && firstEmpIdToSelect) {
-        selectAdminStaffDetail(firstEmpIdToSelect, activeEmployees[0].name);
-      } else if (selectedAdminStaffId) {
-        const selEmp = activeEmployees.find(e => e.id === selectedAdminStaffId);
-        if (selEmp) selectAdminStaffDetail(selEmp.id, selEmp.name);
-      }
-    }
-
-    function selectAdminStaffDetail(empId, empName) {
-      selectedAdminStaffId = empId;
-      document.getElementById('selected-staff-detail-title').textContent = empName;
-
-      // 요약 테이블 하이라이트 갱신을 위해 다시 렌더링 호출
-      loadAdminActualHoursMaster();
-
-      // 해당 직원의 14일치 상세 데이터 가져오기
-      const periodStartStr = formatDateISO(adminPayPeriodStart);
-      if (_supabase) {
-        _supabase.from('actual_hours').select('*').eq('employee_id', empId).eq('period_start_date', periodStartStr).then(({ data }) => {
-          renderAdminDetailTables(data || []);
-        });
-      }
-    }
-
-    function renderAdminDetailTables(staffDataMap) {
-      const container = document.getElementById('admin-detail-container');
-      let detailMap = {};
-      staffDataMap.forEach(item => { detailMap[item.day_offset] = item; });
 
       let html = '';
-      ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
-        const startIdx = wIdx * 7;
+
+      activeEmployees.forEach((emp, idx) => {
+        const staffNo = emp.staff_no || '-';
+        const firstName = emp.first_name || emp.name.split(' ')[0] || '';
+        const lastName = emp.last_name || emp.name.split(' ')[1] || 'Staff';
+        const engName = emp.name;
+
+        // 직원별 14일 데이터 맵핑
+        let detailMap = {};
+        allData.filter(a => a.employee_id === emp.id).forEach(item => {
+          detailMap[item.day_offset] = item;
+        });
+
         html += `
-          <div class="border rounded-xl overflow-hidden shadow-sm bg-white">
-            <div class="bg-gray-100 px-4 py-2 font-bold text-xs text-gray-800 border-b flex justify-between items-center">
-              <span>${weekTitle}</span>
+          <div class="border rounded-2xl overflow-hidden shadow-sm bg-white border-indigo-100">
+            <!-- 직원 정보 상단 헤더 바 -->
+            <div class="bg-gradient-to-r from-indigo-900 to-purple-900 text-white px-4 py-2.5 flex flex-wrap justify-between items-center text-xs font-bold gap-4">
+              <div class="flex items-center gap-3">
+                <span class="bg-white/20 px-2.5 py-1 rounded-md font-mono text-amber-300">No. ${staffNo}</span>
+                <span class="text-sm font-extrabold">${firstName} ${lastName}</span>
+                <span class="px-2 py-0.5 rounded-full bg-white/10 text-[11px] font-normal text-indigo-200">(${engName})</span>
+              </div>
+              <div class="flex items-center gap-4 text-xs">
+                <span>Role: <strong class="text-indigo-200">${getRoleLabel(emp.role)}</strong></span>
+              </div>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left border-collapse min-w-[900px]">
-                <thead>
-                  <tr class="bg-gray-50 border-b text-xs font-semibold text-gray-600 uppercase text-center">
-                    <th class="p-2 border-r w-32">Day</th>
+
+            <!-- 주별 2단 상세 테이블 배치 -->
+            <div class="p-4 space-y-4 bg-gray-50/50">
         `;
 
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(adminPayPeriodStart);
-          d.setDate(d.getDate() + startIdx + i);
-          html += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
-        }
-        html += `<th class="p-2 text-center bg-gray-100 w-28">Weekly Total</th>`;
-        html += `</tr></thead><tbody class="text-sm"><tr>`;
-        html += `<td class="p-3 font-semibold border-r bg-gray-50 text-xs">Logged Hours</td>`;
-
-        let weekSum = 0;
-        for (let i = 0; i < 7; i++) {
-          const globalDayIdx = startIdx + i;
-          const item = detailMap[globalDayIdx] || {};
-          const st = item.start_time ? formatTime12hShort(item.start_time) : '-';
-          const et = item.end_time ? formatTime12hShort(item.end_time) : '-';
-          const hrs = item.hours ? Number(item.hours).toFixed(2) : '0.00';
-          weekSum += Number(hrs);
+        ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
+          const startIdx = wIdx * 7;
+          let weekSum = 0;
 
           html += `
-            <td class="p-2 border-r text-center align-middle">
-              <div class="text-xs font-medium text-gray-700">${st} ~ ${et}</div>
-              <div class="text-xs font-bold text-indigo-700 mt-0.5">${hrs}h</div>
-            </td>
+            <div class="border rounded-xl overflow-hidden bg-white shadow-xs">
+              <div class="bg-indigo-50/80 px-3 py-1.5 font-bold text-xs text-indigo-950 border-b flex justify-between items-center">
+                <span>${weekTitle}</span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[900px]">
+                  <thead>
+                    <tr class="bg-gray-100/70 border-b text-[11px] font-semibold text-gray-700 uppercase text-center">
+                      <th class="p-2 border-r w-32">Day / Date</th>
           `;
-        }
 
-        html += `
-            <td class="p-3 text-center font-bold bg-gray-50 text-indigo-900 text-base">${weekSum.toFixed(2)}h</td>
-          </tr></tbody></table></div></div>
-        `;
+          for (let i = 0; i < 7; i++) {
+            const d = new Date(adminPayPeriodStart);
+            d.setDate(d.getDate() + startIdx + i);
+            html += `<th class="p-1.5 border-r text-center">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
+          }
+          html += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Hours</th>`;
+          html += `</tr></thead><tbody class="text-xs"><tr>`;
+          html += `<td class="p-2 font-semibold border-r bg-gray-50 text-center">Start ~ End / Hours</td>`;
+
+          for (let i = 0; i < 7; i++) {
+            const globalDayIdx = startIdx + i;
+            const item = detailMap[globalDayIdx] || {};
+            const st = item.start_time ? formatTime12hShort(item.start_time) : '-';
+            const et = item.end_time ? formatTime12hShort(item.end_time) : '-';
+            const hrs = item.hours ? Number(item.hours).toFixed(2) : '0.00';
+            weekSum += Number(hrs);
+
+            html += `
+              <td class="p-2 border-r text-center align-middle">
+                <div class="font-medium text-gray-600">${st} ~ ${et}</div>
+                <div class="font-bold text-indigo-700 mt-0.5">${hrs}h</div>
+              </td>
+            `;
+          }
+
+          html += `
+              <td class="p-2 text-center font-black bg-gray-100 text-indigo-900 text-sm">${weekSum.toFixed(2)}h</td>
+            </tr></tbody></table></div></div>
+          `;
+        });
+
+        html += `</div></div>`;
       });
 
-      container.innerHTML = html;
+      container.innerHTML = html || `<div class="p-8 text-center text-gray-400 bg-white rounded-xl border">No active staff found.</div>`;
     }
 
     function formatTime12hShort(timeStr) {
@@ -1130,24 +1067,25 @@
     }
 
     // ==========================================
-    // Employee Management (With Staff No. Field)
+    // Employee Management (First Name, Last Name, Staff No.)
     // ==========================================
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       const isAdmin = currentUser.role === 'admin';
 
-      // 사번 순서로 정렬
       const sortedEmployees = [...dbEmployees].sort((a, b) => {
         let numA = parseInt(a.staff_no || '999', 10);
         let numB = parseInt(b.staff_no || '999', 10);
         if (numA !== numB) return numA - numB;
-        return a.name.localeCompare(b.name);
+        return (a.first_name || '').localeCompare(b.first_name || '');
       });
 
       tbody.innerHTML = sortedEmployees.map((emp) => `
         <tr id="emp-row-${emp.id}" class="hover:bg-gray-50">
           <td class="p-3 text-center font-mono font-bold text-indigo-700">${emp.staff_no || '-'}</td>
-          <td class="p-3 font-semibold text-gray-800">${emp.name}</td>
+          <td class="p-3 font-semibold text-gray-800">${emp.first_name || ''}</td>
+          <td class="p-3 font-semibold text-gray-800">${emp.last_name || ''}</td>
+          <td class="p-3 ${getStaffColorClass(emp.name)}">${emp.name}</td>
           <td class="p-3"><span class="px-2 py-0.5 text-xs font-semibold rounded-full ${emp.role === 'admin' ? 'bg-purple-100 text-purple-800' : emp.role === 'manager' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-700'}">${getRoleLabel(emp.role)}</span></td>
           ${isAdmin ? `<td class="p-3 text-gray-500 font-mono text-xs">••••</td>` : ''}
           <td class="p-3 text-gray-600">${emp.email || '-'}</td>
@@ -1165,7 +1103,9 @@
       tbody.insertAdjacentHTML('afterbegin', `
         <tr id="emp-row-${tempId}" class="bg-blue-50/50">
           <td class="p-2"><input type="text" id="input-staffno-${tempId}" placeholder="No." class="w-full p-1 text-xs border rounded bg-white text-center font-mono"></td>
-          <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="Name" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><input type="text" id="input-firstname-${tempId}" placeholder="First Name" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><input type="text" id="input-lastname-${tempId}" placeholder="Last Name" class="w-full p-1 text-xs border rounded bg-white"></td>
+          <td class="p-2"><input type="text" id="input-name-${tempId}" placeholder="ENG Name" class="w-full p-1 text-xs border rounded bg-white"></td>
           <td class="p-2"><select id="input-role-${tempId}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee">Staff</option><option value="manager">Manager</option><option value="admin">Master Admin</option></select></td>
           <td class="p-2"><input type="text" id="input-pin-${tempId}" placeholder="PIN" class="w-full p-1 text-xs border rounded bg-white"></td>
           <td class="p-2"><input type="email" id="input-email-${tempId}" placeholder="Email" class="w-full p-1 text-xs border rounded bg-white"></td>
@@ -1178,16 +1118,19 @@
 
     async function saveNewEmployee(tempId) {
       const staff_no = document.getElementById(`input-staffno-${tempId}`).value.trim();
-      const name = document.getElementById(`input-name-${tempId}`).value.trim();
+      const first_name = document.getElementById(`input-firstname-${tempId}`).value.trim();
+      const last_name = document.getElementById(`input-lastname-${tempId}`).value.trim();
+      const name = document.getElementById(`input-name-${tempId}`).value.trim() || `${first_name} ${last_name}`;
       const role = document.getElementById(`input-role-${tempId}`).value;
       const pin_code = document.getElementById(`input-pin-${tempId}`).value.trim();
       const email = document.getElementById(`input-email-${tempId}`).value.trim();
       const phone = document.getElementById(`input-phone-${tempId}`).value.trim();
       const status = document.getElementById(`input-status-${tempId}`).value;
-      if (!name || !pin_code) return alert('Name and PIN required.');
+
+      if (!first_name || !pin_code) return alert('First Name and PIN required.');
 
       if (_supabase) {
-        await _supabase.from('employees').insert([{ staff_no, name, role, pin_code, email, phone, status }]);
+        await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status }]);
       }
       await initApp();
       renderEmployeeTable();
@@ -1198,7 +1141,9 @@
       if (!emp) return;
       document.getElementById(`emp-row-${id}`).innerHTML = `
         <td class="p-2"><input type="text" id="edit-staffno-${id}" value="${emp.staff_no || ''}" class="w-full p-1 text-xs border rounded bg-white text-center font-mono" oninput="markModified()"></td>
-        <td class="p-2"><input type="text" id="edit-name-${id}" value="${emp.name}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
+        <td class="p-2"><input type="text" id="edit-firstname-${id}" value="${emp.first_name || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
+        <td class="p-2"><input type="text" id="edit-lastname-${id}" value="${emp.last_name || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
+        <td class="p-2"><input type="text" id="edit-name-${id}" value="${emp.name || ''}" class="w-full p-1 text-xs border rounded bg-white" oninput="markModified()"></td>
         <td class="p-2"><select id="edit-role-${id}" class="w-full p-1 text-xs border rounded bg-white"><option value="employee" ${emp.role==='employee'?'selected':''}>Staff</option><option value="manager" ${emp.role==='manager'?'selected':''}>Manager</option><option value="admin" ${emp.role==='admin'?'selected':''}>Master</option></select></td>
         <td class="p-2"><input type="text" id="edit-pin-${id}" value="${emp.pin_code||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
         <td class="p-2"><input type="email" id="edit-email-${id}" value="${emp.email||''}" class="w-full p-1 text-xs border rounded bg-white"></td>
@@ -1210,14 +1155,17 @@
 
     async function saveEdit(id) {
       const staff_no = document.getElementById(`edit-staffno-${id}`).value.trim();
+      const first_name = document.getElementById(`edit-firstname-${id}`).value.trim();
+      const last_name = document.getElementById(`edit-lastname-${id}`).value.trim();
       const name = document.getElementById(`edit-name-${id}`).value.trim();
       const role = document.getElementById(`edit-role-${id}`).value;
       const pin_code = document.getElementById(`edit-pin-${id}`).value.trim();
       const email = document.getElementById(`edit-email-${id}`).value.trim();
       const phone = document.getElementById(`edit-phone-${id}`).value.trim();
+
       if (_supabase) {
-        if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ staff_no, name, role, pin_code, email, phone, status: 'active' }]);
-        else await _supabase.from('employees').update({ staff_no, name, role, pin_code, email, phone }).eq('id', id);
+        if (id === defaultAdmin.id) await _supabase.from('employees').insert([{ staff_no, first_name, last_name, name, role, pin_code, email, phone, status: 'active' }]);
+        else await _supabase.from('employees').update({ staff_no, first_name, last_name, name, role, pin_code, email, phone }).eq('id', id);
       }
       await initApp();
       renderEmployeeTable();
