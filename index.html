@@ -376,7 +376,7 @@
     let availSunday = new Date(currentSunday);
     let overviewSunday = new Date(currentSunday);
 
-    let myPayPeriodStart = new Date(2026, 8, 13); // 필요에 따라 조정 가능
+    let myPayPeriodStart = new Date(2026, 8, 13);
     let adminPayPeriodStart = new Date(2026, 8, 13);
 
     let currentScheduleData = {};
@@ -418,9 +418,7 @@
     }
 
     const shifts = [
-      { key: "open1", name: "Open 1", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
-      { key: "open2", name: "Open 2", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
-      { key: "open3", name: "Open 3", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
+      { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
       { key: "day1", name: "Day 1", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
       { key: "day2", name: "Day 2", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
       { key: "divider" },
@@ -826,7 +824,7 @@
 
       dayCells.forEach(({ cell, select, currentVal, shiftKey }) => {
         const isClosingShift = shiftKey.startsWith('closing');
-        const isDayOrOpenShift = shiftKey.startsWith('open') || shiftKey.startsWith('day');
+        const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
 
         let optionsHtml = '<option value="">Select Staff</option>';
         let unavailableOptionsHtml = '';
