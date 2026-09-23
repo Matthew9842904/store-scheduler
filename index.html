@@ -413,7 +413,9 @@
     }
 
     const shifts = [
-      { key: "open", name: "Open", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
+      { key: "open1", name: "Open 1", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
+      { key: "open2", name: "Open 2", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
+      { key: "open3", name: "Open 3", count: "1 Staff", bg: "bg-emerald-50", text: "text-emerald-800", type: "open" },
       { key: "day1", name: "Day 1", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
       { key: "day2", name: "Day 2", count: "1 Staff", bg: "bg-blue-50", text: "text-blue-800", type: "day" },
       { key: "divider" },
@@ -810,7 +812,7 @@
         if (select) {
           const shiftKey = cell.getAttribute('data-shift-key');
           const savedItem = currentScheduleData[`${shiftKey}_${dayIndex}`];
-          const initialEmp = select.value || (savedItem ? savedItem.employee_name : '') || '';
+          const initialEmp = select.value !== undefined && select.value !== null ? select.value : (savedItem ? savedItem.employee_name : '') || '';
           dayCells.push({ cell, select, currentVal: initialEmp, shiftKey });
         }
       });
@@ -819,7 +821,7 @@
 
       dayCells.forEach(({ cell, select, currentVal, shiftKey }) => {
         const isClosingShift = shiftKey.startsWith('closing');
-        const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
+        const isDayOrOpenShift = shiftKey.startsWith('open') || shiftKey.startsWith('day');
 
         let optionsHtml = '<option value="">Select Staff</option>';
         let unavailableOptionsHtml = '';
@@ -870,8 +872,9 @@
         }
 
         select.innerHTML = optionsHtml;
+        select.value = currentVal; // 명시적으로 현재 값 적용 (비어있으면 빈 칸 선택)
+
         if (currentVal) {
-          select.value = currentVal;
           select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(currentVal)}`;
         } else {
           select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white`;
