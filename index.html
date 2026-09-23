@@ -147,8 +147,8 @@
     <main id="view-view-avail" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div>
-          <h2 class="text-lg font-bold">Staff Availability Overview & Admin Override</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Review all staff availabilities. As Admin/Manager, you can select any staff member below to modify their availability for this week.</p>
+          <h2 class="text-lg font-bold">Staff Availability Overview</h2>
+          <p id="avail-overview-desc" class="text-xs text-gray-500 mt-0.5">Review all staff availabilities for this week.</p>
         </div>
 
         <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border">
@@ -157,8 +157,8 @@
           <button onclick="changeOverviewWeek(1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">Next Week &gt;</button>
         </div>
 
-        <div id="override-section-box" class="bg-indigo-50 border border-indigo-200 p-4 rounded-xl space-y-3">
-          <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wide">👑 Admin/Manager Override: Modify Staff Availability</label>
+        <div id="override-section-box" class="hidden bg-indigo-50 border border-indigo-200 p-4 rounded-xl space-y-3">
+          <label class="block text-xs font-bold text-indigo-900 uppercase tracking-wide">👑 Admin Override: Modify Staff Availability</label>
           <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             <select id="admin-override-user" class="p-2 border rounded-lg bg-white text-sm font-semibold text-indigo-900 flex-1" onchange="loadAdminSelectedAvail()">
               <option value="">-- Click here to select staff to edit --</option>
@@ -368,12 +368,9 @@
     let dbEmployees = [defaultAdmin];
     let currentUser = null;
 
-    // Dates for standard references
-    let currentSunday = new Date(2026, 8, 20); // 2026-09-20 (Current Week)
-    // Default Availability views point to NEXT week (Sept 27)
-    let availSunday = new Date(2026, 8, 27);   // 2026-09-27 
+    let currentSunday = new Date(2026, 8, 20); // 2026-09-20
+    let availSunday = new Date(2026, 8, 27);   // 2026-09-27
     let overviewSunday = new Date(2026, 8, 27); // 2026-09-27
-    
     let myPayPeriodStart = new Date(2026, 8, 13); // 2026-09-13
     let adminPayPeriodStart = new Date(2026, 8, 13);
 
@@ -574,7 +571,6 @@
     function setupNavigationAndHub() {
       const isAdminOrManager = currentUser.role === 'admin' || currentUser.role === 'manager';
 
-      // 1. Top Nav Bar
       let navHtml = `<button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 font-semibold transition">🏠 Menu</button>`;
       navHtml += `<button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Weekly Schedule</button>`;
       navHtml += `<button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Submit Availability</button>`;
@@ -588,7 +584,6 @@
       navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Actual Hours</button>`;
       document.getElementById('top-nav-bar').innerHTML = navHtml;
 
-      // 2. 3x3 Hub Grid
       let hubHtml = `
         <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
@@ -608,7 +603,7 @@
         hubHtml += `
           <button onclick="switchTab('view-avail')" class="p-6 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
             <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">👥</div>
-            <div><h3 class="font-bold text-gray-900 text-base">Staff Availability</h3><p class="text-xs text-gray-500 mt-1">Review team availability & admin override.</p></div>
+            <div><h3 class="font-bold text-gray-900 text-base">Staff Availability</h3><p class="text-xs text-gray-500 mt-1">Review team availability & overview.</p></div>
           </button>
           <button onclick="switchTab('employees')" class="p-6 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
             <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
@@ -635,11 +630,15 @@
         document.getElementById('btn-copy-sms').classList.add('hidden');
       }
 
+      // 👑 Admin Override Box: Master Admin에게만 허용 (Manager는 제외)
       const overrideBox = document.getElementById('override-section-box');
-      if (isAdmin || isManager) {
+      const descEl = document.getElementById('avail-overview-desc');
+      if (isAdmin) {
         if (overrideBox) overrideBox.classList.remove('hidden');
+        if (descEl) descEl.textContent = 'Review all staff availabilities. As Admin, you can select any staff member below to modify their availability for this week.';
       } else {
         if (overrideBox) overrideBox.classList.add('hidden');
+        if (descEl) descEl.textContent = 'Review all staff availabilities for this week (Read-Only).';
       }
 
       const addEmpBtn = document.getElementById('add-emp-btn');
@@ -649,11 +648,11 @@
         if (addEmpBtn) addEmpBtn.classList.add('hidden');
       }
 
-      const descEl = document.getElementById('employee-tab-desc');
+      const empDescEl = document.getElementById('employee-tab-desc');
       if (isAdmin) {
-        descEl.textContent = 'Manage staff First/Last name, Staff No., PIN codes, and permissions.';
+        empDescEl.textContent = 'Manage staff First/Last name, Staff No., PIN codes, and permissions.';
       } else if (isManager) {
-        descEl.textContent = 'View contact information (Phone and Email) for all active staff members (Read-Only).';
+        empDescEl.textContent = 'View contact information (Phone and Email) for all active staff members (Read-Only).';
       }
     }
 
@@ -957,7 +956,7 @@
 
     function checkAvailabilityDeadline(sundayDate) {
       const thursday = new Date(sundayDate);
-      thursday.setDate(thursday.getDate() - 3); // 해당 주 일요일 기준 3일 전 목요일
+      thursday.setDate(thursday.getDate() - 3);
       thursday.setHours(23, 59, 59, 999);
 
       const thMonth = String(thursday.getMonth() + 1).padStart(2, '0');
@@ -982,7 +981,6 @@
             saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
           }
         } else {
-          // Admin & Manager can override deadline for themselves
           if(saveBtn) {
             saveBtn.disabled = false;
             saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
@@ -1023,8 +1021,8 @@
           week_start_date: weekStartStr,
           day_index: dayIndex,
           status,
-          start_time: startTime,
-          end_time: endTime
+          start_time: startTime || null,
+          end_time: endTime || null
         });
       });
 
@@ -1038,7 +1036,7 @@
     }
 
     // ==========================================
-    // Staff Availability Overview & Admin/Manager Override
+    // Staff Availability Overview & Master Admin Override (Fixed Schema Compatibility)
     // ==========================================
     function changeOverviewWeek(offset) {
       overviewSunday.setDate(overviewSunday.getDate() + (offset * 7));
@@ -1169,8 +1167,8 @@
           week_start_date: weekStartStr,
           day_index: dayIndex,
           status,
-          start_time: startTime,
-          end_time: endTime
+          start_time: startTime || null,
+          end_time: endTime || null
         });
       });
 
@@ -1404,8 +1402,8 @@
             employee_name: currentUser.name,
             period_start_date: periodStartStr,
             day_offset: i,
-            start_time,
-            end_time,
+            start_time: start_time || null,
+            end_time: end_time || null,
             hours
           });
         }
@@ -1424,8 +1422,8 @@
             employee_name: currentUser.name,
             period_start_date: periodStartStr,
             date,
-            start_time,
-            end_time,
+            start_time: start_time || null,
+            end_time: end_time || null,
             hours,
             reason
           });
