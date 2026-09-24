@@ -839,7 +839,7 @@
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}" data-shift-key="${shift.key}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onchange="markModified(); onStaffSelectChange(this, ${dayIndex}); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onfocus="onDropdownFocus(this, ${dayIndex})" onblur="onDropdownBlur(this, ${dayIndex})" onchange="markModified(); onStaffSelectChange(this, ${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
@@ -858,18 +858,28 @@
       document.querySelectorAll('#schedule-tbody td[data-day]').forEach(cell => {
         const select = cell.querySelector('.emp-select');
         if (select) {
-          select.removeAttribute('data-initialized');
-          select.removeAttribute('data-selected-emp');
+          const shiftKey = cell.getAttribute('data-shift-key');
+          const dayIndex = cell.getAttribute('data-day');
+          const savedItem = currentScheduleData[`${shiftKey}_${dayIndex}`];
+          const empName = savedItem ? savedItem.employee_name : '';
+          select.value = empName;
+          updateSelectDisplayAndColor(select, empName);
         }
       });
+    }
 
-      for (let i = 0; i < 7; i++) updateDropdowns(i);
+    function onDropdownFocus(selectEl, dayIndex) {
+      updateDropdownsWithOptions(selectEl, dayIndex, true);
+    }
+
+    function onDropdownBlur(selectEl, dayIndex) {
+      setTimeout(() => {
+        updateDropdownsWithOptions(selectEl, dayIndex, false);
+      }, 200);
     }
 
     function onStaffSelectChange(selectEl, dayIndex) {
       const newEmpName = selectEl.value;
-      selectEl.setAttribute('data-selected-emp', newEmpName);
-      
       const currentCell = selectEl.closest('td');
 
       if (newEmpName) {
@@ -878,7 +888,7 @@
             const otherSelect = cell.querySelector('.emp-select');
             if (otherSelect && otherSelect.value === newEmpName) {
               otherSelect.value = "";
-              otherSelect.setAttribute('data-selected-emp', "");
+              updateSelectDisplayAndColor(otherSelect, "");
               const otherStart = cell.querySelector('.start-time-select');
               const otherEnd = cell.querySelector('.end-time-select');
               if (otherStart) otherStart.value = "";
@@ -887,6 +897,8 @@
           }
         });
       }
+
+      updateSelectDisplayAndColor(selectEl, newEmpName);
 
       const startSelect = currentCell.querySelector('.start-time-select');
       const endSelect = currentCell.querySelector('.end-time-select');
@@ -909,124 +921,119 @@
       }
     }
 
-    function updateDropdowns(dayIndex) {
+    function updateSelectDisplayAndColor(selectEl, empName) {
+      selectEl.value = empName;
+      if (empName) {
+        selectEl.innerHTML = `<option value="${empName}">${empName}</option>`;
+        selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(empName)}`;
+      } else {
+        selectEl.innerHTML = `<option value="">Select Staff</option>`;
+        selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white`;
+      }
+    }
+
+    function updateDropdownsWithOptions(selectEl, dayIndex, isOpen) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
-      
+      const currentCell = selectEl.closest('td');
+      const shiftKey = currentCell.getAttribute('data-shift-key');
+      const currentVal = selectEl.value;
+
+      if (!isOpen) {
+        updateSelectDisplayAndColor(selectEl, currentVal);
+        return;
+      }
+
       const dayCells = [];
       document.querySelectorAll(`#schedule-tbody td[data-day="${dayIndex}"]`).forEach(cell => {
-        const select = cell.querySelector('.emp-select');
-        if (select) {
-          const shiftKey = cell.getAttribute('data-shift-key');
-          const savedItem = currentScheduleData[`${shiftKey}_${dayIndex}`];
-          
-          let initialEmp = select.value;
-          if (initialEmp === undefined || initialEmp === null || !select.hasAttribute('data-initialized')) {
-            initialEmp = (savedItem ? savedItem.employee_name : '') || '';
-            select.setAttribute('data-selected-emp', initialEmp);
-            select.setAttribute('data-initialized', 'true');
-          } else {
-            initialEmp = select.getAttribute('data-selected-emp') || '';
-          }
-
-          dayCells.push({ cell, select, currentVal: initialEmp, shiftKey });
-        }
+        const sel = cell.querySelector('.emp-select');
+        if (sel) dayCells.push({ cell, sel, val: sel.value });
       });
 
-      // 1. 해당 요일에 현재 선택박스들에서 실제로 선택(배정)된 모든 직원을 정확히 집계
       const assignedMapToday = {};
       dayCells.forEach(c => {
-        if (c.currentVal) {
-          if (!assignedMapToday[c.currentVal]) assignedMapToday[c.currentVal] = 0;
-          assignedMapToday[c.currentVal]++;
+        if (c.val) {
+          assignedMapToday[c.val] = (assignedMapToday[c.val] || 0) + 1;
         }
       });
 
-      dayCells.forEach(({ cell, select, currentVal, shiftKey }) => {
-        const isClosingShift = shiftKey.startsWith('closing');
-        const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
+      const isClosingShift = shiftKey.startsWith('closing');
+      const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
 
-        let optionsHtml = '<option value="">Select Staff</option>';
-        let availableOptionsHtml = '';
-        let assignedOptionsHtml = '';
-        let unavailableOptionsHtml = '';
-        let hasAssigned = false;
-        let hasUnavailable = false;
+      let optionsHtml = '<option value="">Select Staff</option>';
+      let availableOptionsHtml = '';
+      let assignedOptionsHtml = '';
+      let unavailableOptionsHtml = '';
+      let hasAssigned = false;
+      let hasUnavailable = false;
 
-        // 이미 오늘 배정된 직원들 이름 세트 (가용 여부와 무관하게 Already Assigned에 포함시키기 위함)
-        const isAssignedToday = assignedMapToday[currentVal] || assignedMapToday; // 전체 배정된 직원 체크용
+      activeEmployees.forEach(emp => {
+        const empAvail = weekAvailMap[emp.name]?.[dayIndex];
+        const status = empAvail?.status || 'Available (Anytime)';
 
-        activeEmployees.forEach(emp => {
-          const empAvail = weekAvailMap[emp.name]?.[dayIndex];
-          const status = empAvail?.status || 'Available (Anytime)';
-
-          // 이 직원이 오늘 날짜의 스케줄 셀 중 어디라도 배정되어 있는지 확인
-          let isAssignedAnywhere = false;
-          dayCells.forEach(dc => {
-            if (dc.currentVal === emp.name) isAssignedAnywhere = true;
-          });
-
-          if (status === 'Unavailable') {
-            // Unavailable 상태이더라도, 만약 이미 이 요일에 배정된 적이 있다면 Already Assigned로 처리하거나 관리할 수 있으나 기본은 Unavailable
-            if (isAssignedAnywhere) {
-              hasAssigned = true;
-              assignedOptionsHtml += `<option value="${emp.name}" class="text-indigo-700 bg-indigo-50" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name} (Already Assigned)</option>`;
-            } else {
-              hasUnavailable = true;
-              unavailableOptionsHtml += `<option value="${emp.name}" class="text-gray-400 bg-gray-100" ${currentVal === emp.name ? 'selected' : ''}>⚠️ ${emp.name} (Unavailable)</option>`;
-            }
-            return;
-          }
-
-          let isEligible = false;
-          let noteStr = '';
-
-          if (status === 'Available (Anytime)' || status === 'Custom Hours') {
-            isEligible = true;
-            if (status === 'Custom Hours' && empAvail.start_time && empAvail.end_time) {
-              noteStr = ` (${empAvail.start_time}~${empAvail.end_time})`;
-            }
-          } else if (status === 'Open') {
-            isEligible = true;
-            noteStr = ' (Open)';
-          } else if (status === 'Day Only') {
-            if (isDayOrOpenShift) {
-              isEligible = true;
-              noteStr = ' (Day Only)';
-            }
-          } else if (status === 'Closing Only') {
-            if (isClosingShift) {
-              isEligible = true;
-              noteStr = ' (Closing)';
-            }
-          }
-
-          if (isAssignedAnywhere) {
-            hasAssigned = true;
-            assignedOptionsHtml += `<option value="${emp.name}" class="text-indigo-700 bg-indigo-50" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${noteStr} (Already Assigned)</option>`;
-          } else if (isEligible) {
-            availableOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
-          }
+        let isAssignedAnywhere = false;
+        dayCells.forEach(dc => {
+          if (dc.sel !== selectEl && dc.val === emp.name) isAssignedAnywhere = true;
         });
 
-        optionsHtml += availableOptionsHtml;
-
-        if (hasAssigned) {
-          optionsHtml += `<option disabled>─── Already Assigned ───</option>` + assignedOptionsHtml;
+        if (status === 'Unavailable') {
+          if (isAssignedAnywhere || currentVal === emp.name) {
+            hasAssigned = true;
+            assignedOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name} (Already Assigned)</option>`;
+          } else {
+            hasUnavailable = true;
+            unavailableOptionsHtml += `<option value="${emp.name}" class="text-gray-400 bg-gray-100" ${currentVal === emp.name ? 'selected' : ''}>⚠️ ${emp.name} (Unavailable)</option>`;
+          }
+          return;
         }
 
-        if (hasUnavailable) {
-          optionsHtml += `<option disabled>────── Unavailable ──────</option>` + unavailableOptionsHtml;
+        let isEligible = false;
+        let noteStr = '';
+
+        if (status === 'Available (Anytime)') {
+          isEligible = true;
+          noteStr = ' (Anytime)';
+        } else if (status === 'Custom Hours') {
+          isEligible = true;
+          if (empAvail.start_time && empAvail.end_time) {
+            noteStr = ` (${empAvail.start_time}~${empAvail.end_time})`;
+          } else {
+            noteStr = ' (Anytime)';
+          }
+        } else if (status === 'Open') {
+          isEligible = true;
+          noteStr = ' (Open/Day)';
+        } else if (status === 'Day Only') {
+          if (isDayOrOpenShift) {
+            isEligible = true;
+            noteStr = ' (Open/Day)';
+          }
+        } else if (status === 'Closing Only') {
+          if (isClosingShift) {
+            isEligible = true;
+            noteStr = ' (Closing)';
+          }
         }
 
-        select.innerHTML = optionsHtml;
-        select.value = currentVal;
-
-        if (currentVal) {
-          select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(currentVal)}`;
-        } else {
-          select.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white`;
+        if (isAssignedAnywhere || (currentVal === emp.name && assignedMapToday[emp.name] > 1)) {
+          hasAssigned = true;
+          assignedOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${noteStr} (Already Assigned)</option>`;
+        } else if (isEligible) {
+          availableOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
         }
       });
+
+      optionsHtml += availableOptionsHtml;
+
+      if (hasAssigned) {
+        optionsHtml += `<option disabled>─── Already Assigned ───</option>` + assignedOptionsHtml;
+      }
+
+      if (hasUnavailable) {
+        optionsHtml += `<option disabled>────── Unavailable ──────</option>` + unavailableOptionsHtml;
+      }
+
+      selectEl.innerHTML = optionsHtml;
+      selectEl.value = currentVal;
     }
 
     function renderStaffPersonalSchedule() {
