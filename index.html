@@ -839,7 +839,7 @@
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}" data-shift-key="${shift.key}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onfocus="onDropdownFocus(this, ${dayIndex})" onblur="onDropdownBlur(this, ${dayIndex})" onchange="markModified(); onStaffSelectChange(this, ${dayIndex}); updateShiftCountSummary();">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white text-gray-800" ${!canEdit ? 'disabled' : ''} onfocus="onDropdownFocus(this, ${dayIndex})" onblur="onDropdownBlur(this, ${dayIndex})" onchange="markModified(); onStaffSelectChange(this, ${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
@@ -923,12 +923,12 @@
 
     function updateSelectDisplayAndColor(selectEl, empName) {
       selectEl.value = empName;
+      // 드롭다운이 닫혀있거나 선택된 상태에서는 항상 흰색 배경 및 기본 텍스트 유지 (1번 요청사항 완벽 고정)
+      selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white text-gray-800`;
       if (empName) {
         selectEl.innerHTML = `<option value="${empName}">${empName}</option>`;
-        selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(empName)}`;
       } else {
         selectEl.innerHTML = `<option value="">Select Staff</option>`;
-        selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white`;
       }
     }
 
@@ -957,7 +957,8 @@
       });
 
       const isClosingShift = shiftKey.startsWith('closing');
-      const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
+      const isOpenShift = shiftKey === 'open';
+      const isDayShift = shiftKey.startsWith('day');
 
       let optionsHtml = '<option value="">Select Staff</option>';
       let availableOptionsHtml = '';
@@ -1000,12 +1001,16 @@
             noteStr = ' (Anytime)';
           }
         } else if (status === 'Open') {
-          isEligible = true;
-          noteStr = ' (Open/Day)';
-        } else if (status === 'Day Only') {
-          if (isDayOrOpenShift) {
+          // Open은 open/day 근무 모두 가능하도록 허용
+          if (isOpenShift || isDayShift) {
             isEligible = true;
             noteStr = ' (Open/Day)';
+          }
+        } else if (status === 'Day Only') {
+          // Day Only는 엄격하게 Day 스케줄에만 허용 (Open에는 안 됨)
+          if (isDayShift) {
+            isEligible = true;
+            noteStr = ' (Day Only)';
           }
         } else if (status === 'Closing Only') {
           if (isClosingShift) {
