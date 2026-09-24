@@ -924,7 +924,6 @@
     function updateSelectDisplayAndColor(selectEl, empName) {
       selectEl.value = empName;
       if (empName) {
-        // 선택되었을 때는 직원 고유 뱃지 컬러 복원
         selectEl.innerHTML = `<option value="${empName}">${empName}</option>`;
         selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition ${getStaffColorClass(empName)}`;
       } else {
@@ -944,19 +943,27 @@
         return;
       }
 
-      // 드롭다운이 열렸을 때는 옵션 보기를 위해 배경색을 흰색으로 고정하여 가독성 확보
       selectEl.className = `emp-select w-full p-1 text-xs border rounded font-medium transition bg-white text-gray-800`;
 
       const dayCells = [];
       document.querySelectorAll(`#schedule-tbody td[data-day="${dayIndex}"]`).forEach(cell => {
         const sel = cell.querySelector('.emp-select');
-        if (sel) dayCells.push({ cell, sel, val: sel.value });
+        if (sel) {
+          dayCells.push({ 
+            cell, 
+            sel, 
+            val: sel.value, 
+            sKey: cell.getAttribute('data-shift-key') 
+          });
+        }
       });
 
       const assignedMapToday = {};
+      const assignedShiftKeyMap = {};
       dayCells.forEach(c => {
         if (c.val) {
           assignedMapToday[c.val] = (assignedMapToday[c.val] || 0) + 1;
+          assignedShiftKeyMap[c.val] = c.sKey;
         }
       });
 
@@ -980,7 +987,6 @@
           if (dc.sel !== selectEl && dc.val === emp.name) isAssignedAnywhere = true;
         });
 
-        // 현재 선택된 본인인 경우 이미 배정된 항목으로 중복 노출되지 않도록 처리
         if (currentVal === emp.name) {
           isAssignedAnywhere = true;
         }
@@ -988,7 +994,12 @@
         if (status === 'Unavailable') {
           if (isAssignedAnywhere) {
             hasAssigned = true;
-            assignedOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name} (Already Assigned)</option>`;
+            const assignedSK = assignedShiftKeyMap[emp.name] || '';
+            let assignedNote = '';
+            if (assignedSK === 'open') assignedNote = ' (Open)';
+            else if (assignedSK.startsWith('day')) assignedNote = ' (Day)';
+            else if (assignedSK.startsWith('closing')) assignedNote = ' (Closing)';
+            assignedOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${assignedNote} (Already Assigned)</option>`;
           } else {
             hasUnavailable = true;
             unavailableOptionsHtml += `<option value="${emp.name}" class="text-gray-400 bg-gray-100" ${currentVal === emp.name ? 'selected' : ''}>⚠️ ${emp.name} (Unavailable)</option>`;
@@ -1028,7 +1039,12 @@
 
         if (isAssignedAnywhere || (currentVal === emp.name && assignedMapToday[emp.name] > 1)) {
           hasAssigned = true;
-          assignedOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${noteStr} (Already Assigned)</option>`;
+          const assignedSK = assignedShiftKeyMap[emp.name] || '';
+          let assignedNote = noteStr;
+          if (assignedSK === 'open') assignedNote = ' (Open)';
+          else if (assignedSK.startsWith('day')) assignedNote = ' (Day)';
+          else if (assignedSK.startsWith('closing')) assignedNote = ' (Closing)';
+          assignedOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${assignedNote} (Already Assigned)</option>`;
         } else if (isEligible) {
           availableOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
         }
