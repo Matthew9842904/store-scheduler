@@ -839,7 +839,7 @@
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}" data-shift-key="${shift.key}">
               <div class="space-y-1">
-                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onchange="markModified(); onStaffSelectChange(this); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
+                <select class="emp-select w-full p-1 text-xs border rounded font-medium transition bg-white" ${!canEdit ? 'disabled' : ''} onchange="markModified(); onStaffSelectChange(this, ${dayIndex}); updateDropdowns(${dayIndex}); updateShiftCountSummary();">
                   <option value="">Select Staff</option>
                 </select>
                 <div class="flex items-center gap-1 text-[11px]">
@@ -867,14 +867,34 @@
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
-    function onStaffSelectChange(selectEl) {
-      selectEl.setAttribute('data-selected-emp', selectEl.value);
-      const cell = selectEl.closest('td');
-      const startSelect = cell.querySelector('.start-time-select');
-      const endSelect = cell.querySelector('.end-time-select');
-      const shiftKey = cell.getAttribute('data-shift-key');
+    function onStaffSelectChange(selectEl, dayIndex) {
+      const newEmpName = selectEl.value;
+      selectEl.setAttribute('data-selected-emp', newEmpName);
+      
+      const currentCell = selectEl.closest('td');
 
-      if (!selectEl.value) {
+      // 중복 선택 처리: 만약 이 직원이 이미 이 날짜의 다른 셀에 배정되어 있다면 기존 셀 초기화
+      if (newEmpName) {
+        document.querySelectorAll(`#schedule-tbody td[data-day="${dayIndex}"]`).forEach(cell => {
+          if (cell !== currentCell) {
+            const otherSelect = cell.querySelector('.emp-select');
+            if (otherSelect && otherSelect.value === newEmpName) {
+              otherSelect.value = "";
+              otherSelect.setAttribute('data-selected-emp', "");
+              const otherStart = cell.querySelector('.start-time-select');
+              const otherEnd = cell.querySelector('.end-time-select');
+              if (otherStart) otherStart.value = "";
+              if (otherEnd) otherEnd.value = "";
+            }
+          }
+        });
+      }
+
+      const startSelect = currentCell.querySelector('.start-time-select');
+      const endSelect = currentCell.querySelector('.end-time-select');
+      const shiftKey = currentCell.getAttribute('data-shift-key');
+
+      if (!newEmpName) {
         if (startSelect) startSelect.value = "";
         if (endSelect) endSelect.value = "";
       } else {
@@ -914,7 +934,14 @@
         }
       });
 
-      const selectedNamesOnThisDay = dayCells.map(c => c.currentVal).filter(v => v !== "");
+      // 이미 이 날짜에 배정되어 있는 직원들의 명단 집계 (중복 배정 시 [Selected] 표시용)
+      const assignedMapToday = {};
+      dayCells.forEach(c => {
+        if (c.currentVal) {
+          if (!assignedMapToday[c.currentVal]) assignedMapToday[c.currentVal] = 0;
+          assignedMapToday[c.currentVal]++;
+        }
+      });
 
       dayCells.forEach(({ cell, select, currentVal, shiftKey }) => {
         const isClosingShift = shiftKey.startsWith('closing');
@@ -927,10 +954,6 @@
         activeEmployees.forEach(emp => {
           const empAvail = weekAvailMap[emp.name]?.[dayIndex];
           const status = empAvail?.status || 'Available (Anytime)';
-
-          if (currentVal !== emp.name && selectedNamesOnThisDay.includes(emp.name)) {
-            return;
-          }
 
           let isEligible = false;
           let noteStr = '';
@@ -960,7 +983,10 @@
           }
 
           if (isEligible) {
-            optionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
+            // 이미 다른 셀에 선택되어 있다면 [Selected] 표시 추가
+            const isAlreadyAssignedElsewhere = assignedMapToday[emp.name] && (currentVal !== emp.name || assignedMapToday[emp.name] > 1);
+            const selectedBadge = isAlreadyAssignedElsewhere ? ' [Selected]' : '';
+            optionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}${selectedBadge}</option>`;
           }
         });
 
