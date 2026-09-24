@@ -245,7 +245,51 @@
       </div>
     </main>
 
-    <!-- 4. Employee Management Tab -->
+    <!-- My Profile Tab (For Staff to Edit Their Own Info) -->
+    <main id="view-my-profile" class="hidden space-y-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border max-w-xl mx-auto space-y-6">
+        <div class="border-b pb-4">
+          <h2 class="text-lg font-bold text-gray-900">My Profile Settings</h2>
+          <p class="text-xs text-gray-500 mt-0.5">View and update your personal account information and PIN code.</p>
+        </div>
+        <form onsubmit="saveMyProfile(event)" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">First Name</label>
+              <input type="text" id="profile-firstname" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-600 mb-1">Last Name</label>
+              <input type="text" id="profile-lastname" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Display Name (ENG Name)</label>
+            <input type="text" id="profile-name" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">PIN / Password</label>
+            <input type="text" id="profile-pin" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 font-mono" required>
+            <p class="text-[10px] text-gray-400 mt-1">Used for logging into your account.</p>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
+            <input type="email" id="profile-email" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-600 mb-1">Phone</label>
+            <input type="tel" id="profile-phone" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50">
+          </div>
+          <div class="pt-2">
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-md transition">
+              💾 Save My Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
+
+    <!-- 4. Employee Management Tab (Admin/Manager Only) -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
@@ -584,6 +628,8 @@
         navHtml += `<button onclick="switchTab('view-avail')" id="nav-view-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Team Availability</button>`;
         navHtml += `<button onclick="switchTab('employees')" id="nav-employees" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Team Directory</button>`;
         navHtml += `<button onclick="switchTab('actuals')" id="nav-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Payroll</button>`;
+      } else {
+        navHtml += `<button onclick="switchTab('my-profile')" id="nav-my-profile" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Profile</button>`;
       }
 
       navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button>`;
@@ -617,6 +663,13 @@
           <button onclick="switchTab('actuals')" class="p-6 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
             <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
             <div><h3 class="font-bold text-gray-900 text-base">ADP Payroll</h3><p class="text-xs text-gray-500 mt-1">Summary table & weekly detailed tables.</p></div>
+          </button>
+        `;
+      } else {
+        hubHtml += `
+          <button onclick="switchTab('my-profile')" class="p-6 bg-white hover:bg-rose-50 border border-gray-200 hover:border-rose-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
+            <div class="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-rose-600 group-hover:text-white transition">👤</div>
+            <div><h3 class="font-bold text-gray-900 text-base">My Profile</h3><p class="text-xs text-gray-500 mt-1">View and update your personal info and PIN.</p></div>
           </button>
         `;
       }
@@ -1546,6 +1599,61 @@
     }
 
     // ==========================================
+    // My Profile Management (For Staff)
+    // ==========================================
+    function loadMyProfileForm() {
+      if (!currentUser) return;
+      document.getElementById('profile-firstname').value = currentUser.first_name || '';
+      document.getElementById('profile-lastname').value = currentUser.last_name || '';
+      document.getElementById('profile-name').value = currentUser.name || '';
+      document.getElementById('profile-pin').value = currentUser.pin_code || '';
+      document.getElementById('profile-email').value = currentUser.email || '';
+      document.getElementById('profile-phone').value = currentUser.phone || '';
+    }
+
+    async function saveMyProfile(e) {
+      e.preventDefault();
+      if (!currentUser || !_supabase) return alert("Database not connected.");
+
+      const first_name = document.getElementById('profile-firstname').value.trim();
+      const last_name = document.getElementById('profile-lastname').value.trim();
+      const name = document.getElementById('profile-name').value.trim() || `${first_name} ${last_name}`;
+      const pin_code = document.getElementById('profile-pin').value.trim();
+      const email = document.getElementById('profile-email').value.trim();
+      const phone = document.getElementById('profile-phone').value.trim();
+
+      if (!first_name || !pin_code) return alert("First Name and PIN are required.");
+
+      try {
+        const { error } = await _supabase.from('employees').update({
+          first_name,
+          last_name,
+          name,
+          pin_code,
+          email,
+          phone
+        }).eq('id', currentUser.id);
+
+        if (error) throw error;
+
+        // Update local session user
+        currentUser.first_name = first_name;
+        currentUser.last_name = last_name;
+        currentUser.name = name;
+        currentUser.pin_code = pin_code;
+        currentUser.email = email;
+        currentUser.phone = phone;
+
+        localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
+        document.getElementById('current-user-name').textContent = currentUser.name;
+
+        alert("Profile updated successfully!");
+      } catch (err) {
+        alert("Failed to update profile: " + err.message);
+      }
+    }
+
+    // ==========================================
     // Admin / Manager ADP Bi-Weekly Master Sheet
     // ==========================================
     function changeAdminPayPeriod(offset) {
@@ -1892,7 +2000,7 @@
         isDataModified = false;
       }
       currentActiveTab = tabName;
-      ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'employees', 'actuals'].forEach(t => {
+      ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'my-profile', 'employees', 'actuals'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const navBtn = document.getElementById(`nav-${t}`);
         if (view) {
@@ -1908,6 +2016,7 @@
       if (tabName === 'submit-avail') loadMyAvailabilityForm();
       if (tabName === 'view-avail') loadOverviewAvailability();
       if (tabName === 'my-actuals') loadMyActualHoursForm();
+      if (tabName === 'my-profile') loadMyProfileForm();
       if (tabName === 'actuals') loadAdminActualHoursMaster();
     }
 
