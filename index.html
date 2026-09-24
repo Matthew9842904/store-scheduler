@@ -934,7 +934,7 @@
         }
       });
 
-      // 이미 이 날짜에 배정되어 있는 직원들의 명단 집계 (중복 배정 시 [Selected] 표시용)
+      // 이미 이 날짜에 배정되어 있는 직원들의 명단 집계
       const assignedMapToday = {};
       dayCells.forEach(c => {
         if (c.currentVal) {
@@ -948,7 +948,10 @@
         const isDayOrOpenShift = shiftKey === 'open' || shiftKey.startsWith('day');
 
         let optionsHtml = '<option value="">Select Staff</option>';
+        let availableOptionsHtml = '';
+        let assignedOptionsHtml = '';
         let unavailableOptionsHtml = '';
+        let hasAssigned = false;
         let hasUnavailable = false;
 
         activeEmployees.forEach(emp => {
@@ -983,12 +986,22 @@
           }
 
           if (isEligible) {
-            // 이미 다른 셀에 선택되어 있다면 [Selected] 표시 추가
             const isAlreadyAssignedElsewhere = assignedMapToday[emp.name] && (currentVal !== emp.name || assignedMapToday[emp.name] > 1);
-            const selectedBadge = isAlreadyAssignedElsewhere ? ' [Selected]' : '';
-            optionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}${selectedBadge}</option>`;
+            
+            if (isAlreadyAssignedElsewhere) {
+              hasAssigned = true;
+              assignedOptionsHtml += `<option value="${emp.name}" class="text-indigo-700 bg-indigo-50" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${noteStr} (Already Assigned)</option>`;
+            } else {
+              availableOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
+            }
           }
         });
+
+        optionsHtml += availableOptionsHtml;
+
+        if (hasAssigned) {
+          optionsHtml += `<option disabled>─── Already Assigned ───</option>` + assignedOptionsHtml;
+        }
 
         if (hasUnavailable) {
           optionsHtml += `<option disabled>────── Unavailable ──────</option>` + unavailableOptionsHtml;
