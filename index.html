@@ -855,10 +855,20 @@
         tbody.appendChild(tr);
       });
 
+      // Clear previous initialization state when rendering new week table
+      document.querySelectorAll('#schedule-tbody td[data-day]').forEach(cell => {
+        const select = cell.querySelector('.emp-select');
+        if (select) {
+          select.removeAttribute('data-initialized');
+          select.removeAttribute('data-selected-emp');
+        }
+      });
+
       for (let i = 0; i < 7; i++) updateDropdowns(i);
     }
 
     function onStaffSelectChange(selectEl) {
+      selectEl.setAttribute('data-selected-emp', selectEl.value);
       const cell = selectEl.closest('td');
       const startSelect = cell.querySelector('.start-time-select');
       const endSelect = cell.querySelector('.end-time-select');
@@ -890,7 +900,16 @@
         if (select) {
           const shiftKey = cell.getAttribute('data-shift-key');
           const savedItem = currentScheduleData[`${shiftKey}_${dayIndex}`];
-          const initialEmp = select.value !== undefined && select.value !== null && select.value !== "" ? select.value : (savedItem ? savedItem.employee_name : '') || '';
+          
+          let initialEmp = select.value;
+          if (initialEmp === undefined || initialEmp === null || !select.hasAttribute('data-initialized')) {
+            initialEmp = (savedItem ? savedItem.employee_name : '') || '';
+            select.setAttribute('data-selected-emp', initialEmp);
+            select.setAttribute('data-initialized', 'true');
+          } else {
+            initialEmp = select.getAttribute('data-selected-emp') || '';
+          }
+
           dayCells.push({ cell, select, currentVal: initialEmp, shiftKey });
         }
       });
@@ -1636,7 +1655,6 @@
 
         if (error) throw error;
 
-        // Update local session user
         currentUser.first_name = first_name;
         currentUser.last_name = last_name;
         currentUser.name = name;
