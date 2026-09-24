@@ -855,7 +855,6 @@
         tbody.appendChild(tr);
       });
 
-      // Clear previous initialization state when rendering new week table
       document.querySelectorAll('#schedule-tbody td[data-day]').forEach(cell => {
         const select = cell.querySelector('.emp-select');
         if (select) {
@@ -873,7 +872,6 @@
       
       const currentCell = selectEl.closest('td');
 
-      // 중복 선택 처리: 만약 이 직원이 이미 이 날짜의 다른 셀에 배정되어 있다면 기존 셀 초기화
       if (newEmpName) {
         document.querySelectorAll(`#schedule-tbody td[data-day="${dayIndex}"]`).forEach(cell => {
           if (cell !== currentCell) {
@@ -934,7 +932,7 @@
         }
       });
 
-      // 이미 이 날짜에 배정되어 있는 직원들의 명단 집계
+      // 1. 해당 요일에 현재 선택박스들에서 실제로 선택(배정)된 모든 직원을 정확히 집계
       const assignedMapToday = {};
       dayCells.forEach(c => {
         if (c.currentVal) {
@@ -954,18 +952,35 @@
         let hasAssigned = false;
         let hasUnavailable = false;
 
+        // 이미 오늘 배정된 직원들 이름 세트 (가용 여부와 무관하게 Already Assigned에 포함시키기 위함)
+        const isAssignedToday = assignedMapToday[currentVal] || assignedMapToday; // 전체 배정된 직원 체크용
+
         activeEmployees.forEach(emp => {
           const empAvail = weekAvailMap[emp.name]?.[dayIndex];
           const status = empAvail?.status || 'Available (Anytime)';
 
+          // 이 직원이 오늘 날짜의 스케줄 셀 중 어디라도 배정되어 있는지 확인
+          let isAssignedAnywhere = false;
+          dayCells.forEach(dc => {
+            if (dc.currentVal === emp.name) isAssignedAnywhere = true;
+          });
+
+          if (status === 'Unavailable') {
+            // Unavailable 상태이더라도, 만약 이미 이 요일에 배정된 적이 있다면 Already Assigned로 처리하거나 관리할 수 있으나 기본은 Unavailable
+            if (isAssignedAnywhere) {
+              hasAssigned = true;
+              assignedOptionsHtml += `<option value="${emp.name}" class="text-indigo-700 bg-indigo-50" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name} (Already Assigned)</option>`;
+            } else {
+              hasUnavailable = true;
+              unavailableOptionsHtml += `<option value="${emp.name}" class="text-gray-400 bg-gray-100" ${currentVal === emp.name ? 'selected' : ''}>⚠️ ${emp.name} (Unavailable)</option>`;
+            }
+            return;
+          }
+
           let isEligible = false;
           let noteStr = '';
 
-          if (status === 'Unavailable') {
-            hasUnavailable = true;
-            unavailableOptionsHtml += `<option value="${emp.name}" class="text-gray-400 bg-gray-100" ${currentVal === emp.name ? 'selected' : ''}>⚠️ ${emp.name} (Unavailable)</option>`;
-            return;
-          } else if (status === 'Available (Anytime)' || status === 'Custom Hours') {
+          if (status === 'Available (Anytime)' || status === 'Custom Hours') {
             isEligible = true;
             if (status === 'Custom Hours' && empAvail.start_time && empAvail.end_time) {
               noteStr = ` (${empAvail.start_time}~${empAvail.end_time})`;
@@ -985,15 +1000,11 @@
             }
           }
 
-          if (isEligible) {
-            const isAlreadyAssignedElsewhere = assignedMapToday[emp.name] && (currentVal !== emp.name || assignedMapToday[emp.name] > 1);
-            
-            if (isAlreadyAssignedElsewhere) {
-              hasAssigned = true;
-              assignedOptionsHtml += `<option value="${emp.name}" class="text-indigo-700 bg-indigo-50" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${noteStr} (Already Assigned)</option>`;
-            } else {
-              availableOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
-            }
+          if (isAssignedAnywhere) {
+            hasAssigned = true;
+            assignedOptionsHtml += `<option value="${emp.name}" class="text-indigo-700 bg-indigo-50" ${currentVal === emp.name ? 'selected' : ''}>📌 ${emp.name}${noteStr} (Already Assigned)</option>`;
+          } else if (isEligible) {
+            availableOptionsHtml += `<option value="${emp.name}" ${currentVal === emp.name ? 'selected' : ''}>${emp.name}${noteStr}</option>`;
           }
         });
 
