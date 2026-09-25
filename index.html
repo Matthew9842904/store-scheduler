@@ -56,7 +56,7 @@
         </div>
       </div>
 
-      <!-- Quick Jump Navigation Bar (Dynamic rendered based on role) -->
+      <!-- Quick Jump Navigation Bar -->
       <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"></nav>
 
       <div class="flex items-center gap-2">
@@ -66,7 +66,7 @@
       </div>
     </header>
 
-    <!-- Main Menu Hub View (Dynamic Grid based on role) -->
+    <!-- Main Menu Hub View -->
     <div id="view-hub" class="py-6 max-w-4xl mx-auto">
       <div class="text-center mb-8">
         <h2 class="text-2xl font-extrabold text-gray-800">Main Menu</h2>
@@ -83,12 +83,20 @@
           <span id="current-week-label" class="font-bold text-base md:text-lg text-gray-800">Calculating week...</span>
           <button onclick="changeWeek(1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">Next Week &gt;</button>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-sm items-center gap-1">
-            💾 Save Schedule
+        
+        <!-- Admin Action Buttons -->
+        <div id="admin-action-buttons" class="hidden flex items-center gap-2 flex-wrap">
+          <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">
+            💾 Save (Draft)
           </button>
-          <button onclick="generateSmsText()" id="btn-copy-sms" class="hidden px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm items-center gap-1">
-            💬 Copy Schedule Text
+          <button onclick="publishCurrentSchedule()" id="btn-publish-schedule" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">
+            🚀 Publish & Lock
+          </button>
+          <button onclick="unlockSchedule()" id="btn-unlock-schedule" class="hidden px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">
+            🔓 Unlock to Edit
+          </button>
+          <button onclick="generateSmsText()" id="btn-copy-sms" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">
+            💬 Copy Text
           </button>
         </div>
       </div>
@@ -98,8 +106,9 @@
           <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">📊 Shift Count:</span>
           <div id="shift-count-badges" class="flex flex-wrap gap-2"></div>
         </div>
-        <div id="schedule-confirm-status-box" class="text-xs border-l pl-4">
-          <!-- Admin confirmation overview badge -->
+        <div class="flex items-center gap-3">
+          <span id="publish-status-badge" class="px-2.5 py-1 rounded-lg text-xs font-bold">Draft</span>
+          <div id="schedule-confirm-status-box" class="text-xs border-l pl-3"></div>
         </div>
       </div>
 
@@ -118,9 +127,7 @@
             <h2 class="text-lg font-bold text-gray-900">Your Assigned Schedule</h2>
             <p class="text-xs text-gray-500 mt-0.5">Review your shifts for the selected week and confirm receipt.</p>
           </div>
-          <div id="staff-confirm-action-area">
-            <!-- Dynamic confirm button -->
-          </div>
+          <div id="staff-confirm-action-area"></div>
         </div>
         <div id="staff-shifts-container" class="grid grid-cols-1 md:grid-cols-7 gap-3"></div>
       </div>
@@ -200,7 +207,7 @@
       </div>
     </main>
 
-    <!-- My Actual Hours Tab (Staff Entry + Missing Hours Table) -->
+    <!-- My Actual Hours Tab -->
     <main id="view-my-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -223,7 +230,6 @@
 
         <div id="my-actuals-tables-container" class="space-y-6"></div>
 
-        <!-- Missing Hours from Last Payroll Period Section -->
         <div class="pt-6 border-t space-y-4">
           <div class="flex justify-between items-center">
             <div>
@@ -255,7 +261,7 @@
       </div>
     </main>
 
-    <!-- My Profile Tab (For Staff to Edit Their Own Info) -->
+    <!-- My Profile Tab -->
     <main id="view-my-profile" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border max-w-xl mx-auto space-y-6">
         <div class="border-b pb-4">
@@ -299,7 +305,7 @@
       </div>
     </main>
 
-    <!-- 4. Employee Management Tab (Admin/Manager Only) -->
+    <!-- 4. Employee Management Tab -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
@@ -334,7 +340,7 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours (Admin/Manager) -->
+    <!-- 5. ADP Hours -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -349,7 +355,6 @@
           </div>
         </div>
 
-        <!-- Schedule Discrepancy & Missing Hours Alert Notice (Top) -->
         <div id="schedule-discrepancy-container" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl shadow-xs space-y-3">
           <div class="flex items-center gap-2 font-bold text-amber-900 text-sm">
             <span>⚠️</span>
@@ -358,7 +363,6 @@
           <div id="schedule-discrepancy-list" class="space-y-1.5 pl-6 text-xs text-amber-800"></div>
         </div>
 
-        <!-- 1. Top Summary Table -->
         <div class="space-y-2">
           <h3 class="font-bold text-sm text-gray-800">📊 Bi-Weekly Summary Table (Sorted by Staff No.)</h3>
           <div class="overflow-x-auto border rounded-xl shadow-sm">
@@ -379,7 +383,6 @@
           </div>
         </div>
 
-        <!-- 2. Bottom Detailed Tables (Week 1 & Week 2 Stacked) -->
         <div class="space-y-6 pt-4 border-t">
           <div class="space-y-2">
             <h3 class="font-bold text-sm text-gray-800">📅 Week 1 Detailed Daily Table (Sun ~ Sat)</h3>
@@ -435,6 +438,8 @@
     let currentScheduleData = {};
     let weekAvailMap = {};
     let scheduleConfirmsMap = {};
+    let weekPublicationState = { is_published: false, is_locked: false };
+
     let isAvailDeadlinePassed = false;
     let adminTargetAvailData = {};
 
@@ -490,27 +495,19 @@
         for (let m = 0; m < 60; m += 15) {
           if (h === 1 && m >= 15) continue;
           if (h >= 2 && h <= 6) continue;
-
           const hh24 = String(h).padStart(2, '0');
           const mm = String(m).padStart(2, '0');
           const val24 = `${hh24}:${mm}`;
-
           let period = h >= 12 ? 'PM' : 'AM';
-          let h12 = h % 12;
-          if (h12 === 0) h12 = 12;
-          const displayTime = `${h12}:${mm} ${period}`;
-
-          options += `<option value="${val24}" ${val24 === selectedVal ? 'selected' : ''}>${displayTime}</option>`;
+          let h12 = h % 12; if (h12 === 0) h12 = 12;
+          options += `<option value="${val24}" ${val24 === selectedVal ? 'selected' : ''}>${h12}:${mm} ${period}</option>`;
         }
       }
       return options;
     }
 
     function formatDateISO(d) {
-      const year = d.getFullYear();
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
     async function fetchRealVancouverWeather14Days() {
@@ -519,8 +516,7 @@
         const data = await response.json();
         if (data && data.daily && data.daily.time) {
           for (let i = 0; i < data.daily.time.length; i++) {
-            const dateStr = data.daily.time[i];
-            realVancouverWeatherCache[dateStr] = {
+            realVancouverWeatherCache[data.daily.time[i]] = {
               temp: Math.round(data.daily.temperature_2m_max[i]),
               icon: getWeatherEmojiByCode(data.daily.weathercode[i])
             };
@@ -649,7 +645,7 @@
       let hubHtml = `
         <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
-          <div><h3 class="font-bold text-gray-900 text-base">Scheduler</h3><p class="text-xs text-gray-500 mt-1">View personal schedule & confirm shifts.</p></div>
+          <div><h3 class="font-bold text-gray-900 text-base">Scheduler</h3><p class="text-xs text-gray-500 mt-1">View schedule & confirm shifts.</p></div>
         </button>
         <button onclick="switchTab('submit-avail')" class="p-6 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">⏰</div>
@@ -692,11 +688,9 @@
       const isManager = currentUser.role === 'manager';
 
       if (isAdmin) {
-        document.getElementById('btn-save-schedule').classList.remove('hidden');
-        document.getElementById('btn-copy-sms').classList.remove('hidden');
+        document.getElementById('admin-action-buttons').classList.remove('hidden');
       } else {
-        document.getElementById('btn-save-schedule').classList.add('hidden');
-        document.getElementById('btn-copy-sms').classList.add('hidden');
+        document.getElementById('admin-action-buttons').classList.add('hidden');
       }
 
       const overrideBox = document.getElementById('override-section-box');
@@ -725,7 +719,7 @@
     }
 
     // ==========================================
-    // Weekly Schedule & Confirmations
+    // Weekly Schedule, Lock & Publish Workflow
     // ==========================================
     function changeWeek(offset) {
       currentSunday.setDate(currentSunday.getDate() + (offset * 7));
@@ -741,6 +735,7 @@
       currentScheduleData = {};
       weekAvailMap = {};
       scheduleConfirmsMap = {};
+      weekPublicationState = { is_published: false, is_locked: false };
 
       if (_supabase) {
         try {
@@ -761,9 +756,12 @@
 
           const { data: confData } = await _supabase.from('schedule_confirms').select('*').eq('week_start_date', weekStartStr);
           if (confData) {
-            confData.forEach(item => {
-              scheduleConfirmsMap[item.employee_name] = item;
-            });
+            confData.forEach(item => { scheduleConfirmsMap[item.employee_name] = item; });
+          }
+
+          const { data: pubData } = await _supabase.from('week_publications').select('*').eq('week_start_date', weekStartStr).single();
+          if (pubData) {
+            weekPublicationState = pubData;
           }
         } catch (e) { console.error(e); }
       }
@@ -772,20 +770,135 @@
 
     function renderScheduler() {
       const isAdminOrManager = currentUser && (currentUser.role === 'admin' || currentUser.role === 'manager');
-      const canEditSchedule = currentUser && currentUser.role === 'admin';
+      const isLocked = weekPublicationState.is_locked;
+      const canEditSchedule = currentUser && currentUser.role === 'admin' && !isLocked;
 
       if (isAdminOrManager) {
         document.getElementById('admin-schedule-view').classList.remove('hidden');
         document.getElementById('staff-schedule-view').classList.add('hidden');
         renderAdminScheduleTable(canEditSchedule);
         updateShiftCountSummary();
-        renderAdminConfirmStatusBadge();
+        updateAdminPublishUI();
       } else {
         document.getElementById('admin-schedule-view').classList.add('hidden');
         document.getElementById('staff-schedule-view').classList.remove('hidden');
         document.getElementById('shift-count-summary').classList.add('hidden');
         renderStaffPersonalSchedule();
       }
+    }
+
+    function updateAdminPublishUI() {
+      const badge = document.getElementById('publish-status-badge');
+      const btnUnlock = document.getElementById('btn-unlock-schedule');
+      const btnPublish = document.getElementById('btn-publish-schedule');
+
+      if (weekPublicationState.is_locked) {
+        badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-900';
+        badge.textContent = '🔒 Published & Locked';
+        btnUnlock.classList.remove('hidden');
+        btnPublish.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900';
+        badge.textContent = '📝 Draft (Unpublished)';
+        btnUnlock.classList.add('hidden');
+        btnPublish.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+
+      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+      let confirmedCount = 0;
+      activeStaff.forEach(emp => {
+        if (scheduleConfirmsMap[emp.name]) confirmedCount++;
+      });
+      document.getElementById('schedule-confirm-status-box').innerHTML = `<span class="font-bold text-gray-700">Confirms:</span> <span class="px-2 py-0.5 bg-indigo-100 text-indigo-900 rounded font-black ml-1">${confirmedCount} / ${activeStaff.length}</span>`;
+    }
+
+    async function publishCurrentSchedule() {
+      if (!_supabase) return alert("Database not connected.");
+      if (isDataModified) {
+        if (!confirm("You have unsaved changes. Do you want to save and publish?")) return;
+        await saveCurrentScheduleSilent();
+      }
+
+      const weekStartStr = formatDateISO(currentSunday);
+      try {
+        const payload = {
+          week_start_date: weekStartStr,
+          is_published: true,
+          is_locked: true,
+          published_at: new Date().toISOString()
+        };
+        const { error } = await _supabase.from('week_publications').upsert(payload, { onConflict: 'week_start_date' });
+        if (error) throw error;
+
+        weekPublicationState = payload;
+        alert("Schedule published and locked successfully! Staff can now view and confirm.");
+        loadWeeklySchedule();
+      } catch (e) {
+        alert("Failed to publish schedule: " + e.message);
+      }
+    }
+
+    async function unlockSchedule() {
+      if (!confirm("Are you sure you want to unlock this schedule for editing?")) return;
+      const weekStartStr = formatDateISO(currentSunday);
+      try {
+        const payload = {
+          week_start_date: weekStartStr,
+          is_published: true,
+          is_locked: false
+        };
+        const { error } = await _supabase.from('week_publications').upsert(payload, { onConflict: 'week_start_date' });
+        if (error) throw error;
+
+        weekPublicationState.is_locked = false;
+        alert("Schedule unlocked for editing.");
+        loadWeeklySchedule();
+      } catch (e) {
+        alert("Failed to unlock schedule: " + e.message);
+      }
+    }
+
+    async function saveCurrentScheduleSilent() {
+      const weekStartStr = formatDateISO(currentSunday);
+      const records = [];
+      const activeShifts = shifts.filter(s => s.key !== 'divider');
+      let trIdx = 0;
+
+      document.querySelectorAll('#schedule-tbody tr').forEach(tr => {
+        const empSelect = tr.querySelector('.emp-select');
+        if (!empSelect) return;
+        const shiftKey = activeShifts[trIdx].key;
+        tr.querySelectorAll('td[data-day]').forEach((cell, dayIdx) => {
+          const empName = cell.querySelector('.emp-select')?.value || '';
+          const startTime = cell.querySelector('.start-time-select')?.value || '';
+          const endTime = cell.querySelector('.end-time-select')?.value || '';
+          if (empName) {
+            records.push({
+              week_start_date: weekStartStr,
+              shift_key: shiftKey,
+              day_index: dayIdx,
+              employee_name: empName,
+              start_time: startTime || null,
+              end_time: endTime || null
+            });
+          }
+        });
+        trIdx++;
+      });
+
+      await _supabase.from('schedules').delete().eq('week_start_date', weekStartStr);
+      if (records.length > 0) {
+        await _supabase.from('schedules').insert(records);
+      }
+      isDataModified = false;
+    }
+
+    async function saveCurrentSchedule() {
+      if (!_supabase) return alert("Database connection is not configured.");
+      await saveCurrentScheduleSilent();
+      isDataModified = false;
+      alert("Schedule saved successfully (Draft mode)!");
+      await loadWeeklySchedule();
     }
 
     function updateShiftCountSummary() {
@@ -811,16 +924,6 @@
       document.getElementById('shift-count-summary').classList.remove('hidden');
     }
 
-    function renderAdminConfirmStatusBadge() {
-      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
-      let confirmedCount = 0;
-      activeStaff.forEach(emp => {
-        if (scheduleConfirmsMap[emp.name]) confirmedCount++;
-      });
-      const box = document.getElementById('schedule-confirm-status-box');
-      box.innerHTML = `<span class="font-bold text-gray-700">Staff Confirms:</span> <span class="px-2.5 py-1 bg-indigo-100 text-indigo-900 rounded-lg font-black ml-1">${confirmedCount} / ${activeStaff.length} Confirmed</span>`;
-    }
-
     function renderAdminScheduleTable(canEdit) {
       const headerRow = document.getElementById('schedule-header-row');
       let headerHtml = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
@@ -832,7 +935,6 @@
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const color = i === 0 ? 'text-red-600' : i === 6 ? 'text-blue-600' : 'text-gray-600';
-
         const weather = realVancouverWeatherCache[isoDate] || { temp: '--', icon: '🌡️' };
         const statHolidayName = bcStatHolidays2026[isoDate];
         let statBadge = statHolidayName ? `<div class="mt-0.5"><span class="px-1.5 py-0.5 text-[9px] bg-red-100 text-red-700 font-extrabold rounded border border-red-200">★ Stat: ${statHolidayName}</span></div>` : '';
@@ -899,6 +1001,7 @@
     }
 
     function onDropdownFocus(selectEl, dayIndex) {
+      if (weekPublicationState.is_locked) return;
       updateDropdownsWithOptions(selectEl, dayIndex, true);
     }
 
@@ -979,12 +1082,7 @@
       document.querySelectorAll(`#schedule-tbody td[data-day="${dayIndex}"]`).forEach(cell => {
         const sel = cell.querySelector('.emp-select');
         if (sel) {
-          dayCells.push({ 
-            cell, 
-            sel, 
-            val: sel.value, 
-            sKey: cell.getAttribute('data-shift-key') 
-          });
+          dayCells.push({ cell, sel, val: sel.value, sKey: cell.getAttribute('data-shift-key') });
         }
       });
 
@@ -1017,9 +1115,7 @@
           if (dc.sel !== selectEl && dc.val === emp.name) isAssignedAnywhere = true;
         });
 
-        if (currentVal === emp.name) {
-          isAssignedAnywhere = true;
-        }
+        if (currentVal === emp.name) isAssignedAnywhere = true;
 
         if (status === 'Unavailable') {
           if (isAssignedAnywhere) {
@@ -1045,26 +1141,13 @@
           noteStr = ' (Anytime)';
         } else if (status === 'Custom Hours') {
           isEligible = true;
-          if (empAvail.start_time && empAvail.end_time) {
-            noteStr = ` (${empAvail.start_time}~${empAvail.end_time})`;
-          } else {
-            noteStr = ' (Anytime)';
-          }
+          noteStr = (empAvail.start_time && empAvail.end_time) ? ` (${empAvail.start_time}~${empAvail.end_time})` : ' (Anytime)';
         } else if (status === 'Open') {
-          if (isOpenShift || isDayShift) {
-            isEligible = true;
-            noteStr = ' (Open/Day)';
-          }
+          if (isOpenShift || isDayShift) { isEligible = true; noteStr = ' (Open/Day)'; }
         } else if (status === 'Day Only') {
-          if (isDayShift) {
-            isEligible = true;
-            noteStr = ' (Day Only)';
-          }
+          if (isDayShift) { isEligible = true; noteStr = ' (Day Only)'; }
         } else if (status === 'Closing Only') {
-          if (isClosingShift) {
-            isEligible = true;
-            noteStr = ' (Closing)';
-          }
+          if (isClosingShift) { isEligible = true; noteStr = ' (Closing)'; }
         }
 
         if (isAssignedAnywhere || (currentVal === emp.name && assignedMapToday[emp.name] > 1)) {
@@ -1081,14 +1164,8 @@
       });
 
       optionsHtml += availableOptionsHtml;
-
-      if (hasAssigned) {
-        optionsHtml += `<option disabled>─── Already Assigned ───</option>` + assignedOptionsHtml;
-      }
-
-      if (hasUnavailable) {
-        optionsHtml += `<option disabled>────── Unavailable ──────</option>` + unavailableOptionsHtml;
-      }
+      if (hasAssigned) optionsHtml += `<option disabled>─── Already Assigned ───</option>` + assignedOptionsHtml;
+      if (hasUnavailable) optionsHtml += `<option disabled>────── Unavailable ──────</option>` + unavailableOptionsHtml;
 
       selectEl.innerHTML = optionsHtml;
       selectEl.value = currentVal;
@@ -1098,6 +1175,12 @@
       const container = document.getElementById('staff-shifts-container');
       const actionArea = document.getElementById('staff-confirm-action-area');
       container.innerHTML = '';
+
+      if (!weekPublicationState.is_published) {
+        container.innerHTML = `<div class="col-span-7 p-8 text-center text-gray-400 italic">The schedule for this week has not been published yet. Please check back later.</div>`;
+        actionArea.innerHTML = '';
+        return;
+      }
 
       for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
         const d = new Date(currentSunday);
@@ -1160,49 +1243,8 @@
       }
     }
 
-    async function saveCurrentSchedule() {
-      if (!_supabase) return alert("Database connection is not configured.");
-      const weekStartStr = formatDateISO(currentSunday);
-      const records = [];
-      const activeShifts = shifts.filter(s => s.key !== 'divider');
-      let trIdx = 0;
-
-      document.querySelectorAll('#schedule-tbody tr').forEach(tr => {
-        const empSelect = tr.querySelector('.emp-select');
-        if (!empSelect) return;
-        const shiftKey = activeShifts[trIdx].key;
-        tr.querySelectorAll('td[data-day]').forEach((cell, dayIdx) => {
-          const empName = cell.querySelector('.emp-select')?.value || '';
-          const startTime = cell.querySelector('.start-time-select')?.value || '';
-          const endTime = cell.querySelector('.end-time-select')?.value || '';
-          if (empName) {
-            records.push({
-              week_start_date: weekStartStr,
-              shift_key: shiftKey,
-              day_index: dayIdx,
-              employee_name: empName,
-              start_time: startTime || null,
-              end_time: endTime || null
-            });
-          }
-        });
-        trIdx++;
-      });
-
-      try {
-        await _supabase.from('schedules').delete().eq('week_start_date', weekStartStr);
-        if (records.length > 0) {
-          const { error } = await _supabase.from('schedules').insert(records);
-          if (error) throw error;
-        }
-        isDataModified = false;
-        alert("Schedule saved successfully!");
-        await loadWeeklySchedule();
-      } catch (e) { alert("Failed to save schedule: " + e.message); }
-    }
-
     // ==========================================
-    // Staff Availability Submission (with Cut-off)
+    // Staff Availability & Other Tabs (unchanged)
     // ==========================================
     function changeAvailWeek(offset) {
       availSunday.setDate(availSunday.getDate() + (offset * 7));
@@ -1213,7 +1255,6 @@
       const saturday = new Date(availSunday);
       saturday.setDate(saturday.getDate() + 6);
       document.getElementById('avail-week-label').textContent = `Week of ${availSunday.toLocaleString('en-US', { month: 'short' })} ${availSunday.getDate()} (${formatDateISO(availSunday)} ~ ${formatDateISO(saturday)})`;
-
       checkAvailabilityDeadline(availSunday);
 
       let existingMap = {};
@@ -1227,10 +1268,8 @@
 
       const grid = document.getElementById('submit-avail-grid');
       let html = '';
-
       for (let i = 0; i < 7; i++) {
-        const d = new Date(availSunday);
-        d.setDate(d.getDate() + i);
+        const d = new Date(availSunday); d.setDate(d.getDate() + i);
         const mm = String(d.getMonth() + 1).padStart(2, '0');
         const dd = String(d.getDate()).padStart(2, '0');
         const saved = existingMap[i] || {};
@@ -1266,42 +1305,26 @@
       const thursday = new Date(sundayDate);
       thursday.setDate(thursday.getDate() - 3);
       thursday.setHours(23, 59, 59, 999);
-
       const thMonth = String(thursday.getMonth() + 1).padStart(2, '0');
       const thDate = String(thursday.getDate()).padStart(2, '0');
-
       const now = new Date();
       isAvailDeadlinePassed = now > thursday;
 
       const warningBox = document.getElementById('deadline-warning-box');
       const warningText = document.getElementById('deadline-warning-text');
       const saveBtn = document.getElementById('btn-save-avail');
-
       warningBox.classList.remove('hidden');
 
       if (isAvailDeadlinePassed) {
         warningBox.className = 'mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-800 text-xs font-semibold';
         warningText.innerHTML = `The deadline for this week has passed (Thursday, ${thMonth}/${thDate} at 11:59 PM). Please contact the manager.`;
-        
-        if (currentUser.role === 'employee') {
-          if(saveBtn) {
-            saveBtn.disabled = true;
-            saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
-          }
-        } else {
-          if(saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          }
+        if (currentUser.role === 'employee' && saveBtn) {
+          saveBtn.disabled = true; saveBtn.classList.add('opacity-50', 'cursor-not-allowed');
         }
       } else {
         warningBox.className = 'mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-800 text-xs font-semibold';
         warningText.innerHTML = `Please submit your availability by Thursday, ${thMonth}/${thDate} at 11:59 PM.`;
-        
-        if(saveBtn) {
-          saveBtn.disabled = false;
-          saveBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.classList.remove('opacity-50', 'cursor-not-allowed'); }
       }
     }
 
@@ -1317,7 +1340,6 @@
 
       const weekStartStr = formatDateISO(availSunday);
       const records = [];
-
       document.querySelectorAll('#submit-avail-grid [data-avail-day]').forEach(card => {
         const dayIndex = parseInt(card.getAttribute('data-avail-day'), 10);
         const status = card.querySelector('.avail-status').value;
@@ -1325,13 +1347,9 @@
         const endTime = card.querySelector('.avail-end')?.value || '';
 
         records.push({
-          employee_id: currentUser.id,
-          employee_name: currentUser.name,
-          week_start_date: weekStartStr,
-          day_index: dayIndex,
-          status,
-          start_time: startTime || null,
-          end_time: endTime || null
+          employee_id: currentUser.id, employee_name: currentUser.name,
+          week_start_date: weekStartStr, day_index: dayIndex, status,
+          start_time: startTime || null, end_time: endTime || null
         });
       });
 
@@ -1344,9 +1362,6 @@
       } catch (e) { alert("Failed to save availability: " + e.message); }
     }
 
-    // ==========================================
-    // Staff Availability Overview & Master Admin Override
-    // ==========================================
     function changeOverviewWeek(offset) {
       overviewSunday.setDate(overviewSunday.getDate() + (offset * 7));
       loadOverviewAvailability();
@@ -1378,15 +1393,13 @@
       const headerRow = document.getElementById('avail-overview-header');
       let hHtml = `<th class="p-3 w-36 border-r">Staff Name</th>`;
       for (let i = 0; i < 7; i++) {
-        const d = new Date(overviewSunday);
-        d.setDate(d.getDate() + i);
+        const d = new Date(overviewSunday); d.setDate(d.getDate() + i);
         hHtml += `<th class="p-2 border-r text-center">${dayNames[i]} (${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')})</th>`;
       }
       headerRow.innerHTML = hHtml;
 
       const tbody = document.getElementById('avail-overview-tbody');
       let tHtml = '';
-
       staffList.forEach(emp => {
         let rowHtml = `<td class="p-3 font-semibold border-r ${getStaffColorClass(emp.name)}">${emp.name}</td>`;
         for (let i = 0; i < 7; i++) {
@@ -1400,7 +1413,6 @@
           else if (st === 'Custom Hours') badgeColor = 'bg-amber-100 text-amber-800';
 
           const note = (st === 'Custom Hours' && match.start_time) ? `<br><span class="text-[10px] text-gray-500">${match.start_time}~${match.end_time}</span>` : '';
-
           rowHtml += `<td class="p-2 border-r text-center align-middle"><span class="px-2 py-1 text-xs rounded-lg inline-block ${badgeColor}">${st}${note}</span></td>`;
         }
         tHtml += `<tr class="hover:bg-gray-50">${rowHtml}</tr>`;
@@ -1412,7 +1424,6 @@
       const empId = document.getElementById('admin-override-user').value;
       const box = document.getElementById('admin-override-form-box');
       if (!empId) { box.classList.add('hidden'); return; }
-
       const targetEmp = dbEmployees.find(e => e.id === empId);
       if (!targetEmp) { box.classList.add('hidden'); return; }
 
@@ -1464,13 +1475,11 @@
     async function saveAdminOverrideAvail() {
       const empId = document.getElementById('admin-override-user').value;
       if (!empId || !_supabase) return;
-
       const targetEmp = dbEmployees.find(e => e.id === empId);
       if (!targetEmp) return alert("Employee not found.");
 
       const weekStartStr = formatDateISO(overviewSunday);
       const records = [];
-
       document.querySelectorAll('#admin-override-grid [data-override-day]').forEach(card => {
         const dayIndex = parseInt(card.getAttribute('data-override-day'), 10);
         const status = card.querySelector('.override-status').value;
@@ -1478,13 +1487,9 @@
         const endTime = card.querySelector('.override-end')?.value || '';
 
         records.push({
-          employee_id: targetEmp.id,
-          employee_name: targetEmp.name,
-          week_start_date: weekStartStr,
-          day_index: dayIndex,
-          status,
-          start_time: startTime || null,
-          end_time: endTime || null
+          employee_id: targetEmp.id, employee_name: targetEmp.name,
+          week_start_date: weekStartStr, day_index: dayIndex, status,
+          start_time: startTime || null, end_time: endTime || null
         });
       });
 
@@ -1497,9 +1502,6 @@
       } catch (e) { alert("Failed to save override: " + e.message); }
     }
 
-    // ==========================================
-    // My Actual Hours & Missing Hours Entry
-    // ==========================================
     function changePayPeriod(offset) {
       myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (offset * 14));
       loadMyActualHoursForm();
@@ -1507,15 +1509,10 @@
 
     async function loadMyActualHoursForm() {
       const periodStartStr = formatDateISO(myPayPeriodStart);
-      const periodEnd = new Date(myPayPeriodStart);
-      periodEnd.setDate(periodEnd.getDate() + 13);
+      const periodEnd = new Date(myPayPeriodStart); periodEnd.setDate(periodEnd.getDate() + 13);
       document.getElementById('pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
 
-      let savedActualsMap = {};
-      let week1Schedules = {};
-      let week2Schedules = {};
-      let missingHoursList = [];
-
+      let savedActualsMap = {}, week1Schedules = {}, week2Schedules = {}, missingHoursList = [];
       if (_supabase && currentUser) {
         try {
           const { data: actData } = await _supabase.from('actual_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
@@ -1533,7 +1530,6 @@
 
           const { data: missData } = await _supabase.from('missing_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
           if (missData) missingHoursList = missData;
-
         } catch (e) { console.error(e); }
       }
       renderMyActualsGrid(savedActualsMap, week1Schedules, week2Schedules);
@@ -1557,10 +1553,8 @@
                   <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center">
                     <th class="p-2 border-r w-32">Day</th>
         `;
-
         for (let i = 0; i < 7; i++) {
-          const d = new Date(myPayPeriodStart);
-          d.setDate(d.getDate() + startIdx + i);
+          const d = new Date(myPayPeriodStart); d.setDate(d.getDate() + startIdx + i);
           const hasScheduledShift = schedMap[i] === true;
           const badge = hasScheduledShift ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded ml-1">Scheduled</span>` : `<span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded ml-1">No Shift</span>`;
           html += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}${badge}</th>`;
@@ -1572,11 +1566,10 @@
         let weekTotal = 0;
         for (let i = 0; i < 7; i++) {
           const globalDayIdx = startIdx + i;
-          const localDayIdx = i;
           const item = savedMap[globalDayIdx] || {};
           const hoursVal = item.hours || 0;
           weekTotal += Number(hoursVal);
-          const isScheduled = schedMap[localDayIdx] === true;
+          const isScheduled = schedMap[i] === true;
 
           html += `
             <td class="p-2 border-r text-center align-middle ${!isScheduled ? 'bg-amber-50/40' : ''}" data-day-offset="${globalDayIdx}" data-scheduled="${isScheduled}">
@@ -1588,13 +1581,9 @@
             </td>
           `;
         }
-
-        html += `
-            <td class="p-3 text-center font-bold bg-gray-100 text-indigo-900 text-base" id="week-${wIdx}-total">${weekTotal.toFixed(2)}h</td>
-          </tr></tbody></table></div></div>
-        `;
+        html += `<td class="p-3 text-center font-bold bg-gray-100 text-indigo-900 text-base" id="week-${wIdx}-total">${weekTotal.toFixed(2)}h</td>`;
+        html += `</tr></tbody></table></div></div>`;
       });
-
       container.innerHTML = html;
     }
 
@@ -1608,15 +1597,12 @@
       if (start && end) {
         const isScheduled = cell.getAttribute('data-scheduled') === 'true';
         if (!isScheduled) {
-          const proceed = confirm("This date is not in your schedule. Do you still want to enter hours?");
-          if (!proceed) {
-            cell.querySelector('.my-start').value = '';
-            cell.querySelector('.my-end').value = '';
+          if (!confirm("This date is not in your schedule. Do you still want to enter hours?")) {
+            cell.querySelector('.my-start').value = ''; cell.querySelector('.my-end').value = '';
             document.getElementById(`my-hrs-display-${dayOffset}`).textContent = '0.00';
             return;
           }
         }
-
         const [sh, sm] = start.split(':').map(Number);
         const [eh, em] = end.split(':').map(Number);
         let diff = (eh * 60 + em) - (sh * 60 + sm);
@@ -1625,7 +1611,6 @@
       }
 
       document.getElementById(`my-hrs-display-${dayOffset}`).textContent = hours.toFixed(2);
-      
       let w0Tot = 0, w1Tot = 0;
       for (let i = 0; i < 7; i++) {
         w0Tot += Number(document.getElementById(`my-hrs-display-${i}`).textContent);
@@ -1642,7 +1627,6 @@
         tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400 text-xs">No missing hours recorded for this period.</td></tr>`;
         return;
       }
-
       tbody.innerHTML = list.map((item, idx) => `
         <tr class="missing-row hover:bg-gray-50" data-missing-id="${item.id || idx}">
           <td class="p-2"><input type="date" class="miss-date w-full p-1 text-xs border rounded bg-white" value="${item.date || ''}" onchange="calcMissingRowHours(this)"></td>
@@ -1714,13 +1698,9 @@
 
         if (start_time || end_time || hours > 0) {
           records.push({
-            employee_id: currentUser.id,
-            employee_name: currentUser.name,
-            period_start_date: periodStartStr,
-            day_offset: i,
-            start_time: start_time || null,
-            end_time: end_time || null,
-            hours
+            employee_id: currentUser.id, employee_name: currentUser.name,
+            period_start_date: periodStartStr, day_offset: i,
+            start_time: start_time || null, end_time: end_time || null, hours
           });
         }
       }
@@ -1734,14 +1714,9 @@
         const reason = tr.querySelector('.miss-reason')?.value || '';
         if (date && hours > 0) {
           missingRecords.push({
-            employee_id: currentUser.id,
-            employee_name: currentUser.name,
-            period_start_date: periodStartStr,
-            date,
-            start_time: start_time || null,
-            end_time: end_time || null,
-            hours,
-            reason
+            employee_id: currentUser.id, employee_name: currentUser.name,
+            period_start_date: periodStartStr, date,
+            start_time: start_time || null, end_time: end_time || null, hours, reason
           });
         }
       });
@@ -1764,9 +1739,6 @@
       } catch (e) { alert("Failed to save: " + e.message); }
     }
 
-    // ==========================================
-    // My Profile Management (For Staff)
-    // ==========================================
     function loadMyProfileForm() {
       if (!currentUser) return;
       document.getElementById('profile-firstname').value = currentUser.first_name || '';
@@ -1792,35 +1764,23 @@
 
       try {
         const { error } = await _supabase.from('employees').update({
-          first_name,
-          last_name,
-          name,
-          pin_code,
-          email,
-          phone
+          first_name, last_name, name, pin_code, email, phone
         }).eq('id', currentUser.id);
 
         if (error) throw error;
 
-        currentUser.first_name = first_name;
-        currentUser.last_name = last_name;
-        currentUser.name = name;
-        currentUser.pin_code = pin_code;
-        currentUser.email = email;
-        currentUser.phone = phone;
+        currentUser.first_name = first_name; currentUser.last_name = last_name;
+        currentUser.name = name; currentUser.pin_code = pin_code;
+        currentUser.email = email; currentUser.phone = phone;
 
         localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
         document.getElementById('current-user-name').textContent = currentUser.name;
-
         alert("Profile updated successfully!");
       } catch (err) {
         alert("Failed to update profile: " + err.message);
       }
     }
 
-    // ==========================================
-    // Admin / Manager ADP Bi-Weekly Master Sheet
-    // ==========================================
     function changeAdminPayPeriod(offset) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14));
       loadAdminActualHoursMaster();
@@ -1828,14 +1788,10 @@
 
     async function loadAdminActualHoursMaster() {
       const periodStartStr = formatDateISO(adminPayPeriodStart);
-      const periodEnd = new Date(adminPayPeriodStart);
-      periodEnd.setDate(periodEnd.getDate() + 13);
+      const periodEnd = new Date(adminPayPeriodStart); periodEnd.setDate(periodEnd.getDate() + 13);
       document.getElementById('admin-pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
 
-      let allActualsData = [];
-      let allSchedulesMap = {};
-      let allMissingData = [];
-
+      let allActualsData = [], allSchedulesMap = {}, allMissingData = [];
       if (_supabase) {
         try {
           const { data } = await _supabase.from('actual_hours').select('*').eq('period_start_date', periodStartStr);
@@ -1853,16 +1809,13 @@
 
           const { data: missData } = await _supabase.from('missing_hours').select('*').eq('period_start_date', periodStartStr);
           if (missData) allMissingData = missData;
-
         } catch (e) { console.error(e); }
       }
-
       renderAdminBiWeeklyMaster(allActualsData, allSchedulesMap, allMissingData);
     }
 
     function renderAdminBiWeeklyMaster(allData, schedulesMap, missingData) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
-
       activeEmployees.sort((a, b) => {
         let numA = parseInt(a.staff_no || '999', 10);
         let numB = parseInt(b.staff_no || '999', 10);
@@ -1871,15 +1824,12 @@
       });
 
       let alertsHtml = [];
-
       allData.forEach(act => {
         if (act.hours > 0) {
           const key = `${act.employee_name}_${act.day_offset}`;
           if (!schedulesMap[key]) {
-            const d = new Date(adminPayPeriodStart);
-            d.setDate(d.getDate() + act.day_offset);
-            const dateStr = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
-            alertsHtml.push(`<div>• <strong>${act.employee_name}</strong> logged hours on an unscheduled date: <strong>${dateStr}</strong>, total <strong>${Number(act.hours).toFixed(2)}h</strong>.</div>`);
+            const d = new Date(adminPayPeriodStart); d.setDate(d.getDate() + act.day_offset);
+            alertsHtml.push(`<div>• <strong>${act.employee_name}</strong> logged hours on an unscheduled date: <strong>${d.getMonth()+1}/${d.getDate()}</strong>, total <strong>${Number(act.hours).toFixed(2)}h</strong>.</div>`);
           }
         }
       });
@@ -1887,8 +1837,7 @@
       missingData.forEach(miss => {
         if (miss.hours > 0) {
           const d = new Date(miss.date + 'T00:00:00');
-          const dateStr = `${d.getMonth()+1}/${d.getDate()} (${dayNames[d.getDay()]})`;
-          alertsHtml.push(`<div>• <strong>${miss.employee_name}</strong> submitted <strong>Missing Hours</strong> for <strong>${dateStr}</strong> (${Number(miss.hours).toFixed(2)}h). Reason: <em>"${miss.reason || 'No reason provided'}"</em></div>`);
+          alertsHtml.push(`<div>• <strong>${miss.employee_name}</strong> submitted <strong>Missing Hours</strong> for <strong>${d.getMonth()+1}/${d.getDate()}</strong> (${Number(miss.hours).toFixed(2)}h). Reason: <em>"${miss.reason || 'No reason'}"</em></div>`);
         }
       });
 
@@ -1903,38 +1852,27 @@
 
       const summaryTbody = document.getElementById('admin-summary-tbody');
       let summaryHtml = '';
-
       activeEmployees.forEach(emp => {
         const staffNo = emp.staff_no || '-';
         const firstName = emp.first_name || emp.name.split(' ')[0] || '';
         const lastName = emp.last_name || emp.name.split(' ')[1] || 'Staff';
         const engName = emp.name;
 
-        let w1Sum = 0;
-        let w2Sum = 0;
-
+        let w1Sum = 0, w2Sum = 0;
         for (let i = 0; i < 7; i++) {
           const m1 = allData.find(a => (a.employee_id === emp.id || a.employee_name === emp.name) && a.day_offset === i);
           if (m1 && m1.hours) w1Sum += Number(m1.hours);
-
           const m2 = allData.find(a => (a.employee_id === emp.id || a.employee_name === emp.name) && a.day_offset === i + 7);
           if (m2 && m2.hours) w2Sum += Number(m2.hours);
         }
 
         const periodStartSec = adminPayPeriodStart.getTime();
         const periodEndSec = new Date(adminPayPeriodStart); periodEndSec.setDate(periodEndSec.getDate() + 7);
-
         missingData.filter(m => m.employee_id === emp.id || m.employee_name === emp.name).forEach(miss => {
           const missTime = new Date(miss.date + 'T00:00:00').getTime();
           const hrs = Number(miss.hours) || 0;
-          if (missTime >= periodStartSec && missTime < periodEndSec.getTime()) {
-            w1Sum += hrs;
-          } else {
-            w2Sum += hrs;
-          }
+          if (missTime >= periodStartSec && missTime < periodEndSec.getTime()) w1Sum += hrs; else w2Sum += hrs;
         });
-
-        const totalSum = w1Sum + w2Sum;
 
         summaryHtml += `
           <tr class="hover:bg-gray-50 transition">
@@ -1944,7 +1882,7 @@
             <td class="p-3 ${getStaffColorClass(emp.name)}">${engName}</td>
             <td class="p-3 text-center font-semibold text-gray-800">${w1Sum.toFixed(2)}h</td>
             <td class="p-3 text-center font-semibold text-gray-800">${w2Sum.toFixed(2)}h</td>
-            <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/30">${totalSum.toFixed(2)}h</td>
+            <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/30">${(w1Sum + w2Sum).toFixed(2)}h</td>
           </tr>
         `;
       });
@@ -1964,10 +1902,8 @@
         <th class="p-2 border-r w-32 bg-gray-200">Last Name</th>
         <th class="p-2 border-r w-32 bg-gray-200">ENG Name</th>
       `;
-
       for (let i = 0; i < 7; i++) {
-        const d = new Date(adminPayPeriodStart);
-        d.setDate(d.getDate() + weekOffset + i);
+        const d = new Date(adminPayPeriodStart); d.setDate(d.getDate() + weekOffset + i);
         hHtml += `<th class="p-2 border-r text-center">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}</th>`;
       }
       hHtml += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Total</th>`;
@@ -2008,11 +1944,9 @@
             </td>
           `;
         }
-
         rowHtml += `<td class="p-2 text-center font-black bg-gray-100 text-indigo-900">${weekSum.toFixed(2)}h</td>`;
         tbodyHtml += `<tr class="hover:bg-gray-50">${rowHtml}</tr>`;
       });
-
       tbody.innerHTML = tbodyHtml || `<tr><td colspan="12" class="p-6 text-center text-gray-400">No data found.</td></tr>`;
     }
 
@@ -2025,13 +1959,9 @@
       return mStr === '00' ? `${h}${period}` : `${h}:${mStr}${period}`;
     }
 
-    // ==========================================
-    // Employee Management
-    // ==========================================
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       const isAdmin = currentUser.role === 'admin';
-
       const sortedEmployees = [...dbEmployees].sort((a, b) => {
         let numA = parseInt(a.staff_no || '999', 10);
         let numB = parseInt(b.staff_no || '999', 10);
@@ -2083,7 +2013,7 @@
       const pin_code = document.getElementById(`input-pin-${tempId}`).value.trim();
       const email = document.getElementById(`input-email-${tempId}`).value.trim();
       const phone = document.getElementById(`input-phone-${tempId}`).value.trim();
-      const status = document.getElementById(`input-status-${tempId}` ).value;
+      const status = document.getElementById(`input-status-${tempId}`).value;
 
       if (!first_name || !pin_code) return alert('First Name and PIN required.');
 
@@ -2135,16 +2065,11 @@
 
       const targetEmp = dbEmployees.find(e => e.id === id);
       if (targetEmp) {
-        targetEmp.staff_no = staff_no;
-        targetEmp.first_name = first_name;
-        targetEmp.last_name = last_name;
-        targetEmp.name = name;
-        targetEmp.role = role;
-        targetEmp.pin_code = pin_code;
-        targetEmp.email = email;
-        targetEmp.phone = phone;
+        targetEmp.staff_no = staff_no; targetEmp.first_name = first_name;
+        targetEmp.last_name = last_name; targetEmp.name = name;
+        targetEmp.role = role; targetEmp.pin_code = pin_code;
+        targetEmp.email = email; targetEmp.phone = phone;
       }
-
       isDataModified = false;
       renderEmployeeTable();
     }
@@ -2208,25 +2133,16 @@
             const d = new Date(currentSunday); d.setDate(d.getDate() + dayIndex);
             const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`];
             if (savedItem && savedItem.employee_name === emp.name) {
-              
               let timeDisplay = "";
               if (savedItem.start_time && savedItem.end_time) {
                 timeDisplay = `${formatTime12h(savedItem.start_time)} ~ ${formatTime12h(savedItem.end_time)}`;
               } else {
-                if (shift.key === 'open') {
-                  timeDisplay = "10:00 AM ~ 5:00 PM";
-                } else if (shift.key.startsWith('day')) {
-                  timeDisplay = "11:30 AM ~ 5:00 PM";
-                } else if (shift.key.startsWith('closing')) {
-                  timeDisplay = "5:00 PM ~ 11:30 PM";
-                }
+                if (shift.key === 'open') timeDisplay = "10:00 AM ~ 5:00 PM";
+                else if (shift.key.startsWith('day')) timeDisplay = "11:30 AM ~ 5:00 PM";
+                else if (shift.key.startsWith('closing')) timeDisplay = "5:00 PM ~ 11:30 PM";
               }
 
-              let cleanShiftName = "Open";
-              if (shift.key === 'open') cleanShiftName = "Open";
-              else if (shift.key.startsWith('day')) cleanShiftName = "Day";
-              else if (shift.key.startsWith('closing')) cleanShiftName = "Closing";
-
+              let cleanShiftName = shift.key === 'open' ? 'Open' : shift.key.startsWith('day') ? 'Day' : 'Closing';
               staffShifts.push({
                 dayIndex: dayIndex,
                 text: `- ${d.getMonth()+1}/${d.getDate()} (${dayNames[dayIndex]}) : ${cleanShiftName} (${timeDisplay})`
@@ -2236,7 +2152,6 @@
         });
 
         staffShifts.sort((a, b) => a.dayIndex - b.dayIndex);
-
         if (staffShifts.length > 0) {
           const shiftLines = staffShifts.map(s => s.text).join('\n');
           fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease check your schedule in Chatime Hub and click Confirm.\n-----------------------------------------\n`;
