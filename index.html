@@ -447,7 +447,7 @@
     let weekAvailMap = {};
     let scheduleConfirmsMap = {};
     let weekPublicationState = { is_published: false, is_locked: false };
-    let schedulerMode = 'manage'; // 'manage' or 'my' for admin/manager
+    let schedulerMode = 'manage';
 
     let isAvailDeadlinePassed = false;
     let adminTargetAvailData = {};
@@ -549,7 +549,8 @@
       await fetchRealVancouverWeather14Days();
       if (_supabase) {
         try {
-          const { data } = await _supabase.from('employees').select('*').order('staff_no');
+          const { data, error } = await _supabase.from('employees').select('*').order('staff_no');
+          if (error) throw error;
           if (data && data.length > 0) {
             dbEmployees = data.map(e => ({
               ...e,
@@ -557,7 +558,9 @@
               last_name: e.last_name || e.name.split(' ')[1] || 'Staff'
             }));
           }
-        } catch (e) { dbEmployees = [defaultAdmin]; }
+        } catch (e) {
+          console.warn("Using fallback admin due to fetch error:", e);
+        }
       }
 
       if (!dbEmployees.some(e => e.role === 'admin' && e.status !== 'inactive')) {
@@ -574,6 +577,7 @@
           if (match) {
             currentUser = match;
             showMainDashboard();
+            return;
           }
         } catch (e) { localStorage.removeItem('chatime_session_user'); }
       }
@@ -648,7 +652,7 @@
         navHtml += `<button onclick="switchTab('my-profile')" id="nav-my-profile" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Profile</button>`;
       }
 
-      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button>";
+      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button>`;
       document.getElementById('top-nav-bar').innerHTML = navHtml;
 
       let hubHtml = `
@@ -705,7 +709,7 @@
         if (isAdmin) {
           actionButtons.classList.remove('hidden');
         } else {
-          actionButtons.classList.add('hidden'); // Manager can view manage mode or my mode, but save/publish depends on admin rules or permissions. Let's make manager able to view manage mode.
+          actionButtons.classList.add('hidden');
         }
       } else {
         toggleContainer.classList.add('hidden');
@@ -752,9 +756,6 @@
       renderScheduler();
     }
 
-    // ==========================================
-    // Weekly Schedule, Lock & Publish Workflow
-    // ==========================================
     function changeWeek(offset) {
       currentSunday.setDate(currentSunday.getDate() + (offset * 7));
       loadWeeklySchedule();
@@ -1285,9 +1286,6 @@
       }
     }
 
-    // ==========================================
-    // Staff Availability & Other Tabs (unchanged)
-    // ==========================================
     function changeAvailWeek(offset) {
       availSunday.setDate(availSunday.getDate() + (offset * 7));
       loadMyAvailabilityForm();
