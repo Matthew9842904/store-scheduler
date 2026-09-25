@@ -215,10 +215,10 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="border-b pb-4">
           <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Real Net Sales Reports</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Upload PARPOS Sales Summary PDFs. Clean overwrite logic ensures no duplicate inflation upon re-upload.</p>
+          <p class="text-xs text-gray-500 mt-0.5">Upload PARPOS Sales Summary PDFs. Includes 5% GST breakdown, detailed Merchant/Online columns, and Real Net Total.</p>
         </div>
 
-        <!-- 파일 일괄 업로드 드래그 앤 드롭 영역 -->
+        <!-- 파일 업로드 드래그 앤 드롭 영역 -->
         <div id="pdf-drop-zone" 
              class="bg-indigo-50/50 border-2 border-dashed border-indigo-300 p-8 rounded-2xl text-center space-y-3 cursor-pointer hover:bg-indigo-100/50 transition"
              ondragover="handleDragOver(event)" 
@@ -235,10 +235,10 @@
           <div id="upload-progress-status" class="text-xs font-semibold text-gray-600 mt-2"></div>
         </div>
 
-        <!-- 실질 매출 북키핑 리포트 조회 영역 -->
+        <!-- 리포트 조회 영역 (세부 내역 및 GST 분리 표시 포함) -->
         <div class="space-y-4 pt-4 border-t">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h3 class="font-bold text-sm text-gray-800">📋 Real Net Sales Breakdown (Merchant, Online App 30% Off, Cash)</h3>
+            <h3 class="font-bold text-sm text-gray-800">📋 Real Net Sales Breakdown & GST Details</h3>
             <div class="flex items-center gap-2 flex-wrap">
               <input type="date" id="report-start-date" class="p-1.5 border rounded-lg text-xs bg-white" onchange="loadBookkeepingReports()">
               <span>~</span>
@@ -248,13 +248,14 @@
           </div>
 
           <div class="overflow-x-auto border rounded-xl shadow-sm">
-            <table class="w-full text-left border-collapse min-w-[1000px]">
+            <table class="w-full text-left border-collapse min-w-[1200px]">
               <thead>
                 <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
                   <th class="p-3 w-28">Date</th>
-                  <th class="p-3 text-right">Merchant (Cards)</th>
+                  <th class="p-3 text-right">Merchant (Cards/App)</th>
                   <th class="p-3 text-right">Online (Net × 0.7)</th>
-                  <th class="p-3 text-right">Cash</th>
+                  <th class="p-3 text-right">Cash (Gross)</th>
+                  <th class="p-3 text-right text-purple-800 bg-purple-50/50">GST (5% Excluded)</th>
                   <th class="p-3 text-right bg-indigo-50 text-indigo-900 font-bold">Real Net Total</th>
                   <th class="p-3 text-center w-28">Tenders Detail</th>
                 </tr>
@@ -326,9 +327,9 @@
     </main>
   </div>
 
-  <!-- ================= Tenders Detail Modal ================= -->
+  <!-- ================= Tenders Detail Modal (총합 행 포함) ================= -->
   <div id="tender-detail-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden border">
       <div class="bg-indigo-900 text-white p-4 flex justify-between items-center">
         <h3 class="font-bold text-base" id="modal-title">Tenders Breakdown</h3>
         <button onclick="closeTenderModal()" class="text-white hover:text-gray-200 font-bold text-lg">✕</button>
@@ -346,6 +347,7 @@
             </tr>
           </thead>
           <tbody id="modal-tender-tbody" class="text-sm divide-y"></tbody>
+          <tfoot id="modal-tender-tfoot" class="bg-gray-50 border-t-2 font-bold text-xs text-gray-900"></tfoot>
         </table>
       </div>
       <div class="bg-gray-50 px-6 py-3 border-t flex justify-end">
@@ -512,7 +514,7 @@
       document.getElementById('hub-grid').innerHTML = hubHtml;
     }
 
-    // ================= Bookkeeping & Clean Overwrite Logic =================
+    // ================= Bookkeeping & Detailed Calculations =================
     function handleDragOver(event) {
       event.preventDefault();
       event.stopPropagation();
@@ -556,7 +558,6 @@
       loadBookkeepingReports();
     }
 
-    // 사장님이 올려주신 실제 리포트 기준의 정확한 데이터셋 파서 (중복 뻥튀기 방지)
     function parseParposCleanData(filename) {
       return {
         salesDate: "2026-09-23",
@@ -581,11 +582,8 @@
 
     async function saveParsedDataToSupabaseClean(data) {
       if (!_supabase) return;
-      
-      // 1. 기존 동일 날짜의 상세 텐더 데이터가 있다면 먼저 삭제하여 중복 누적(뻥튀기) 원천 차단
       await _supabase.from('eod_tender_details').delete().eq('sales_date', data.salesDate);
 
-      // 2. 매출 요약 정보 upsert
       await _supabase.from('eod_sales_summary').upsert({
         sales_date: data.salesDate,
         gross_sales: data.grossSales,
@@ -596,7 +594,6 @@
         calculated_cash: data.calculatedCash
       }, { onConflict: 'sales_date' });
 
-      // 3. 깨끗한 상태에서 새로운 텐더 상세 데이터 삽입
       for (const t of data.tenders) {
         await _supabase.from('eod_tender_details').insert({
           sales_date: data.salesDate,
@@ -623,7 +620,7 @@
 
       const tbody = document.getElementById('bookkeeping-report-tbody');
       if (!summaryData || summaryData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
         return;
       }
 
@@ -642,28 +639,25 @@
             const name = t.tender_name.toLowerCase();
             const val = Number(t.total) || 0;
 
-            // 1. Merchant (Visa, MasterCard, American Express, Debit, ssf- 등 카드 머신 매출)
             if (name.includes('visa') || name.includes('master') || name.includes('amex') || name.includes('amx') || name.includes('debit') || name.includes('discover') || name.includes('ssf')) {
               merchantTotal += val;
-            }
-            // 2. Online Platform (UberEats, DoorDash, Skip 등 배달 앱 - 수수료 30% 차감 대상)
-            else if (name.includes('ubereats') || name.includes('doordash') || name.includes('skip') || name.includes('delivery')) {
+            } else if (name.includes('ubereats') || name.includes('doordash') || name.includes('skip') || name.includes('delivery')) {
               onlineTotal += val;
-            }
-            // 3. Cash (현금)
-            else if (name.includes('cash')) {
+            } else if (name.includes('cash')) {
               cashTotal += val;
-            }
-            // 4. Menu App (Kiosk + 차타임 웹오더 통합 값 -> 카드/머신 영역에 합산)
-            else if (name.includes('menu app')) {
-              merchantTotal += val;
+            } else if (name.includes('menu app')) {
+              merchantTotal += val; // 템플릿 기준 카드/앱 영역 합산
             }
           });
         }
 
         // 온라인 오더 수수료 약 30% 차감 반영 (Total × 0.7)
         const onlineNet = onlineTotal * 0.7;
-        const realNetTotal = merchantTotal + onlineNet + cashTotal;
+        
+        // 총 실질 매출 합산액 (Merchant + OnlineNet + Cash)에서 5% GST 역산 분리 (Total / 1.05 * 0.05)
+        const combinedGrossForNet = merchantTotal + onlineNet + cashTotal;
+        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05); // 5% GST 역산 금액
+        const realNetTotal = combinedGrossForNet - gstAmount; // 택스 제외 순수 매출
 
         html += `
           <tr class="hover:bg-gray-50">
@@ -671,6 +665,7 @@
             <td class="p-3 text-right font-semibold">$${merchantTotal.toFixed(2)}</td>
             <td class="p-3 text-right font-semibold text-blue-700">$${onlineNet.toFixed(2)} <span class="text-[10px] text-gray-400">($${onlineTotal.toFixed(2)}×0.7)</span></td>
             <td class="p-3 text-right font-semibold">$${cashTotal.toFixed(2)}</td>
+            <td class="p-3 text-right text-purple-700 bg-purple-50/30 font-semibold">-$${gstAmount.toFixed(2)} <span class="text-[10px] text-gray-400">(5% GST)</span></td>
             <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/40">$${realNetTotal.toFixed(2)}</td>
             <td class="p-3 text-center">
               <button onclick="viewTenderModal('${row.sales_date}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 transition">
@@ -683,11 +678,15 @@
       tbody.innerHTML = html;
     }
 
+    // Tenders Detail 모달 팝업 열기 및 하단 총합(Total Summary) 계산 함수
     async function viewTenderModal(salesDate) {
       if (!_supabase) return;
       document.getElementById('modal-title').textContent = `Tenders Breakdown (${salesDate})`;
       const modalTbody = document.getElementById('modal-tender-tbody');
+      const modalTfoot = document.getElementById('modal-tender-tfoot');
+      
       modalTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Loading details...</td></tr>`;
+      modalTfoot.innerHTML = '';
       document.getElementById('tender-detail-modal').classList.remove('hidden');
 
       const { data } = await _supabase.from('eod_tender_details')
@@ -700,16 +699,42 @@
         return;
       }
 
-      modalTbody.innerHTML = data.map(t => `
-        <tr class="hover:bg-gray-50">
-          <td class="p-2 font-semibold text-gray-800">${t.tender_name}</td>
-          <td class="p-2 text-center">${t.quantity}</td>
-          <td class="p-2 text-right">$${Number(t.payments).toFixed(2)}</td>
-          <td class="p-2 text-right">$${Number(t.tips).toFixed(2)}</td>
-          <td class="p-2 text-right font-bold text-indigo-900">$${Number(t.total).toFixed(2)}</td>
-          <td class="p-2 text-right text-gray-600">${Number(t.percent).toFixed(2)}%</td>
+      let sumQty = 0;
+      let sumPayments = 0;
+      let sumTips = 0;
+      let sumTotal = 0;
+      let sumPercent = 0;
+
+      modalTbody.innerHTML = data.map(t => {
+        sumQty += Number(t.quantity) || 0;
+        sumPayments += Number(t.payments) || 0;
+        sumTips += Number(t.tips) || 0;
+        sumTotal += Number(t.total) || 0;
+        sumPercent += Number(t.percent) || 0;
+
+        return `
+          <tr class="hover:bg-gray-50">
+            <td class="p-2 font-semibold text-gray-800">${t.tender_name}</td>
+            <td class="p-2 text-center">${t.quantity}</td>
+            <td class="p-2 text-right">$${Number(t.payments).toFixed(2)}</td>
+            <td class="p-2 text-right">$${Number(t.tips).toFixed(2)}</td>
+            <td class="p-2 text-right font-bold text-indigo-900">$${Number(t.total).toFixed(2)}</td>
+            <td class="p-2 text-right text-gray-600">${Number(t.percent).toFixed(2)}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      // 모달 하단 총합(Total) 행 삽입
+      modalTfoot.innerHTML = `
+        <tr>
+          <td class="p-3 text-indigo-900 font-extrabold uppercase">Total Summary</td>
+          <td class="p-3 text-center text-indigo-900">${sumQty}</td>
+          <td class="p-3 text-right text-indigo-900">$${sumPayments.toFixed(2)}</td>
+          <td class="p-3 text-right text-indigo-900">$${sumTips.toFixed(2)}</td>
+          <td class="p-3 text-right text-indigo-920 font-black text-sm">$${sumTotal.toFixed(2)}</td>
+          <td class="p-3 text-right text-indigo-900">${sumPercent.toFixed(2)}%</td>
         </tr>
-      `).join('');
+      `;
     }
 
     function closeTenderModal() {
