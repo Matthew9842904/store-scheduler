@@ -93,9 +93,14 @@
         </div>
       </div>
 
-      <div id="shift-count-summary" class="hidden bg-white p-4 rounded-xl shadow-sm border flex flex-wrap items-center gap-3">
-        <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">📊 Shift Count (This Week):</span>
-        <div id="shift-count-badges" class="flex flex-wrap gap-2"></div>
+      <div id="shift-count-summary" class="hidden bg-white p-4 rounded-xl shadow-sm border flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-3">
+          <span class="text-xs font-bold text-gray-600 uppercase tracking-wide">📊 Shift Count:</span>
+          <div id="shift-count-badges" class="flex flex-wrap gap-2"></div>
+        </div>
+        <div id="schedule-confirm-status-box" class="text-xs border-l pl-4">
+          <!-- Admin confirmation overview badge -->
+        </div>
       </div>
 
       <div id="admin-schedule-view" class="bg-white rounded-xl shadow-sm border overflow-x-auto">
@@ -108,9 +113,14 @@
       </div>
 
       <div id="staff-schedule-view" class="hidden bg-white p-6 rounded-xl shadow-sm border space-y-4">
-        <div class="border-b pb-3">
-          <h2 class="text-lg font-bold text-gray-900">Your Assigned Schedule</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Here are your confirmed shifts for the selected week.</p>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-3">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900">Your Assigned Schedule</h2>
+            <p class="text-xs text-gray-500 mt-0.5">Review your shifts for the selected week and confirm receipt.</p>
+          </div>
+          <div id="staff-confirm-action-area">
+            <!-- Dynamic confirm button -->
+          </div>
         </div>
         <div id="staff-shifts-container" class="grid grid-cols-1 md:grid-cols-7 gap-3"></div>
       </div>
@@ -424,6 +434,7 @@
 
     let currentScheduleData = {};
     let weekAvailMap = {};
+    let scheduleConfirmsMap = {};
     let isAvailDeadlinePassed = false;
     let adminTargetAvailData = {};
 
@@ -638,7 +649,7 @@
       let hubHtml = `
         <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
-          <div><h3 class="font-bold text-gray-900 text-base">Scheduler</h3><p class="text-xs text-gray-500 mt-1">View personal or manage store weekly shifts.</p></div>
+          <div><h3 class="font-bold text-gray-900 text-base">Scheduler</h3><p class="text-xs text-gray-500 mt-1">View personal schedule & confirm shifts.</p></div>
         </button>
         <button onclick="switchTab('submit-avail')" class="p-6 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
           <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">⏰</div>
@@ -714,7 +725,7 @@
     }
 
     // ==========================================
-    // Weekly Schedule
+    // Weekly Schedule & Confirmations
     // ==========================================
     function changeWeek(offset) {
       currentSunday.setDate(currentSunday.getDate() + (offset * 7));
@@ -729,6 +740,7 @@
       const weekStartStr = formatDateISO(currentSunday);
       currentScheduleData = {};
       weekAvailMap = {};
+      scheduleConfirmsMap = {};
 
       if (_supabase) {
         try {
@@ -746,6 +758,13 @@
               weekAvailMap[item.employee_name][item.day_index] = item;
             });
           }
+
+          const { data: confData } = await _supabase.from('schedule_confirms').select('*').eq('week_start_date', weekStartStr);
+          if (confData) {
+            confData.forEach(item => {
+              scheduleConfirmsMap[item.employee_name] = item;
+            });
+          }
         } catch (e) { console.error(e); }
       }
       renderScheduler();
@@ -760,6 +779,7 @@
         document.getElementById('staff-schedule-view').classList.add('hidden');
         renderAdminScheduleTable(canEditSchedule);
         updateShiftCountSummary();
+        renderAdminConfirmStatusBadge();
       } else {
         document.getElementById('admin-schedule-view').classList.add('hidden');
         document.getElementById('staff-schedule-view').classList.remove('hidden');
@@ -789,6 +809,16 @@
       }
       container.innerHTML = html || '<span class="text-xs text-gray-400 italic">No shifts assigned yet</span>';
       document.getElementById('shift-count-summary').classList.remove('hidden');
+    }
+
+    function renderAdminConfirmStatusBadge() {
+      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+      let confirmedCount = 0;
+      activeStaff.forEach(emp => {
+        if (scheduleConfirmsMap[emp.name]) confirmedCount++;
+      });
+      const box = document.getElementById('schedule-confirm-status-box');
+      box.innerHTML = `<span class="font-bold text-gray-700">Staff Confirms:</span> <span class="px-2.5 py-1 bg-indigo-100 text-indigo-900 rounded-lg font-black ml-1">${confirmedCount} / ${activeStaff.length} Confirmed</span>`;
     }
 
     function renderAdminScheduleTable(canEdit) {
@@ -1066,7 +1096,9 @@
 
     function renderStaffPersonalSchedule() {
       const container = document.getElementById('staff-shifts-container');
+      const actionArea = document.getElementById('staff-confirm-action-area');
       container.innerHTML = '';
+
       for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
         const d = new Date(currentSunday);
         d.setDate(d.getDate() + dayIndex);
@@ -1095,6 +1127,36 @@
           </div>
         `;
         container.appendChild(card);
+      }
+
+      const isConfirmed = scheduleConfirmsMap[currentUser.name] !== undefined;
+      if (isConfirmed) {
+        const confTime = new Date(scheduleConfirmsMap[currentUser.name].confirmed_at).toLocaleString();
+        actionArea.innerHTML = `<span class="px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-xs flex items-center gap-1.5">✅ Schedule Confirmed <span class="text-[10px] font-normal text-emerald-700">(${confTime})</span></span>`;
+      } else {
+        actionArea.innerHTML = `<button onclick="confirmMySchedule()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-md transition">✅ Confirm Schedule</button>`;
+      }
+    }
+
+    async function confirmMySchedule() {
+      if (!_supabase || !currentUser) return alert("Database not connected.");
+      const weekStartStr = formatDateISO(currentSunday);
+
+      try {
+        const record = {
+          week_start_date: weekStartStr,
+          employee_id: currentUser.id,
+          employee_name: currentUser.name,
+          confirmed_at: new Date().toISOString()
+        };
+
+        const { error } = await _supabase.from('schedule_confirms').upsert(record, { onConflict: 'week_start_date,employee_name' });
+        if (error) throw error;
+
+        alert("Schedule confirmed successfully! Manager has been notified.");
+        await loadWeeklySchedule();
+      } catch (e) {
+        alert("Failed to confirm schedule: " + e.message);
       }
     }
 
@@ -2177,7 +2239,7 @@
 
         if (staffShifts.length > 0) {
           const shiftLines = staffShifts.map(s => s.text).join('\n');
-          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease review your schedule and reply to this message to confirm receipt, and if you have any questions or changes, please contact Tammy as soon as possible. Always appreciate your hard work.\n-----------------------------------------\n`;
+          fullMessages += `Hello ${emp.name},\nHere is your work schedule from ${startDateStr} to ${endDateStr}.\n${shiftLines}\n\nPlease check your schedule in Chatime Hub and click Confirm.\n-----------------------------------------\n`;
         }
       });
 
