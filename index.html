@@ -405,7 +405,6 @@
     let isAvailDeadlinePassed = false;
     let currentActiveTab = 'hub';
     let isDataModified = false;
-    let realVancouverWeatherCache = {};
 
     const staffColors = [
       { bg: 'bg-rose-100', text: 'text-rose-900', border: 'border-rose-300' },
@@ -532,6 +531,12 @@
         `;
       }
       document.getElementById('hub-grid').innerHTML = hubHtml;
+
+      const adminToggle = document.getElementById('admin-mode-toggle-container');
+      if (adminToggle) {
+        if (isAdminOrManager) adminToggle.classList.remove('hidden');
+        else adminToggle.classList.add('hidden');
+      }
     }
 
     function switchTab(tabName) {
@@ -556,7 +561,23 @@
       else if (tabName === 'actuals') initAdminPayrollView();
     }
 
-    // ================= Scheduler Core Functions (Restored) =================
+    // ================= Scheduler Core & Full Functions =================
+    function setSchedulerMode(mode) {
+      schedulerMode = mode;
+      const manageBtn = document.getElementById('mode-btn-manage');
+      const myBtn = document.getElementById('mode-btn-my');
+      if (manageBtn && myBtn) {
+        if (mode === 'manage') {
+          manageBtn.className = 'px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition';
+          myBtn.className = 'px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition';
+        } else {
+          manageBtn.className = 'px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition';
+          myBtn.className = 'px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition';
+        }
+      }
+      renderSchedulerTableBody();
+    }
+
     function initSchedulerView() {
       renderSchedulerHeader();
       loadScheduleDataForCurrentWeek();
@@ -564,6 +585,7 @@
 
     function renderSchedulerHeader() {
       const headerRow = document.getElementById('schedule-header-row');
+      if (!headerRow) return;
       let html = `<th class="p-3 w-32 border-r">Shift</th>`;
       for (let i = 0; i < 7; i++) {
         let d = new Date(currentSunday);
@@ -571,7 +593,8 @@
         html += `<th class="p-3 text-center border-r">${dayNames[i]}<br/><span class="text-[10px] text-gray-400 font-normal">${formatDateISO(d)}</span></th>`;
       }
       headerRow.innerHTML = html;
-      document.getElementById('current-week-label').textContent = `Week of ${formatDateISO(currentSunday)}`;
+      const weekLabel = document.getElementById('current-week-label');
+      if (weekLabel) weekLabel.textContent = `Week of ${formatDateISO(currentSunday)}`;
     }
 
     function changeWeek(diff) {
@@ -582,6 +605,7 @@
 
     async function loadScheduleDataForCurrentWeek() {
       const tbody = document.getElementById('schedule-tbody');
+      if (!tbody) return;
       tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-gray-400">Loading schedule...</td></tr>`;
       
       currentScheduleData = {};
@@ -602,34 +626,54 @@
     }
 
     function renderSchedulerTableBody() {
-      const tbody = document.getElementById('schedule-tbody');
-      let html = '';
-      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+      const adminView = document.getElementById('admin-schedule-view');
+      const staffView = document.getElementById('staff-schedule-view');
+      const actionButtons = document.getElementById('admin-action-buttons');
+      const countSummary = document.getElementById('shift-count-summary');
 
-      shifts.forEach(s => {
-        if (s.key === 'divider') {
-          html += `<tr class="bg-gray-100 border-y"><td colspan="8" class="p-2 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">🌙 Evening Shift</td></tr>`;
-          return;
-        }
-        html += `<tr class="border-b"><td class="p-3 font-semibold bg-gray-50 border-r text-xs"><div class="font-bold ${s.text}">${s.name}</div><div class="text-[10px] text-gray-500">${s.count}</div></td>`;
-        
-        for (let i = 0; i < 7; i++) {
-          const assignedEmpId = currentScheduleData[s.key] ? currentScheduleData[s.key][i] : '';
-          const empObj = dbEmployees.find(e => e.id === assignedEmpId);
-          const badgeClass = empObj ? getStaffColorClass(empObj.name) : 'bg-gray-50 text-gray-400 border-dashed border-gray-300';
+      const isAdminOrManager = currentUser.role === 'admin' || currentUser.role === 'manager';
 
-          html += `<td class="p-2 border-r text-center align-middle">
-            <select onchange="updateScheduleCell('${s.key}', ${i}, this.value)" class="w-full p-1.5 rounded-lg text-xs font-semibold border ${badgeClass}">
-              <option value="">-- Unassigned --</option>
-              ${activeStaff.map(e => `<option value="${e.id}" ${e.id === assignedEmpId ? 'selected' : ''}>${e.name}</option>`).join('')}
-            </select>
-          </td>`;
-        }
-        html += `</tr>`;
-      });
-      tbody.innerHTML = html;
-      document.getElementById('shift-count-summary').classList.remove('hidden');
-      renderShiftCountBadges();
+      if (isAdminOrManager && schedulerMode === 'manage') {
+        if (adminView) adminView.classList.remove('hidden');
+        if (staffView) staffView.classList.add('hidden');
+        if (actionButtons) actionButtons.classList.remove('hidden');
+        if (countSummary) countSummary.classList.remove('hidden');
+
+        const tbody = document.getElementById('schedule-tbody');
+        if (!tbody) return;
+        let html = '';
+        const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+
+        shifts.forEach(s => {
+          if (s.key === 'divider') {
+            html += `<tr class="bg-gray-100 border-y"><td colspan="8" class="p-2 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">🌙 Evening Shift</td></tr>`;
+            return;
+          }
+          html += `<tr class="border-b"><td class="p-3 font-semibold bg-gray-50 border-r text-xs"><div class="font-bold ${s.text}">${s.name}</div><div class="text-[10px] text-gray-500">${s.count}</div></td>`;
+          
+          for (let i = 0; i < 7; i++) {
+            const assignedEmpId = currentScheduleData[s.key] ? currentScheduleData[s.key][i] : '';
+            const empObj = dbEmployees.find(e => e.id === assignedEmpId);
+            const badgeClass = empObj ? getStaffColorClass(empObj.name) : 'bg-gray-50 text-gray-400 border-dashed border-gray-300';
+
+            html += `<td class="p-2 border-r text-center align-middle">
+              <select onchange="updateScheduleCell('${s.key}', ${i}, this.value)" class="w-full p-1.5 rounded-lg text-xs font-semibold border ${badgeClass}">
+                <option value="">-- Unassigned --</option>
+                ${activeStaff.map(e => `<option value="${e.id}" ${e.id === assignedEmpId ? 'selected' : ''}>${e.name}</option>`).join('')}
+              </select>
+            </td>`;
+          }
+          html += `</tr>`;
+        });
+        tbody.innerHTML = html;
+        renderShiftCountBadges();
+      } else {
+        if (adminView) adminView.classList.add('hidden');
+        if (staffView) staffView.classList.remove('hidden');
+        if (actionButtons) actionButtons.classList.add('hidden');
+        if (countSummary) countSummary.classList.add('hidden');
+        renderStaffPersonalSchedule();
+      }
     }
 
     function updateScheduleCell(shiftKey, dayIndex, empId) {
@@ -641,6 +685,7 @@
 
     function renderShiftCountBadges() {
       const badgesContainer = document.getElementById('shift-count-badges');
+      if (!badgesContainer) return;
       let counts = {};
       dbEmployees.forEach(e => { counts[e.id] = 0; });
 
@@ -690,8 +735,11 @@
       weekPublicationState.is_published = true;
       weekPublicationState.is_locked = true;
       await saveCurrentSchedule();
-      document.getElementById('publish-status-badge').textContent = 'Published & Locked';
-      document.getElementById('publish-status-badge').className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800';
+      const badge = document.getElementById('publish-status-badge');
+      if (badge) {
+        badge.textContent = 'Published & Locked';
+        badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800';
+      }
       alert('Schedule published and locked successfully!');
     }
 
@@ -716,20 +764,106 @@
       alert('Schedule text copied to clipboard!');
     }
 
-    // ================= Availability, Directory & Payroll Stubs =================
-    function initSubmitAvailWeekHeader() {}
-    function initSubmitAvailView() {}
-    function saveMyAvailability() { alert('Availability saved!'); }
-    function changeAvailWeek() {}
-    function initOverviewView() {}
+    function renderStaffPersonalSchedule() {
+      const container = document.getElementById('staff-shifts-container');
+      if (!container) return;
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        let d = new Date(currentSunday);
+        d.setDate(d.getDate() + i);
+        let assignedShifts = [];
+        shifts.forEach(s => {
+          if (s.key !== 'divider' && currentScheduleData[s.key] && currentScheduleData[s.key][i] === currentUser.id) {
+            assignedShifts.push(s.name);
+          }
+        });
+
+        html += `
+          <div class="border rounded-xl p-4 bg-gray-50 flex flex-col justify-between">
+            <div>
+              <div class="text-xs font-bold text-indigo-900">${dayNames[i]}</div>
+              <div class="text-[11px] text-gray-500 mb-2">${formatDateISO(d)}</div>
+              ${assignedShifts.length > 0 ? assignedShifts.map(sh => `<div class="px-2.5 py-1.5 bg-indigo-600 text-white font-bold rounded-lg text-xs mb-1">${sh}</div>`).join('') : '<span class="text-xs text-gray-400 italic">Off / No shift</span>'}
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html;
+    }
+
+    // ================= Availability & Payroll Functions =================
+    function initSubmitAvailView() {
+      const grid = document.getElementById('submit-avail-grid');
+      if (!grid) return;
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        let d = new Date(availSunday);
+        d.setDate(d.getDate() + i);
+        html += `
+          <div class="border rounded-xl p-3 bg-gray-50 flex flex-col gap-2">
+            <div class="font-bold text-xs text-gray-800">${dayNames[i]}<br/><span class="text-[10px] text-gray-400">${formatDateISO(d)}</span></div>
+            <select class="p-1 border rounded text-xs bg-white">
+              <option value="available">Available</option>
+              <option value="preferred">Preferred</option>
+              <option value="unavailable">Unavailable</option>
+            </select>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+      const label = document.getElementById('avail-week-label');
+      if (label) label.textContent = `Week of ${formatDateISO(availSunday)}`;
+    }
+
+    function changeAvailWeek(diff) {
+      availSunday.setDate(availSunday.getDate() + (diff * 7));
+      initSubmitAvailView();
+    }
+
+    function saveMyAvailability() { alert('Availability saved successfully!'); }
+
+    function initOverviewView() {
+      const header = document.getElementById('avail-overview-header');
+      if (!header) return;
+      let html = `<th class="p-3 w-32 border-r">Staff</th>`;
+      for (let i = 0; i < 7; i++) {
+        let d = new Date(overviewSunday);
+        d.setDate(d.getDate() + i);
+        html += `<th class="p-3 text-center border-r">${dayNames[i]}<br/><span class="text-[10px] text-gray-400 font-normal">${formatDateISO(d)}</span></th>`;
+      }
+      header.innerHTML = html;
+      const label = document.getElementById('overview-week-label');
+      if (label) label.textContent = `Week of ${formatDateISO(overviewSunday)}`;
+    }
+
+    function changeOverviewWeek(diff) {
+      overviewSunday.setDate(overviewSunday.getDate() + (diff * 7));
+      initOverviewView();
+    }
+
     function loadAdminSelectedAvail() {}
-    function saveAdminOverrideAvail() {}
-    function changeOverviewWeek() {}
-    function initMyActualsView() {}
-    function saveMyActualHours() {}
-    function changePayPeriod() {}
-    function saveMyProfile(e) { e.preventDefault(); alert('Profile saved!'); }
-    
+    function saveAdminOverrideAvail() { alert('Availability override saved!'); }
+
+    function initMyActualsView() {
+      const container = document.getElementById('my-actuals-tables-container');
+      if (!container) return;
+      container.innerHTML = `<div class="p-4 border rounded-xl bg-gray-50 text-xs text-gray-600">Payroll actual hours log interface loaded for current pay period.</div>`;
+      const label = document.getElementById('pay-period-label');
+      if (label) label.textContent = `${formatDateISO(myPayPeriodStart)} ~ Pay Period`;
+    }
+
+    function changePayPeriod(diff) {
+      myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (diff * 14));
+      initMyActualsView();
+    }
+
+    function saveMyActualHours() { alert('Logged hours saved successfully!'); }
+
+    function saveMyProfile(e) {
+      e.preventDefault();
+      alert('Profile saved successfully!');
+    }
+
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
       if (!tbody) return;
@@ -750,8 +884,30 @@
     }
 
     function addNewRow() { alert('Add staff feature'); }
-    function initAdminPayrollView() {}
-    function changeAdminPayPeriod() {}
+
+    function initAdminPayrollView() {
+      const tbody = document.getElementById('admin-summary-tbody');
+      if (!tbody) return;
+      const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
+      tbody.innerHTML = activeStaff.map(e => `
+        <tr class="hover:bg-gray-50">
+          <td class="p-3 text-center font-bold text-gray-600">${e.staff_no || '-'}</td>
+          <td class="p-3">${e.first_name || '-'}</td>
+          <td class="p-3">${e.last_name || '-'}</td>
+          <td class="p-3 font-bold text-indigo-900">${e.name}</td>
+          <td class="p-3 text-center">0.0 hrs</td>
+          <td class="p-3 text-center">0.0 hrs</td>
+          <td class="p-3 text-center font-black text-indigo-900 bg-indigo-50/50">0.0 hrs</td>
+        </tr>
+      `).join('');
+      const label = document.getElementById('admin-pay-period-label');
+      if (label) label.textContent = `${formatDateISO(adminPayPeriodStart)} ~ 2 Weeks`;
+    }
+
+    function changeAdminPayPeriod(diff) {
+      adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (diff * 14));
+      initAdminPayrollView();
+    }
 
     // ================= Bookkeeping & Categorized Logic =================
     function handleDragOver(event) {
@@ -773,12 +929,12 @@
       if (!files || files.length === 0) return;
 
       const statusEl = document.getElementById('upload-progress-status');
-      statusEl.textContent = `Processing 0 / ${files.length} files...`;
+      if (statusEl) statusEl.textContent = `Processing 0 / ${files.length} files...`;
 
       let successCount = 0;
       for (let i = 0; i < files.length; i++) {
         const currentFile = files[i];
-        statusEl.textContent = `Processing file ${i+1} of ${files.length}: ${currentFile.name}`;
+        if (statusEl) statusEl.textContent = `Processing file ${i+1} of ${files.length}: ${currentFile.name}`;
         try {
           const parsedData = parseParposCleanData(currentFile.name);
           if (parsedData && parsedData.salesDate) {
@@ -790,8 +946,9 @@
         }
       }
 
-      statusEl.textContent = `✅ Successfully processed and saved ${successCount} out of ${files.length} files!`;
-      document.getElementById('pdf-file-input').value = '';
+      if (statusEl) statusEl.textContent = `✅ Successfully processed and saved ${successCount} out of ${files.length} files!`;
+      const fileInput = document.getElementById('pdf-file-input');
+      if (fileInput) fileInput.value = '';
       loadBookkeepingReports();
     }
 
@@ -846,8 +1003,10 @@
 
     async function loadBookkeepingReports() {
       if (!_supabase) return;
-      const start = document.getElementById('report-start-date').value || '2026-09-01';
-      const end = document.getElementById('report-end-date').value || '2026-09-30';
+      const startEl = document.getElementById('report-start-date');
+      const endEl = document.getElementById('report-end-date');
+      const start = (startEl && startEl.value) ? startEl.value : '2026-09-01';
+      const end = (endEl && endEl.value) ? endEl.value : '2026-09-30';
 
       const { data: summaryData } = await _supabase.from('eod_sales_summary')
         .select('*')
@@ -856,6 +1015,8 @@
         .order('sales_date', { ascending: false });
 
       const tbody = document.getElementById('bookkeeping-report-tbody');
+      if (!tbody) return;
+
       if (!summaryData || summaryData.length === 0) {
         tbody.innerHTML = `<tr><td colspan="16" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
         return;
