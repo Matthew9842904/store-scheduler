@@ -84,7 +84,13 @@
           <button onclick="changeWeek(1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">Next Week &gt;</button>
         </div>
         
-        <!-- Admin Action Buttons -->
+        <!-- Admin/Manager Mode Toggle (Manage vs My Schedule) -->
+        <div id="admin-mode-toggle-container" class="hidden flex items-center bg-gray-100 p-1 rounded-lg text-xs font-bold">
+          <button onclick="setSchedulerMode('manage')" id="mode-btn-manage" class="px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition">🛠️ Manage Schedule</button>
+          <button onclick="setSchedulerMode('my')" id="mode-btn-my" class="px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition">👤 My Schedule & Confirm</button>
+        </div>
+
+        <!-- Admin Action Buttons (Draft / Publish / Unlock) -->
         <div id="admin-action-buttons" class="hidden flex items-center gap-2 flex-wrap">
           <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">
             💾 Save (Draft)
@@ -112,6 +118,7 @@
         </div>
       </div>
 
+      <!-- Admin Management View -->
       <div id="admin-schedule-view" class="bg-white rounded-xl shadow-sm border overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[1100px]">
           <thead>
@@ -121,6 +128,7 @@
         </table>
       </div>
 
+      <!-- Staff / Manager Personal Schedule & Confirm View -->
       <div id="staff-schedule-view" class="hidden bg-white p-6 rounded-xl shadow-sm border space-y-4">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-3">
           <div>
@@ -439,6 +447,7 @@
     let weekAvailMap = {};
     let scheduleConfirmsMap = {};
     let weekPublicationState = { is_published: false, is_locked: false };
+    let schedulerMode = 'manage'; // 'manage' or 'my' for admin/manager
 
     let isAvailDeadlinePassed = false;
     let adminTargetAvailData = {};
@@ -639,7 +648,7 @@
         navHtml += `<button onclick="switchTab('my-profile')" id="nav-my-profile" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Profile</button>`;
       }
 
-      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button>`;
+      navHtml += `<button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button>";
       document.getElementById('top-nav-bar').innerHTML = navHtml;
 
       let hubHtml = `
@@ -686,11 +695,21 @@
     function applyRolePermissions() {
       const isAdmin = currentUser.role === 'admin';
       const isManager = currentUser.role === 'manager';
+      const isAdminOrManager = isAdmin || isManager;
 
-      if (isAdmin) {
-        document.getElementById('admin-action-buttons').classList.remove('hidden');
+      const toggleContainer = document.getElementById('admin-mode-toggle-container');
+      const actionButtons = document.getElementById('admin-action-buttons');
+
+      if (isAdminOrManager) {
+        toggleContainer.classList.remove('hidden');
+        if (isAdmin) {
+          actionButtons.classList.remove('hidden');
+        } else {
+          actionButtons.classList.add('hidden'); // Manager can view manage mode or my mode, but save/publish depends on admin rules or permissions. Let's make manager able to view manage mode.
+        }
       } else {
-        document.getElementById('admin-action-buttons').classList.add('hidden');
+        toggleContainer.classList.add('hidden');
+        actionButtons.classList.add('hidden');
       }
 
       const overrideBox = document.getElementById('override-section-box');
@@ -716,6 +735,21 @@
       } else if (isManager) {
         empDescEl.textContent = 'View contact information (Phone and Email) for all active staff members (Read-Only).';
       }
+    }
+
+    function setSchedulerMode(mode) {
+      schedulerMode = mode;
+      const btnManage = document.getElementById('mode-btn-manage');
+      const btnMy = document.getElementById('mode-btn-my');
+
+      if (mode === 'manage') {
+        btnManage.className = "px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition";
+        btnMy.className = "px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition";
+      } else {
+        btnMy.className = "px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition";
+        btnManage.className = "px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition";
+      }
+      renderScheduler();
     }
 
     // ==========================================
@@ -773,7 +807,7 @@
       const isLocked = weekPublicationState.is_locked;
       const canEditSchedule = currentUser && currentUser.role === 'admin' && !isLocked;
 
-      if (isAdminOrManager) {
+      if (isAdminOrManager && schedulerMode === 'manage') {
         document.getElementById('admin-schedule-view').classList.remove('hidden');
         document.getElementById('staff-schedule-view').classList.add('hidden');
         renderAdminScheduleTable(canEditSchedule);
@@ -796,12 +830,12 @@
         badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-900';
         badge.textContent = '🔒 Published & Locked';
         btnUnlock.classList.remove('hidden');
-        btnPublish.classList.add('opacity-50', 'cursor-not-allowed');
+        if(btnPublish) btnPublish.classList.add('opacity-50', 'cursor-not-allowed');
       } else {
         badge.className = 'px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-900';
         badge.textContent = '📝 Draft (Unpublished)';
         btnUnlock.classList.add('hidden');
-        btnPublish.classList.remove('opacity-50', 'cursor-not-allowed');
+        if(btnPublish) btnPublish.classList.remove('opacity-50', 'cursor-not-allowed');
       }
 
       const activeStaff = dbEmployees.filter(e => e.status !== 'inactive');
@@ -1193,7 +1227,15 @@
           if (shift.key === 'divider') return;
           const item = currentScheduleData[`${shift.key}_${dayIndex}`];
           if (item && item.employee_name === currentUser.name) {
-            assignedShifts.push({ name: shift.name, time: (item.start_time && item.end_time) ? `${item.start_time} - ${item.end_time}` : 'Assigned' });
+            let timeDisplay = "";
+            if (item.start_time && item.end_time) {
+              timeDisplay = `${formatTime12h(item.start_time)} - ${formatTime12h(item.end_time)}`;
+            } else {
+              if (shift.key === 'open') timeDisplay = "10:00 AM - 5:00 PM";
+              else if (shift.key.startsWith('day')) timeDisplay = "11:30 AM - 5:00 PM";
+              else if (shift.key.startsWith('closing')) timeDisplay = "5:00 PM - 11:30 PM";
+            }
+            assignedShifts.push({ name: shift.name, time: timeDisplay });
           }
         });
 
