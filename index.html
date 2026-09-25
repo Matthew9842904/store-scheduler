@@ -59,7 +59,12 @@
       <!-- Quick Jump Navigation Bar -->
       <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"></nav>
 
+      <!-- 우측 상단 영역 (모드 토글 + 로그아웃) -->
       <div class="flex items-center gap-2">
+        <div id="admin-mode-toggle-container" class="hidden flex items-center bg-gray-100 p-1 rounded-lg text-xs font-bold">
+          <button onclick="setSchedulerMode('manage')" id="mode-btn-manage" class="px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition">🛠️ Manage</button>
+          <button onclick="setSchedulerMode('my')" id="mode-btn-my" class="px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition">👤 My Schedule</button>
+        </div>
         <button onclick="handleLogout()" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-semibold rounded-lg text-xs transition">
           Log Out
         </button>
@@ -78,19 +83,14 @@
     <!-- 1. Weekly Scheduler Tab -->
     <main id="view-scheduler" class="hidden space-y-6">
       <div class="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
-        <div class="flex items-center gap-3">
+        <!-- 날짜 및 이전/다음 주 이동 버튼 (확실한 한 줄 정렬) -->
+        <div class="flex items-center gap-3 whitespace-nowrap">
           <button onclick="changeWeek(-1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">&lt; Prev Week</button>
           <span id="current-week-label" class="font-bold text-base md:text-lg text-gray-800">Calculating week...</span>
           <button onclick="changeWeek(1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">Next Week &gt;</button>
         </div>
         
-        <!-- Admin/Manager Mode Toggle (Manage vs My Schedule) -->
-        <div id="admin-mode-toggle-container" class="hidden flex items-center bg-gray-100 p-1 rounded-lg text-xs font-bold">
-          <button onclick="setSchedulerMode('manage')" id="mode-btn-manage" class="px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition">🛠️ Manage Schedule</button>
-          <button onclick="setSchedulerMode('my')" id="mode-btn-my" class="px-3 py-1.5 rounded-md text-gray-600 hover:bg-white transition">👤 My Schedule & Confirm</button>
-        </div>
-
-        <!-- Admin Action Buttons (Draft / Publish / Unlock) -->
+        <!-- Admin Action Buttons (Save / Publish / Unlock / Copy Text) -->
         <div id="admin-action-buttons" class="hidden flex items-center gap-2 flex-wrap">
           <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">
             💾 Save (Draft)
