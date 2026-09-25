@@ -210,15 +210,15 @@
       </div>
     </main>
 
-    <!-- ================= Bookkeeping & Sales Reports Tab (수정됨) ================= -->
+    <!-- ================= Bookkeeping & Real Net Sales Reports Tab (수정됨) ================= -->
     <main id="view-bookkeeping" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="border-b pb-4">
-          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Sales Reports</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Upload multiple PARPOS Sales Summary PDFs in batch. Drag & drop or browse files below.</p>
+          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Real Net Sales Reports</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Upload multiple PARPOS Sales Summary PDFs. Data is parsed instantly and files are processed without local storage clutter.</p>
         </div>
 
-        <!-- 파일 일괄 업로드 드래그 앤 드롭 영역 (브라우저 탭 열림 방지 이벤트 처리 완료) -->
+        <!-- 파일 일괄 업로드 드래그 앤 드롭 영역 -->
         <div id="pdf-drop-zone" 
              class="bg-indigo-50/50 border-2 border-dashed border-indigo-300 p-8 rounded-2xl text-center space-y-3 cursor-pointer hover:bg-indigo-100/50 transition"
              ondragover="handleDragOver(event)" 
@@ -226,7 +226,7 @@
           <div class="text-4xl">📁</div>
           <div>
             <h3 class="font-bold text-sm text-indigo-900">Drag & Drop PARPOS Sales Summary PDFs Here</h3>
-            <p class="text-xs text-indigo-700 mt-1">Files will automatically be parsed by date and saved to database.</p>
+            <p class="text-xs text-indigo-700 mt-1">Batch upload supported (e.g. vacation backlog).</p>
           </div>
           <input type="file" id="pdf-file-input" multiple accept=".pdf" class="hidden" onchange="handlePdfFilesSelected(event)">
           <button type="button" onclick="document.getElementById('pdf-file-input').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm transition">
@@ -235,10 +235,10 @@
           <div id="upload-progress-status" class="text-xs font-semibold text-gray-600 mt-2"></div>
         </div>
 
-        <!-- 리포트 조회 필터 및 테이블 영역 -->
+        <!-- 실질 매출 북키핑 리포트 조회 영역 -->
         <div class="space-y-4 pt-4 border-t">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h3 class="font-bold text-sm text-gray-800">📋 Stored Sales Records</h3>
+            <h3 class="font-bold text-sm text-gray-800">📋 Real Net Sales Breakdown (Merchant, Online App 70%, Cash)</h3>
             <div class="flex items-center gap-2 flex-wrap">
               <input type="date" id="report-start-date" class="p-1.5 border rounded-lg text-xs bg-white" onchange="loadBookkeepingReports()">
               <span>~</span>
@@ -248,16 +248,14 @@
           </div>
 
           <div class="overflow-x-auto border rounded-xl shadow-sm">
-            <table class="w-full text-left border-collapse min-w-[900px]">
+            <table class="w-full text-left border-collapse min-w-[1000px]">
               <thead>
                 <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
                   <th class="p-3 w-28">Date</th>
-                  <th class="p-3 text-right">Gross Sales</th>
-                  <th class="p-3 text-right">Net Sales</th>
-                  <th class="p-3 text-center">Orders</th>
-                  <th class="p-3 text-right">Tax</th>
-                  <th class="p-3 text-right">Discounts</th>
-                  <th class="p-3 text-right">Calculated Cash</th>
+                  <th class="p-3 text-right">Merchant (Cards)</th>
+                  <th class="p-3 text-right">Online (Net × 0.7)</th>
+                  <th class="p-3 text-right">Cash</th>
+                  <th class="p-3 text-right bg-indigo-50 text-indigo-900 font-bold">Real Net Total</th>
                   <th class="p-3 text-center w-28">Tenders Detail</th>
                 </tr>
               </thead>
@@ -328,7 +326,7 @@
     </main>
   </div>
 
-  <!-- ================= Tenders Detail Modal (실제 데이터 확인용 팝업) ================= -->
+  <!-- ================= Tenders Detail Modal ================= -->
   <div id="tender-detail-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden border">
       <div class="bg-indigo-900 text-white p-4 flex justify-between items-center">
@@ -388,13 +386,6 @@
     let isDataModified = false;
     let realVancouverWeatherCache = {};
 
-    const bcStatHolidays2026 = {
-      '2026-01-01': "New Year's Day", '2026-02-16': "Family Day", '2026-04-03': "Good Friday",
-      '2026-05-18': "Victoria Day", '2026-07-01': "Canada Day", '2026-08-03': "BC Day",
-      '2026-09-07': "Labour Day", '2026-09-30': "Truth and Reconciliation", '2026-10-12': "Thanksgiving",
-      '2026-11-11': "Remembrance Day", '2026-12-25': "Christmas Day"
-    };
-
     const staffColors = [
       { bg: 'bg-rose-100', text: 'text-rose-900', border: 'border-rose-300' },
       { bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-300' },
@@ -422,7 +413,6 @@
     ];
 
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const availOptions = ["Available (Anytime)", "Open", "Day Only", "Closing Only", "Custom Hours", "Unavailable"];
 
     function formatDateISO(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -522,21 +512,17 @@
       document.getElementById('hub-grid').innerHTML = hubHtml;
     }
 
-    // ================= Bookkeeping & PDF Parsing Logic (드래그앤드롭 및 View 상세 동작 수정 완료) =================
-    
-    // 브라우저 탭으로 PDF가 열리는 것을 방지하기 위한 드래그오버 핸들러
+    // ================= Bookkeeping & Real Net Sales Logic =================
     function handleDragOver(event) {
       event.preventDefault();
       event.stopPropagation();
     }
 
-    // 드래그앤드롭으로 파일이 들어왔을 때 처리
     function handleFileDrop(event) {
       event.preventDefault();
       event.stopPropagation();
       const files = event.dataTransfer.files;
       if (files && files.length > 0) {
-        // 기존 업로드 핸들러 재사용
         handlePdfFilesSelected({ target: { files: files } });
       }
     }
@@ -555,7 +541,7 @@
         statusEl.textContent = `Processing file ${i+1} of ${files.length}: ${currentFile.name}`;
 
         try {
-          // 실제 파일 파싱 로직 (예시 데이터 구조 포함)
+          // 파싱 데이터 생성 (테스트용 샘플 데이터)
           const parsedData = parseParposSalesSummary(currentFile.name);
           if (parsedData && parsedData.salesDate) {
             await saveParsedDataToSupabase(parsedData);
@@ -572,7 +558,6 @@
     }
 
     function parseParposSalesSummary(filename) {
-      // 업로드된 파일 이름이나 실제 내용 기반 파싱 (테스트용 데모 데이터 연결)
       return {
         salesDate: "2026-09-23",
         grossSales: 1355.91,
@@ -584,9 +569,11 @@
         tenders: [
           { name: "1-Visa", quantity: 22, payments: 297.45, tips: 9.58, total: 307.03, percent: 22.26 },
           { name: "2-MasterCard", quantity: 18, payments: 163.73, tips: 8.97, total: 172.70, percent: 12.52 },
+          { name: "Debit", quantity: 9, payments: 92.22, tips: 3.56, total: 95.78, percent: 6.94 },
           { name: "Cash", quantity: 6, payments: 49.95, tips: 0.00, total: 49.95, percent: 3.62 },
           { name: "DoorDash", quantity: 9, payments: 173.05, tips: 0.00, total: 173.05, percent: 12.55 },
-          { name: "UberEats", quantity: 14, payments: 312.74, tips: 0.00, total: 312.74, percent: 22.67 }
+          { name: "UberEats", quantity: 14, payments: 312.74, tips: 0.00, total: 312.74, percent: 22.67 },
+          { name: "Menu App", quantity: 18, payments: 231.36, tips: 3.17, total: 234.53, percent: 17.00 }
         ]
       };
     }
@@ -622,53 +609,85 @@
       const start = document.getElementById('report-start-date').value || '2026-09-01';
       const end = document.getElementById('report-end-date').value || '2026-09-30';
 
-      const { data } = await _supabase.from('eod_sales_summary')
+      const { data: summaryData } = await _supabase.from('eod_sales_summary')
         .select('*')
         .gte('sales_date', start)
         .lte('sales_date', end)
         .order('sales_date', { ascending: false });
 
       const tbody = document.getElementById('bookkeeping-report-tbody');
-      if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Try uploading sample PDFs.</td></tr>`;
+      if (!summaryData || summaryData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = data.map(row => `
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 font-bold text-indigo-900">${row.sales_date}</td>
-          <td class="p-3 text-right font-semibold">$${Number(row.gross_sales).toFixed(2)}</td>
-          <td class="p-3 text-right font-semibold">$${Number(row.net_sales).toFixed(2)}</td>
-          <td class="p-3 text-center">${row.total_orders}</td>
-          <td class="p-3 text-right">$${Number(row.total_tax).toFixed(2)}</td>
-          <td class="p-3 text-right">$${Number(row.total_discounts).toFixed(2)}</td>
-          <td class="p-3 text-right font-bold text-emerald-700">$${Number(row.calculated_cash).toFixed(2)}</td>
-          <td class="p-3 text-center">
-            <button onclick="viewTenderModal('${row.sales_date}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 transition">
-              🔍 View Tenders
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      // 각 날짜별 Tenders 데이터를 가져와서 Merchant / Online / Cash 실질 매출 계산
+      let html = '';
+      for (const row of summaryData) {
+        const { data: tenderData } = await _supabase.from('eod_tender_details')
+          .select('*')
+          .eq('sales_date', row.sales_date);
+
+        let merchantTotal = 0;
+        let onlineTotal = 0;
+        let cashTotal = 0;
+
+        if (tenderData) {
+          tenderData.forEach(t => {
+            const name = t.tender_name.toLowerCase();
+            const val = Number(t.total) || 0;
+
+            // 1. Merchant (Visa, MasterCard, AMX, Debit 등 카드 머신 매출)
+            if (name.includes('visa') || name.includes('master') || name.includes('amex') || name.includes('amx') || name.includes('debit') || name.includes('discover')) {
+              merchantTotal += val;
+            }
+            // 2. Online Platform (UberEats, DoorDash, SkipTheDishes 등 수수료 반영 대상)
+            else if (name.includes('ubereats') || name.includes('doordash') || name.includes('skip') || name.includes('delivery')) {
+              onlineTotal += val;
+            }
+            // 3. Cash (현금)
+            else if (name.includes('cash')) {
+              cashTotal += val;
+            }
+          });
+        }
+
+        // 온라인 오더 수수료 약 30% 차감 반영 (Total * 0.7)
+        const onlineNet = onlineTotal * 0.7;
+        const realNetTotal = merchantTotal + onlineNet + cashTotal;
+
+        html += `
+          <tr class="hover:bg-gray-50">
+            <td class="p-3 font-bold text-indigo-900">${row.sales_date}</td>
+            <td class="p-3 text-right font-semibold">$${merchantTotal.toFixed(2)}</td>
+            <td class="p-3 text-right font-semibold text-blue-700">$${onlineNet.toFixed(2)} <span class="text-[10px] text-gray-400">($${onlineTotal.toFixed(2)}×0.7)</span></td>
+            <td class="p-3 text-right font-semibold">$${cashTotal.toFixed(2)}</td>
+            <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/40">$${realNetTotal.toFixed(2)}</td>
+            <td class="p-3 text-center">
+              <button onclick="viewTenderModal('${row.sales_date}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 transition">
+                🔍 View Tenders
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+      tbody.innerHTML = html;
     }
 
-    // View 버튼 클릭 시 해당 날짜의 Tenders 상세 데이터를 조회하여 팝업(Modal)으로 띄워주는 함수
     async function viewTenderModal(salesDate) {
       if (!_supabase) return;
-      
       document.getElementById('modal-title').textContent = `Tenders Breakdown (${salesDate})`;
       const modalTbody = document.getElementById('modal-tender-tbody');
       modalTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Loading details...</td></tr>`;
-      
       document.getElementById('tender-detail-modal').classList.remove('hidden');
 
-      const { data, error } = await _supabase.from('eod_tender_details')
+      const { data } = await _supabase.from('eod_tender_details')
         .select('*')
         .eq('sales_date', salesDate)
         .order('tender_name');
 
-      if (error || !data || data.length === 0) {
-        modalTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">No tender details found for this date.</td></tr>`;
+      if (!data || data.length === 0) {
+        modalTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">No tender details found.</td></tr>`;
         return;
       }
 
