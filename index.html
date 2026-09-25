@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chatime Store Weekly Scheduler & Bookkeeping</title>
+  <title>Chatime Store Weekly Scheduler</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -210,82 +210,6 @@
       </div>
     </main>
 
-    <!-- ================= Bookkeeping & Categorized Reports Tab ================= -->
-    <main id="view-bookkeeping" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
-        <div class="border-b pb-4">
-          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Categorized Sales Breakdown</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Features Merchant Subtotal, Online Subtotal (with 30% fee reduction & Skip/Uber/DoorDash expansion), Cash, 5% GST deduction, and Gift Card Exclusion (Head Office Void Check separation).</p>
-        </div>
-
-        <!-- 파일 업로드 드래그 앤 드롭 영역 -->
-        <div id="pdf-drop-zone" 
-             class="bg-indigo-50/50 border-2 border-dashed border-indigo-300 p-8 rounded-2xl text-center space-y-3 cursor-pointer hover:bg-indigo-100/50 transition"
-             ondragover="handleDragOver(event)" 
-             ondrop="handleFileDrop(event)">
-          <div class="text-4xl">📁</div>
-          <div>
-            <h3 class="font-bold text-sm text-indigo-900">Drag & Drop PARPOS Sales Summary PDFs Here</h3>
-            <p class="text-xs text-indigo-700 mt-1">Batch upload supported. Parsed instantly without server storage clutter.</p>
-          </div>
-          <input type="file" id="pdf-file-input" multiple accept=".pdf" class="hidden" onchange="handlePdfFilesSelected(event)">
-          <button type="button" onclick="document.getElementById('pdf-file-input').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm transition">
-            📂 Browse PDF Files
-          </button>
-          <div id="upload-progress-status" class="text-xs font-semibold text-gray-600 mt-2"></div>
-        </div>
-
-        <!-- 카테고리별 서브토탈 및 세부 내역 리포트 테이블 영역 -->
-        <div class="space-y-4 pt-4 border-t">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h3 class="font-bold text-sm text-gray-800">📋 Categorized Sales & Subtotals Breakdown</h3>
-            <div class="flex items-center gap-2 flex-wrap">
-              <input type="date" id="report-start-date" class="p-1.5 border rounded-lg text-xs bg-white" onchange="loadBookkeepingReports()">
-              <span>~</span>
-              <input type="date" id="report-end-date" class="p-1.5 border rounded-lg text-xs bg-white" onchange="loadBookkeepingReports()">
-              <button onclick="loadBookkeepingReports()" class="px-3 py-1.5 bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold rounded-lg">Refresh</button>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto border rounded-xl shadow-sm">
-            <table class="w-full text-left border-collapse min-w-[1500px]">
-              <thead>
-                <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
-                  <th class="p-3 w-28">Date</th>
-                  <th class="p-3 text-right bg-emerald-50 text-emerald-900 font-bold border-l" colspan="6">📦 Merchant</th>
-                  <th class="p-3 text-right bg-blue-50 text-blue-900 font-bold border-l" colspan="4">🌐 Online Platform</th>
-                  <th class="p-3 text-right border-l">Cash</th>
-                  <th class="p-3 text-right text-amber-800 bg-amber-50/50" title="Gift Card Loads Excluded from Sales (Void Check by Head Office)">Gift Card <span class="text-[9px]">(Excl.)</span></th>
-                  <th class="p-3 text-right text-purple-800 bg-purple-50/50">GST (5% Ex)</th>
-                  <th class="p-3 text-right bg-indigo-50 text-indigo-900 font-bold border-l">Real Net Total</th>
-                  <th class="p-3 text-center w-28 border-l">Tenders Detail</th>
-                </tr>
-                <tr class="bg-gray-50 border-b text-[11px] font-semibold text-gray-600 uppercase">
-                  <th class="p-2"></th>
-                  <th class="p-2 text-right bg-emerald-50/30">Visa</th>
-                  <th class="p-2 text-right bg-emerald-50/30">Master</th>
-                  <th class="p-2 text-right bg-emerald-50/30">AMX</th>
-                  <th class="p-2 text-right bg-emerald-50/30">Debit</th>
-                  <th class="p-2 text-right bg-emerald-50/30">Menu App</th>
-                  <th class="p-2 text-right bg-emerald-100 text-emerald-950 font-black">Merchant Subtotal</th>
-                  <th class="p-2 text-right bg-blue-50/30">UberEats (×0.7)</th>
-                  <th class="p-2 text-right bg-blue-50/30">DoorDash (×0.7)</th>
-                  <th class="p-2 text-right bg-blue-50/30">Skip (×0.7)</th>
-                  <th class="p-2 text-right bg-blue-100 text-blue-950 font-black">Online Subtotal</th>
-                  <th class="p-2 text-right">Cash</th>
-                  <th class="p-2 text-right text-amber-800 bg-amber-50/30">Gift Card</th>
-                  <th class="p-2 text-right text-purple-800 bg-purple-50/30">5% GST</th>
-                  <th class="p-2 text-right bg-indigo-50 text-indigo-900 font-bold">Net Total</th>
-                  <th class="p-2 text-center"></th>
-                </tr>
-              </thead>
-              <tbody id="bookkeeping-report-tbody" class="text-sm divide-y"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </main>
-
     <!-- Team Directory Tab -->
     <main id="view-employees" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border">
@@ -344,35 +268,6 @@
         </div>
       </div>
     </main>
-  </div>
-
-  <!-- ================= Tenders Detail Modal ================= -->
-  <div id="tender-detail-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden border">
-      <div class="bg-indigo-900 text-white p-4 flex justify-between items-center">
-        <h3 class="font-bold text-base" id="modal-title">Tenders Breakdown</h3>
-        <button onclick="closeTenderModal()" class="text-white hover:text-gray-200 font-bold text-lg">✕</button>
-      </div>
-      <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
-              <th class="p-2">Tender Name</th>
-              <th class="p-2 text-center">Quantity</th>
-              <th class="p-2 text-right">Payments</th>
-              <th class="p-2 text-right">Tips</th>
-              <th class="p-2 text-right">Total</th>
-              <th class="p-2 text-right">Percent</th>
-            </tr>
-          </thead>
-          <tbody id="modal-tender-tbody" class="text-sm divide-y"></tbody>
-          <tfoot id="modal-tender-tfoot" class="bg-gray-50 border-t-2 font-bold text-xs text-gray-900"></tfoot>
-        </table>
-      </div>
-      <div class="bg-gray-50 px-6 py-3 border-t flex justify-end">
-        <button onclick="closeTenderModal()" class="px-4 py-2 bg-gray-800 text-white font-bold rounded-lg text-xs">Close</button>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -510,7 +405,6 @@
 
       if (isAdminOrManager) {
         navHtml += `<button onclick="switchTab('view-avail')" id="nav-view-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700">Team Availability</button>`;
-        navHtml += `<button onclick="switchTab('bookkeeping')" id="nav-bookkeeping" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700">Bookkeeping</button>`;
         navHtml += `<button onclick="switchTab('employees')" id="nav-employees" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700">Team Directory</button>`;
         navHtml += `<button onclick="switchTab('actuals')" id="nav-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700">ADP Payroll</button>`;
       }
@@ -525,7 +419,6 @@
       if (isAdminOrManager) {
         hubHtml += `
           <button onclick="switchTab('view-avail')" class="p-6 bg-white hover:bg-purple-50 border rounded-2xl shadow-sm text-left"><div class="text-2xl mb-2">👥</div><h3 class="font-bold">Team Availability</h3></button>
-          <button onclick="switchTab('bookkeeping')" class="p-6 bg-white hover:bg-teal-50 border rounded-2xl shadow-sm text-left"><div class="text-2xl mb-2">📊</div><h3 class="font-bold">Bookkeeping</h3></button>
           <button onclick="switchTab('employees')" class="p-6 bg-white hover:bg-blue-50 border rounded-2xl shadow-sm text-left"><div class="text-2xl mb-2">⚙️</div><h3 class="font-bold">Team Directory</h3></button>
           <button onclick="switchTab('actuals')" class="p-6 bg-white hover:bg-amber-50 border rounded-2xl shadow-sm text-left"><div class="text-2xl mb-2">📈</div><h3 class="font-bold">ADP Payroll</h3></button>
         `;
@@ -541,7 +434,7 @@
 
     function switchTab(tabName) {
       currentActiveTab = tabName;
-      ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'my-profile', 'bookkeeping', 'employees', 'actuals'].forEach(t => {
+      ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'my-profile', 'employees', 'actuals'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const navBtn = document.getElementById(`nav-${t}`);
         if (view) {
@@ -556,12 +449,10 @@
       else if (tabName === 'submit-avail') initSubmitAvailView();
       else if (tabName === 'view-avail') initOverviewView();
       else if (tabName === 'my-actuals') initMyActualsView();
-      else if (tabName === 'bookkeeping') loadBookkeepingReports();
       else if (tabName === 'employees') renderEmployeeTable();
       else if (tabName === 'actuals') initAdminPayrollView();
     }
 
-    // ================= Scheduler Core & Full Functions =================
     function setSchedulerMode(mode) {
       schedulerMode = mode;
       const manageBtn = document.getElementById('mode-btn-manage');
@@ -791,7 +682,6 @@
       container.innerHTML = html;
     }
 
-    // ================= Availability & Payroll Functions =================
     function initSubmitAvailView() {
       const grid = document.getElementById('submit-avail-grid');
       if (!grid) return;
@@ -858,11 +748,7 @@
     }
 
     function saveMyActualHours() { alert('Logged hours saved successfully!'); }
-
-    function saveMyProfile(e) {
-      e.preventDefault();
-      alert('Profile saved successfully!');
-    }
+    function saveMyProfile(e) { e.preventDefault(); alert('Profile saved successfully!'); }
 
     function renderEmployeeTable() {
       const tbody = document.getElementById('employee-table-body');
@@ -907,267 +793,6 @@
     function changeAdminPayPeriod(diff) {
       adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (diff * 14));
       initAdminPayrollView();
-    }
-
-    // ================= Bookkeeping & Categorized Logic =================
-    function handleDragOver(event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    function handleFileDrop(event) {
-      event.preventDefault();
-      event.stopPropagation();
-      const files = event.dataTransfer.files;
-      if (files && files.length > 0) {
-        handlePdfFilesSelected({ target: { files: files } });
-      }
-    }
-
-    async function handlePdfFilesSelected(event) {
-      const files = event.target.files;
-      if (!files || files.length === 0) return;
-
-      const statusEl = document.getElementById('upload-progress-status');
-      if (statusEl) statusEl.textContent = `Processing 0 / ${files.length} files...`;
-
-      let successCount = 0;
-      for (let i = 0; i < files.length; i++) {
-        const currentFile = files[i];
-        if (statusEl) statusEl.textContent = `Processing file ${i+1} of ${files.length}: ${currentFile.name}`;
-        try {
-          const parsedData = parseParposCleanData(currentFile.name);
-          if (parsedData && parsedData.salesDate) {
-            await saveParsedDataToSupabaseClean(parsedData);
-            successCount++;
-          }
-        } catch (err) {
-          console.error(`Error parsing file ${currentFile.name}:`, err);
-        }
-      }
-
-      if (statusEl) statusEl.textContent = `✅ Successfully processed and saved ${successCount} out of ${files.length} files!`;
-      const fileInput = document.getElementById('pdf-file-input');
-      if (fileInput) fileInput.value = '';
-      loadBookkeepingReports();
-    }
-
-    function parseParposCleanData(filename) {
-      return {
-        salesDate: "2026-09-23",
-        grossSales: 1355.91,
-        netSales: 1298.49,
-        totalOrders: 97,
-        totalTax: 364.86,
-        totalDiscounts: 50.91,
-        calculatedCash: 49.95,
-        tenders: [
-          { name: "1-Visa", quantity: 22, payments: 297.45, tips: 9.58, total: 307.03, percent: 22.26 },
-          { name: "2-MasterCard", quantity: 18, payments: 163.73, tips: 8.97, total: 172.70, percent: 12.52 },
-          { name: "3-American Express", quantity: 1, payments: 31.50, tips: 2.00, total: 33.50, percent: 2.43 },
-          { name: "Debit", quantity: 9, payments: 92.22, tips: 3.56, total: 95.78, percent: 6.94 },
-          { name: "Cash", quantity: 6, payments: 49.95, tips: 0.00, total: 49.95, percent: 3.62 },
-          { name: "DoorDash", quantity: 9, payments: 173.05, tips: 0.00, total: 173.05, percent: 12.55 },
-          { name: "Menu App", quantity: 18, payments: 231.36, tips: 3.17, total: 234.53, percent: 17.00 },
-          { name: "UberEats", quantity: 14, payments: 312.74, tips: 0.00, total: 312.74, percent: 22.67 }
-        ]
-      };
-    }
-
-    async function saveParsedDataToSupabaseClean(data) {
-      if (!_supabase) return;
-      await _supabase.from('eod_tender_details').delete().eq('sales_date', data.salesDate);
-
-      await _supabase.from('eod_sales_summary').upsert({
-        sales_date: data.salesDate,
-        gross_sales: data.grossSales,
-        net_sales: data.netSales,
-        total_orders: data.totalOrders,
-        total_tax: data.totalTax,
-        total_discounts: data.totalDiscounts,
-        calculated_cash: data.calculatedCash
-      }, { onConflict: 'sales_date' });
-
-      for (const t of data.tenders) {
-        await _supabase.from('eod_tender_details').insert({
-          sales_date: data.salesDate,
-          tender_name: t.name,
-          quantity: t.quantity,
-          payments: t.payments,
-          tips: t.tips,
-          total: t.total,
-          percent: t.percent
-        });
-      }
-    }
-
-    async function loadBookkeepingReports() {
-      if (!_supabase) return;
-      const startEl = document.getElementById('report-start-date');
-      const endEl = document.getElementById('report-end-date');
-      const start = (startEl && startEl.value) ? startEl.value : '2026-09-01';
-      const end = (endEl && endEl.value) ? endEl.value : '2026-09-30';
-
-      const { data: summaryData } = await _supabase.from('eod_sales_summary')
-        .select('*')
-        .gte('sales_date', start)
-        .lte('sales_date', end)
-        .order('sales_date', { ascending: false });
-
-      const tbody = document.getElementById('bookkeeping-report-tbody');
-      if (!tbody) return;
-
-      if (!summaryData || summaryData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="16" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
-        return;
-      }
-
-      let html = '';
-      for (const row of summaryData) {
-        const { data: tenderData } = await _supabase.from('eod_tender_details')
-          .select('*')
-          .eq('sales_date', row.sales_date);
-
-        let visaVal = 0;
-        let masterVal = 0;
-        let amexVal = 0;
-        let debitVal = 0;
-        let menuAppVal = 0;
-        let uberVal = 0;
-        let doordashVal = 0;
-        let skipVal = 0;
-        let cashVal = 0;
-        let giftCardVal = 0;
-
-        if (tenderData) {
-          tenderData.forEach(t => {
-            const name = t.tender_name.toLowerCase();
-            const val = Number(t.total) || 0;
-
-            if (name.includes('visa')) {
-              visaVal += val;
-            } else if (name.includes('master')) {
-              masterVal += val;
-            } else if (name.includes('amex') || name.includes('amx')) {
-              amexVal += val;
-            } else if (name.includes('debit')) {
-              debitVal += val;
-            } else if (name.includes('menu app')) {
-              menuAppVal += val;
-            } else if (name.includes('ubereats') || name.includes('uber')) {
-              uberVal += val;
-            } else if (name.includes('doordash')) {
-              doordashVal += val;
-            } else if (name.includes('skip')) {
-              skipVal += val;
-            } else if (name.includes('cash')) {
-              cashVal += val;
-            } else if (name.includes('gift card')) {
-              giftCardVal += val;
-            }
-          });
-        }
-
-        const merchantSubtotal = visaVal + masterVal + amexVal + debitVal + menuAppVal;
-        const uberNet = uberVal * 0.7;
-        const doordashNet = doordashVal * 0.7;
-        const skipNet = skipVal * 0.7;
-        const onlineSubtotal = uberNet + doordashNet + skipNet;
-
-        const combinedGrossForNet = merchantSubtotal + onlineSubtotal + cashVal;
-        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05);
-        const realNetTotal = combinedGrossForNet - gstAmount;
-
-        html += `
-          <tr class="hover:bg-gray-50">
-            <td class="p-3 font-bold text-indigo-900">${row.sales_date}</td>
-            <td class="p-3 text-right bg-emerald-50/20 border-l">$${visaVal.toFixed(2)}</td>
-            <td class="p-3 text-right bg-emerald-50/20">$${masterVal.toFixed(2)}</td>
-            <td class="p-3 text-right bg-emerald-50/20">$${amexVal.toFixed(2)}</td>
-            <td class="p-3 text-right bg-emerald-50/20">$${debitVal.toFixed(2)}</td>
-            <td class="p-3 text-right bg-emerald-50/20">$${menuAppVal.toFixed(2)}</td>
-            <td class="p-3 text-right font-black text-emerald-950 bg-emerald-100/70">$${merchantSubtotal.toFixed(2)}</td>
-            
-            <td class="p-3 text-right bg-blue-50/20 border-l">$${uberNet.toFixed(2)} <span class="text-[8px] text-gray-400">($${uberVal.toFixed(2)}×0.7)</span></td>
-            <td class="p-3 text-right bg-blue-50/20">$${doordashNet.toFixed(2)} <span class="text-[8px] text-gray-400">($${doordashVal.toFixed(2)}×0.7)</span></td>
-            <td class="p-3 text-right bg-blue-50/20">$${skipNet.toFixed(2)}</td>
-            <td class="p-3 text-right font-black text-blue-950 bg-blue-100/70">$${onlineSubtotal.toFixed(2)}</td>
-            
-            <td class="p-3 text-right border-l font-semibold">$${cashVal.toFixed(2)}</td>
-            <td class="p-3 text-right text-amber-800 bg-amber-50/30 font-semibold" title="Head Office Void Check Deduction">$${giftCardVal.toFixed(2)}</td>
-            <td class="p-3 text-right text-purple-700 bg-purple-50/30 font-semibold">-$${gstAmount.toFixed(2)}</td>
-            <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/40 border-l">$${realNetTotal.toFixed(2)}</td>
-            
-            <td class="p-3 text-center border-l">
-              <button onclick="viewTenderModal('${row.sales_date}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 transition">
-                🔍 View Tenders
-              </button>
-            </td>
-          </tr>
-        `;
-      }
-      tbody.innerHTML = html;
-    }
-
-    async function viewTenderModal(salesDate) {
-      if (!_supabase) return;
-      document.getElementById('modal-title').textContent = `Tenders Breakdown (${salesDate})`;
-      const modalTbody = document.getElementById('modal-tender-tbody');
-      const modalTfoot = document.getElementById('modal-tender-tfoot');
-      
-      modalTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">Loading details...</td></tr>`;
-      modalTfoot.innerHTML = '';
-      document.getElementById('tender-detail-modal').classList.remove('hidden');
-
-      const { data } = await _supabase.from('eod_tender_details')
-        .select('*')
-        .eq('sales_date', salesDate)
-        .order('tender_name');
-
-      if (!data || data.length === 0) {
-        modalTbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400">No tender details found.</td></tr>`;
-        return;
-      }
-
-      let sumQty = 0;
-      let sumPayments = 0;
-      let sumTips = 0;
-      let sumTotal = 0;
-      let sumPercent = 0;
-
-      modalTbody.innerHTML = data.map(t => {
-        sumQty += Number(t.quantity) || 0;
-        sumPayments += Number(t.payments) || 0;
-        sumTips += Number(t.tips) || 0;
-        sumTotal += Number(t.total) || 0;
-        sumPercent += Number(t.percent) || 0;
-
-        return `
-          <tr class="hover:bg-gray-50">
-            <td class="p-2 font-semibold text-gray-800">${t.tender_name}</td>
-            <td class="p-2 text-center">${t.quantity}</td>
-            <td class="p-2 text-right">$${Number(t.payments).toFixed(2)}</td>
-            <td class="p-2 text-right">$${Number(t.tips).toFixed(2)}</td>
-            <td class="p-2 text-right font-bold text-indigo-900">$${Number(t.total).toFixed(2)}</td>
-            <td class="p-2 text-right text-gray-600">${Number(t.percent).toFixed(2)}%</td>
-          </tr>
-        `;
-      }).join('');
-
-      modalTfoot.innerHTML = `
-        <tr>
-          <td class="p-3 text-indigo-900 font-extrabold uppercase">Total Summary</td>
-          <td class="p-3 text-center text-indigo-900">${sumQty}</td>
-          <td class="p-3 text-right text-indigo-900">$${sumPayments.toFixed(2)}</td>
-          <td class="p-3 text-right text-indigo-900">$${sumTips.toFixed(2)}</td>
-          <td class="p-3 text-right text-indigo-900 font-black text-sm">$${sumTotal.toFixed(2)}</td>
-          <td class="p-3 text-right text-indigo-900">${sumPercent.toFixed(2)}%</td>
-        </tr>
-      `;
-    }
-
-    function closeTenderModal() {
-      document.getElementById('tender-detail-modal').classList.add('hidden');
     }
 
     window.addEventListener('DOMContentLoaded', initApp);
