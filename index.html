@@ -252,10 +252,10 @@
               <thead>
                 <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
                   <th class="p-3 w-28">Date</th>
-                  <!-- Merchant Category Group -->
-                  <th class="p-3 text-right bg-emerald-50 text-emerald-900 font-bold border-l" colspan="6">📦 Merchant Category (Visa, Master, AMX, Debit, Menu App) & Subtotal</th>
-                  <!-- Online Platform Category Group -->
-                  <th class="p-3 text-right bg-blue-50 text-blue-900 font-bold border-l" colspan="4">🌐 Online Platform Category (Uber, DoorDash, Skip × 0.7) & Subtotal</th>
+                  <!-- Merchant Category Group (간결한 상단 이름) -->
+                  <th class="p-3 text-right bg-emerald-50 text-emerald-900 font-bold border-l" colspan="6">📦 Merchant</th>
+                  <!-- Online Platform Category Group (간결한 상단 이름) -->
+                  <th class="p-3 text-right bg-blue-50 text-blue-900 font-bold border-l" colspan="4">🌐 Online Platform</th>
                   <!-- Cash & Adjustments -->
                   <th class="p-3 text-right border-l">Cash</th>
                   <th class="p-3 text-right text-amber-800 bg-amber-50/50" title="Gift Card Loads Excluded from Sales (Void Check by Head Office)">Gift Card <span class="text-[9px]">(Excl.)</span></th>
@@ -659,9 +659,9 @@
         let menuAppVal = 0;
         let uberVal = 0;
         let doordashVal = 0;
-        let skipVal = 0; // 향후 확장용
+        let skipVal = 0;
         let cashVal = 0;
-        let giftCardVal = 0; // 기프트 카드 충전액 (매출 제외 대상)
+        let giftCardVal = 0;
 
         if (tenderData) {
           tenderData.forEach(t => {
@@ -687,24 +687,20 @@
             } else if (name.includes('cash')) {
               cashVal += val;
             } else if (name.includes('gift card')) {
-              giftCardVal += val; // 기프트 카드 충전 (본사 보이드 인출 항목)
+              giftCardVal += val;
             }
           });
         }
 
-        // 1. Merchant 서브토탈 (Visa + Master + AMX + Debit + Menu App)
         const merchantSubtotal = visaVal + masterVal + amexVal + debitVal + menuAppVal;
-
-        // 2. Online 서브토탈 (Uber, DoorDash, Skip 등 각 30% 수수료 차감 반영 Net 합산)
         const uberNet = uberVal * 0.7;
         const doordashNet = doordashVal * 0.7;
         const skipNet = skipVal * 0.7;
         const onlineSubtotal = uberNet + doordashNet + skipNet;
 
-        // 3. 순수 실질 매출 계산 (Merchant Subtotal + Online Subtotal + Cash, Gift Card는 선수금이므로 제외!)
         const combinedGrossForNet = merchantSubtotal + onlineSubtotal + cashVal;
-        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05); // 5% GST 역산 분리
-        const realNetTotal = combinedGrossForNet - gstAmount; // 택스 제외 순수 매출
+        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05);
+        const realNetTotal = combinedGrossForNet - gstAmount;
 
         html += `
           <tr class="hover:bg-gray-50">
