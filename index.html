@@ -210,12 +210,12 @@
       </div>
     </main>
 
-    <!-- ================= Bookkeeping & Detailed Expanded Reports Tab ================= -->
+    <!-- ================= Bookkeeping & Categorized Reports Tab ================= -->
     <main id="view-bookkeeping" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="border-b pb-4">
-          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Detailed Sales Breakdown</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Detailed view showing individual Merchant cards, Online delivery apps (with 30% fee reduction), Cash, and GST.</p>
+          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Categorized Sales Breakdown</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Features Merchant Subtotal, Online Subtotal (with 30% fee reduction & Skip/Uber/DoorDash expansion), Cash, 5% GST deduction, and Gift Card Exclusion (Head Office Void Check separation).</p>
         </div>
 
         <!-- 파일 업로드 드래그 앤 드롭 영역 -->
@@ -235,10 +235,10 @@
           <div id="upload-progress-status" class="text-xs font-semibold text-gray-600 mt-2"></div>
         </div>
 
-        <!-- 상세 내역 확장 테이블 영역 -->
+        <!-- 카테고리별 서브토탈 및 세부 내역 리포트 테이블 영역 -->
         <div class="space-y-4 pt-4 border-t">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h3 class="font-bold text-sm text-gray-800">📋 Expanded Merchant & Online Breakdown</h3>
+            <h3 class="font-bold text-sm text-gray-800">📋 Categorized Sales & Subtotals Breakdown</h3>
             <div class="flex items-center gap-2 flex-wrap">
               <input type="date" id="report-start-date" class="p-1.5 border rounded-lg text-xs bg-white" onchange="loadBookkeepingReports()">
               <span>~</span>
@@ -248,21 +248,38 @@
           </div>
 
           <div class="overflow-x-auto border rounded-xl shadow-sm">
-            <table class="w-full text-left border-collapse min-w-[1400px]">
+            <table class="w-full text-left border-collapse min-w-[1500px]">
               <thead>
                 <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
                   <th class="p-3 w-28">Date</th>
-                  <th class="p-3 text-right">Visa</th>
-                  <th class="p-3 text-right">Master</th>
-                  <th class="p-3 text-right">AMX</th>
-                  <th class="p-3 text-right">Debit</th>
-                  <th class="p-3 text-right">Menu App</th>
-                  <th class="p-3 text-right text-blue-700">UberEats (×0.7)</th>
-                  <th class="p-3 text-right text-blue-700">DoorDash (×0.7)</th>
-                  <th class="p-3 text-right">Cash</th>
+                  <!-- Merchant Category Group -->
+                  <th class="p-3 text-right bg-emerald-50 text-emerald-900 font-bold border-l" colspan="6">📦 Merchant Category (Visa, Master, AMX, Debit, Menu App) & Subtotal</th>
+                  <!-- Online Platform Category Group -->
+                  <th class="p-3 text-right bg-blue-50 text-blue-900 font-bold border-l" colspan="4">🌐 Online Platform Category (Uber, DoorDash, Skip × 0.7) & Subtotal</th>
+                  <!-- Cash & Adjustments -->
+                  <th class="p-3 text-right border-l">Cash</th>
+                  <th class="p-3 text-right text-amber-800 bg-amber-50/50" title="Gift Card Loads Excluded from Sales (Void Check by Head Office)">Gift Card <span class="text-[9px]">(Excl.)</span></th>
                   <th class="p-3 text-right text-purple-800 bg-purple-50/50">GST (5% Ex)</th>
-                  <th class="p-3 text-right bg-indigo-50 text-indigo-900 font-bold">Real Net Total</th>
-                  <th class="p-3 text-center w-28">Tenders Detail</th>
+                  <th class="p-3 text-right bg-indigo-50 text-indigo-900 font-bold border-l">Real Net Total</th>
+                  <th class="p-3 text-center w-28 border-l">Tenders Detail</th>
+                </tr>
+                <tr class="bg-gray-50 border-b text-[11px] font-semibold text-gray-600 uppercase">
+                  <th class="p-2"></th>
+                  <th class="p-2 text-right bg-emerald-50/30">Visa</th>
+                  <th class="p-2 text-right bg-emerald-50/30">Master</th>
+                  <th class="p-2 text-right bg-emerald-50/30">AMX</th>
+                  <th class="p-2 text-right bg-emerald-50/30">Debit</th>
+                  <th class="p-2 text-right bg-emerald-50/30">Menu App</th>
+                  <th class="p-2 text-right bg-emerald-100 text-emerald-950 font-black">Merchant Subtotal</th>
+                  <th class="p-2 text-right bg-blue-50/30">UberEats (×0.7)</th>
+                  <th class="p-2 text-right bg-blue-50/30">DoorDash (×0.7)</th>
+                  <th class="p-2 text-right bg-blue-50/30">Skip (×0.7)</th>
+                  <th class="p-2 text-right bg-blue-100 text-blue-950 font-black">Online Subtotal</th>
+                  <th class="p-2 text-right">Cash</th>
+                  <th class="p-2 text-right text-amber-800 bg-amber-50/30">Gift Card</th>
+                  <th class="p-2 text-right text-purple-800 bg-purple-50/30">5% GST</th>
+                  <th class="p-2 text-right bg-indigo-50 text-indigo-900 font-bold">Net Total</th>
+                  <th class="p-2 text-center"></th>
                 </tr>
               </thead>
               <tbody id="bookkeeping-report-tbody" class="text-sm divide-y"></tbody>
@@ -519,7 +536,7 @@
       document.getElementById('hub-grid').innerHTML = hubHtml;
     }
 
-    // ================= Bookkeeping & Detailed Expanded Logic =================
+    // ================= Bookkeeping & Categorized Logic =================
     function handleDragOver(event) {
       event.preventDefault();
       event.stopPropagation();
@@ -625,7 +642,7 @@
 
       const tbody = document.getElementById('bookkeeping-report-tbody');
       if (!summaryData || summaryData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="16" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
         return;
       }
 
@@ -642,7 +659,9 @@
         let menuAppVal = 0;
         let uberVal = 0;
         let doordashVal = 0;
+        let skipVal = 0; // 향후 확장용
         let cashVal = 0;
+        let giftCardVal = 0; // 기프트 카드 충전액 (매출 제외 대상)
 
         if (tenderData) {
           tenderData.forEach(t => {
@@ -663,35 +682,54 @@
               uberVal += val;
             } else if (name.includes('doordash')) {
               doordashVal += val;
+            } else if (name.includes('skip')) {
+              skipVal += val;
             } else if (name.includes('cash')) {
               cashVal += val;
+            } else if (name.includes('gift card')) {
+              giftCardVal += val; // 기프트 카드 충전 (본사 보이드 인출 항목)
             }
           });
         }
 
-        // 온라인 오더 수수료 약 30% 차감 반영 (각각 Total × 0.7)
+        // 1. Merchant 서브토탈 (Visa + Master + AMX + Debit + Menu App)
+        const merchantSubtotal = visaVal + masterVal + amexVal + debitVal + menuAppVal;
+
+        // 2. Online 서브토탈 (Uber, DoorDash, Skip 등 각 30% 수수료 차감 반영 Net 합산)
         const uberNet = uberVal * 0.7;
         const doordashNet = doordashVal * 0.7;
+        const skipNet = skipVal * 0.7;
+        const onlineSubtotal = uberNet + doordashNet + skipNet;
 
-        // 전체 합산액에서 5% GST 역산 분리
-        const combinedGrossForNet = visaVal + masterVal + amexVal + debitVal + menuAppVal + uberNet + doordashNet + cashVal;
-        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05);
-        const realNetTotal = combinedGrossForNet - gstAmount;
+        // 3. 순수 실질 매출 계산 (Merchant Subtotal + Online Subtotal + Cash, Gift Card는 선수금이므로 제외!)
+        const combinedGrossForNet = merchantSubtotal + onlineSubtotal + cashVal;
+        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05); // 5% GST 역산 분리
+        const realNetTotal = combinedGrossForNet - gstAmount; // 택스 제외 순수 매출
 
         html += `
           <tr class="hover:bg-gray-50">
             <td class="p-3 font-bold text-indigo-900">${row.sales_date}</td>
-            <td class="p-3 text-right">$${visaVal.toFixed(2)}</td>
-            <td class="p-3 text-right">$${masterVal.toFixed(2)}</td>
-            <td class="p-3 text-right">$${amexVal.toFixed(2)}</td>
-            <td class="p-3 text-right">$${debitVal.toFixed(2)}</td>
-            <td class="p-3 text-right">$${menuAppVal.toFixed(2)}</td>
-            <td class="p-3 text-right text-blue-700 font-semibold">$${uberNet.toFixed(2)} <span class="text-[9px] text-gray-400">($${uberVal.toFixed(2)}×0.7)</span></td>
-            <td class="p-3 text-right text-blue-700 font-semibold">$${doordashNet.toFixed(2)} <span class="text-[9px] text-gray-400">($${doordashVal.toFixed(2)}×0.7)</span></td>
-            <td class="p-3 text-right">$${cashVal.toFixed(2)}</td>
+            <!-- Merchant Category Details & Subtotal -->
+            <td class="p-3 text-right bg-emerald-50/20 border-l">$${visaVal.toFixed(2)}</td>
+            <td class="p-3 text-right bg-emerald-50/20">$${masterVal.toFixed(2)}</td>
+            <td class="p-3 text-right bg-emerald-50/20">$${amexVal.toFixed(2)}</td>
+            <td class="p-3 text-right bg-emerald-50/20">$${debitVal.toFixed(2)}</td>
+            <td class="p-3 text-right bg-emerald-50/20">$${menuAppVal.toFixed(2)}</td>
+            <td class="p-3 text-right font-black text-emerald-950 bg-emerald-100/70">$${merchantSubtotal.toFixed(2)}</td>
+            
+            <!-- Online Category Details & Subtotal -->
+            <td class="p-3 text-right bg-blue-50/20 border-l">$${uberNet.toFixed(2)} <span class="text-[8px] text-gray-400">($${uberVal.toFixed(2)}×0.7)</span></td>
+            <td class="p-3 text-right bg-blue-50/20">$${doordashNet.toFixed(2)} <span class="text-[8px] text-gray-400">($${doordashVal.toFixed(2)}×0.7)</span></td>
+            <td class="p-3 text-right bg-blue-50/20">$${skipNet.toFixed(2)}</td>
+            <td class="p-3 text-right font-black text-blue-950 bg-blue-100/70">$${onlineSubtotal.toFixed(2)}</td>
+            
+            <!-- Cash, Gift Card (Excluded), GST, Real Net Total -->
+            <td class="p-3 text-right border-l font-semibold">$${cashVal.toFixed(2)}</td>
+            <td class="p-3 text-right text-amber-800 bg-amber-50/30 font-semibold" title="Head Office Void Check Deduction">$${giftCardVal.toFixed(2)}</td>
             <td class="p-3 text-right text-purple-700 bg-purple-50/30 font-semibold">-$${gstAmount.toFixed(2)}</td>
-            <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/40">$${realNetTotal.toFixed(2)}</td>
-            <td class="p-3 text-center">
+            <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/40 border-l">$${realNetTotal.toFixed(2)}</td>
+            
+            <td class="p-3 text-center border-l">
               <button onclick="viewTenderModal('${row.sales_date}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 transition">
                 🔍 View Tenders
               </button>
