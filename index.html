@@ -210,12 +210,12 @@
       </div>
     </main>
 
-    <!-- ================= Bookkeeping & Real Net Sales Reports Tab ================= -->
+    <!-- ================= Bookkeeping & Detailed Expanded Reports Tab ================= -->
     <main id="view-bookkeeping" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="border-b pb-4">
-          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Real Net Sales Reports</h2>
-          <p class="text-xs text-gray-500 mt-0.5">Upload PARPOS Sales Summary PDFs. Includes 5% GST breakdown, detailed Merchant/Online columns, and Real Net Total.</p>
+          <h2 class="text-lg font-bold text-gray-900">📊 Bookkeeping & Detailed Sales Breakdown</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Detailed view showing individual Merchant cards, Online delivery apps (with 30% fee reduction), Cash, and GST.</p>
         </div>
 
         <!-- 파일 업로드 드래그 앤 드롭 영역 -->
@@ -226,7 +226,7 @@
           <div class="text-4xl">📁</div>
           <div>
             <h3 class="font-bold text-sm text-indigo-900">Drag & Drop PARPOS Sales Summary PDFs Here</h3>
-            <p class="text-xs text-indigo-700 mt-1">Batch upload supported. Files are parsed instantly without server storage clutter.</p>
+            <p class="text-xs text-indigo-700 mt-1">Batch upload supported. Parsed instantly without server storage clutter.</p>
           </div>
           <input type="file" id="pdf-file-input" multiple accept=".pdf" class="hidden" onchange="handlePdfFilesSelected(event)">
           <button type="button" onclick="document.getElementById('pdf-file-input').click()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-sm transition">
@@ -235,10 +235,10 @@
           <div id="upload-progress-status" class="text-xs font-semibold text-gray-600 mt-2"></div>
         </div>
 
-        <!-- 리포트 조회 영역 (세부 내역 및 GST 분리 표시 포함) -->
+        <!-- 상세 내역 확장 테이블 영역 -->
         <div class="space-y-4 pt-4 border-t">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h3 class="font-bold text-sm text-gray-800">📋 Real Net Sales Breakdown & GST Details</h3>
+            <h3 class="font-bold text-sm text-gray-800">📋 Expanded Merchant & Online Breakdown</h3>
             <div class="flex items-center gap-2 flex-wrap">
               <input type="date" id="report-start-date" class="p-1.5 border rounded-lg text-xs bg-white" onchange="loadBookkeepingReports()">
               <span>~</span>
@@ -248,14 +248,19 @@
           </div>
 
           <div class="overflow-x-auto border rounded-xl shadow-sm">
-            <table class="w-full text-left border-collapse min-w-[1200px]">
+            <table class="w-full text-left border-collapse min-w-[1400px]">
               <thead>
                 <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase">
                   <th class="p-3 w-28">Date</th>
-                  <th class="p-3 text-right">Merchant (Cards/App)</th>
-                  <th class="p-3 text-right">Online (Net × 0.7)</th>
-                  <th class="p-3 text-right">Cash (Gross)</th>
-                  <th class="p-3 text-right text-purple-800 bg-purple-50/50">GST (5% Excluded)</th>
+                  <th class="p-3 text-right">Visa</th>
+                  <th class="p-3 text-right">Master</th>
+                  <th class="p-3 text-right">AMX</th>
+                  <th class="p-3 text-right">Debit</th>
+                  <th class="p-3 text-right">Menu App</th>
+                  <th class="p-3 text-right text-blue-700">UberEats (×0.7)</th>
+                  <th class="p-3 text-right text-blue-700">DoorDash (×0.7)</th>
+                  <th class="p-3 text-right">Cash</th>
+                  <th class="p-3 text-right text-purple-800 bg-purple-50/50">GST (5% Ex)</th>
                   <th class="p-3 text-right bg-indigo-50 text-indigo-900 font-bold">Real Net Total</th>
                   <th class="p-3 text-center w-28">Tenders Detail</th>
                 </tr>
@@ -514,7 +519,7 @@
       document.getElementById('hub-grid').innerHTML = hubHtml;
     }
 
-    // ================= Bookkeeping & Detailed Calculations =================
+    // ================= Bookkeeping & Detailed Expanded Logic =================
     function handleDragOver(event) {
       event.preventDefault();
       event.stopPropagation();
@@ -620,7 +625,7 @@
 
       const tbody = document.getElementById('bookkeeping-report-tbody');
       if (!summaryData || summaryData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="12" class="p-6 text-center text-gray-400">No bookkeeping records found for this period. Upload sample PDFs to view.</td></tr>`;
         return;
       }
 
@@ -630,42 +635,61 @@
           .select('*')
           .eq('sales_date', row.sales_date);
 
-        let merchantTotal = 0;
-        let onlineTotal = 0;
-        let cashTotal = 0;
+        let visaVal = 0;
+        let masterVal = 0;
+        let amexVal = 0;
+        let debitVal = 0;
+        let menuAppVal = 0;
+        let uberVal = 0;
+        let doordashVal = 0;
+        let cashVal = 0;
 
         if (tenderData) {
           tenderData.forEach(t => {
             const name = t.tender_name.toLowerCase();
             const val = Number(t.total) || 0;
 
-            if (name.includes('visa') || name.includes('master') || name.includes('amex') || name.includes('amx') || name.includes('debit') || name.includes('discover') || name.includes('ssf')) {
-              merchantTotal += val;
-            } else if (name.includes('ubereats') || name.includes('doordash') || name.includes('skip') || name.includes('delivery')) {
-              onlineTotal += val;
-            } else if (name.includes('cash')) {
-              cashTotal += val;
+            if (name.includes('visa')) {
+              visaVal += val;
+            } else if (name.includes('master')) {
+              masterVal += val;
+            } else if (name.includes('amex') || name.includes('amx')) {
+              amexVal += val;
+            } else if (name.includes('debit')) {
+              debitVal += val;
             } else if (name.includes('menu app')) {
-              merchantTotal += val; // 템플릿 기준 카드/앱 영역 합산
+              menuAppVal += val;
+            } else if (name.includes('ubereats') || name.includes('uber')) {
+              uberVal += val;
+            } else if (name.includes('doordash')) {
+              doordashVal += val;
+            } else if (name.includes('cash')) {
+              cashVal += val;
             }
           });
         }
 
-        // 온라인 오더 수수료 약 30% 차감 반영 (Total × 0.7)
-        const onlineNet = onlineTotal * 0.7;
-        
-        // 총 실질 매출 합산액 (Merchant + OnlineNet + Cash)에서 5% GST 역산 분리 (Total / 1.05 * 0.05)
-        const combinedGrossForNet = merchantTotal + onlineNet + cashTotal;
-        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05); // 5% GST 역산 금액
-        const realNetTotal = combinedGrossForNet - gstAmount; // 택스 제외 순수 매출
+        // 온라인 오더 수수료 약 30% 차감 반영 (각각 Total × 0.7)
+        const uberNet = uberVal * 0.7;
+        const doordashNet = doordashVal * 0.7;
+
+        // 전체 합산액에서 5% GST 역산 분리
+        const combinedGrossForNet = visaVal + masterVal + amexVal + debitVal + menuAppVal + uberNet + doordashNet + cashVal;
+        const gstAmount = combinedGrossForNet - (combinedGrossForNet / 1.05);
+        const realNetTotal = combinedGrossForNet - gstAmount;
 
         html += `
           <tr class="hover:bg-gray-50">
             <td class="p-3 font-bold text-indigo-900">${row.sales_date}</td>
-            <td class="p-3 text-right font-semibold">$${merchantTotal.toFixed(2)}</td>
-            <td class="p-3 text-right font-semibold text-blue-700">$${onlineNet.toFixed(2)} <span class="text-[10px] text-gray-400">($${onlineTotal.toFixed(2)}×0.7)</span></td>
-            <td class="p-3 text-right font-semibold">$${cashTotal.toFixed(2)}</td>
-            <td class="p-3 text-right text-purple-700 bg-purple-50/30 font-semibold">-$${gstAmount.toFixed(2)} <span class="text-[10px] text-gray-400">(5% GST)</span></td>
+            <td class="p-3 text-right">$${visaVal.toFixed(2)}</td>
+            <td class="p-3 text-right">$${masterVal.toFixed(2)}</td>
+            <td class="p-3 text-right">$${amexVal.toFixed(2)}</td>
+            <td class="p-3 text-right">$${debitVal.toFixed(2)}</td>
+            <td class="p-3 text-right">$${menuAppVal.toFixed(2)}</td>
+            <td class="p-3 text-right text-blue-700 font-semibold">$${uberNet.toFixed(2)} <span class="text-[9px] text-gray-400">($${uberVal.toFixed(2)}×0.7)</span></td>
+            <td class="p-3 text-right text-blue-700 font-semibold">$${doordashNet.toFixed(2)} <span class="text-[9px] text-gray-400">($${doordashVal.toFixed(2)}×0.7)</span></td>
+            <td class="p-3 text-right">$${cashVal.toFixed(2)}</td>
+            <td class="p-3 text-right text-purple-700 bg-purple-50/30 font-semibold">-$${gstAmount.toFixed(2)}</td>
             <td class="p-3 text-right font-black text-indigo-900 bg-indigo-50/40">$${realNetTotal.toFixed(2)}</td>
             <td class="p-3 text-center">
               <button onclick="viewTenderModal('${row.sales_date}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 text-xs font-bold rounded-lg border border-indigo-200 transition">
@@ -678,7 +702,6 @@
       tbody.innerHTML = html;
     }
 
-    // Tenders Detail 모달 팝업 열기 및 하단 총합(Total Summary) 계산 함수
     async function viewTenderModal(salesDate) {
       if (!_supabase) return;
       document.getElementById('modal-title').textContent = `Tenders Breakdown (${salesDate})`;
@@ -724,14 +747,13 @@
         `;
       }).join('');
 
-      // 모달 하단 총합(Total) 행 삽입
       modalTfoot.innerHTML = `
         <tr>
           <td class="p-3 text-indigo-900 font-extrabold uppercase">Total Summary</td>
           <td class="p-3 text-center text-indigo-900">${sumQty}</td>
           <td class="p-3 text-right text-indigo-900">$${sumPayments.toFixed(2)}</td>
           <td class="p-3 text-right text-indigo-900">$${sumTips.toFixed(2)}</td>
-          <td class="p-3 text-right text-indigo-920 font-black text-sm">$${sumTotal.toFixed(2)}</td>
+          <td class="p-3 text-right text-indigo-900 font-black text-sm">$${sumTotal.toFixed(2)}</td>
           <td class="p-3 text-right text-indigo-900">${sumPercent.toFixed(2)}%</td>
         </tr>
       `;
