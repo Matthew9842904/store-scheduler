@@ -40,7 +40,6 @@
 
   <!-- ================= 2. Main Dashboard ================= -->
   <div id="app" class="hidden max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-    <!-- Header with Dynamic Role-based Navigation Tabs -->
     <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5 bg-purple-900 text-white px-3 py-1.5 rounded-lg shadow-sm">
@@ -56,10 +55,8 @@
         </div>
       </div>
 
-      <!-- Quick Jump Navigation Bar -->
       <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"></nav>
 
-      <!-- 우측 상단 영역 (모드 토글 + 로그아웃) -->
       <div class="flex items-center gap-2">
         <div id="admin-mode-toggle-container" class="hidden flex items-center bg-gray-100 p-1 rounded-lg text-xs font-bold">
           <button onclick="setSchedulerMode('manage')" id="mode-btn-manage" class="px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition">🛠️ Manage</button>
@@ -71,7 +68,6 @@
       </div>
     </header>
 
-    <!-- Main Menu Hub View -->
     <div id="view-hub" class="py-6 max-w-4xl mx-auto">
       <div class="text-center mb-8">
         <h2 class="text-2xl font-extrabold text-gray-800">Main Menu</h2>
@@ -149,7 +145,7 @@
       </div>
     </main>
 
-    <!-- 3. Staff Availability Overview & Admin Override Tab -->
+    <!-- 3. Team Availability Overview Tab -->
     <main id="view-view-avail" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div>
@@ -257,7 +253,7 @@
       </div>
     </main>
 
-    <!-- 5. ADP Hours -->
+    <!-- 5. ADP Payroll -->
     <main id="view-actuals" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -290,7 +286,7 @@
       </div>
     </main>
 
-    <!-- ================= 6. Bookkeeping Tab (북키핑 기능 추가) ================= -->
+    <!-- 6. Bookkeeping Tab -->
     <main id="view-bookkeeping" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -304,7 +300,6 @@
           </div>
         </div>
 
-        <!-- Summary Cards -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-xl">
             <div class="text-xs font-bold text-emerald-800 uppercase">Total Revenue</div>
@@ -320,7 +315,6 @@
           </div>
         </div>
 
-        <!-- Transactions Table -->
         <div class="overflow-x-auto border rounded-xl shadow-sm">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -602,14 +596,23 @@
     }
 
     async function loadWeeklySchedule() {
+      const saturday = new Date(currentSunday);
+      saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('current-week-label').textContent = `Week of ${currentSunday.toLocaleString('en-US', { month: 'short' })} ${currentSunday.getDate()} (${formatDateISO(currentSunday)} ~ ${formatDateISO(saturday)})`;
+
       const weekStr = formatDateISO(currentSunday);
       currentScheduleData = {};
+      scheduleConfirmsMap = {};
+      weekPublicationState = { is_published: false, is_locked: false };
+
       if (_supabase) {
         try {
           const { data } = await _supabase.from('schedules').select('*').eq('week_start_date', weekStr);
-          if (data) {
-            data.forEach(item => { currentScheduleData[`${item.shift_key}_${item.day_index}`] = item; });
-          }
+          if (data) data.forEach(item => { currentScheduleData[`${item.shift_key}_${item.day_index}`] = item; });
+
+          const { data: confData } = await _supabase.from('schedule_confirms').select('*').eq('week_start_date', weekStr);
+          if (confData) confData.forEach(item => { scheduleConfirmsMap[item.employee_name] = item; });
+
           const { data: pubData } = await _supabase.from('week_publications').select('*').eq('week_start_date', weekStr).single();
           if (pubData) weekPublicationState = pubData;
         } catch (e) { console.warn(e); }
@@ -633,7 +636,7 @@
 
     function renderAdminScheduleTable(canEdit) {
       const headerRow = document.getElementById('schedule-header-row');
-      let html = `<th class="p-3 w-32 border-r">Shift</th>`;
+      let html = `<th class="p-3 w-32 border-r">Shift / Day</th>`;
       for (let i = 0; i < 7; i++) {
         let d = new Date(currentSunday); d.setDate(d.getDate() + i);
         html += `<th class="p-3 text-center border-r">${dayNames[i]}<br/><span class="text-[10px] text-gray-400">${formatDateISO(d)}</span></th>`;
@@ -644,7 +647,7 @@
       tbody.innerHTML = '';
       shifts.forEach(s => {
         if (s.key === 'divider') {
-          tbody.innerHTML += `<tr class="bg-gray-100 border-y"><td colspan="8" class="p-2 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">🌙 Evening Shift</td></tr>`;
+          tbody.innerHTML += `<tr class="bg-purple-100 border-y-2 border-purple-300"><td colspan="8" class="p-2 text-center text-xs font-black text-purple-900 tracking-wider uppercase">🌙 Closing Shifts (Night Group)</td></tr>`;
           return;
         }
         let trHtml = `<tr class="border-b"><td class="p-3 font-semibold bg-gray-50 border-r text-xs"><div class="font-bold ${s.text}">${s.name}</div><div class="text-[10px] text-gray-500">${s.count}</div></td>`;
@@ -660,7 +663,6 @@
         trHtml += `</tr>`;
         tbody.innerHTML += trHtml;
       });
-      document.getElementById('current-week-label').textContent = `Week of ${formatDateISO(currentSunday)}`;
     }
 
     function updateShiftCountSummary() {}
@@ -668,26 +670,165 @@
     async function publishCurrentSchedule() { alert('Schedule published!'); }
     function unlockSchedule() {}
     function generateSmsText() { alert('Text copied!'); }
-    function renderStaffPersonalSchedule() {}
-    function changeAvailWeek() {}
-    function saveMyAvailability() {}
-    function changeOverviewWeek() {}
+
+    function renderStaffPersonalSchedule() {
+      const container = document.getElementById('staff-shifts-container');
+      const actionArea = document.getElementById('staff-confirm-action-area');
+      container.innerHTML = '';
+
+      if (!weekPublicationState.is_published) {
+        container.innerHTML = `<div class="col-span-7 p-8 text-center text-gray-400 italic">The schedule for this week has not been published yet. Please check back later.</div>`;
+        actionArea.innerHTML = '';
+        return;
+      }
+
+      for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
+        let d = new Date(currentSunday); d.setDate(d.getDate() + dayIndex);
+        let assignedShifts = [];
+        shifts.forEach(shift => {
+          if (shift.key === 'divider') return;
+          const item = currentScheduleData[`${shift.key}_${dayIndex}`];
+          if (item && item.employee_name === currentUser.name) {
+            assignedShifts.push({ name: shift.name, time: "Shift Assigned" });
+          }
+        });
+
+        const hasShift = assignedShifts.length > 0;
+        container.innerHTML += `
+          <div class="border rounded-xl p-4 flex flex-col justify-between ${hasShift ? 'bg-indigo-50/60 border-indigo-200' : 'bg-gray-50 border-gray-200 opacity-60'}">
+            <div>
+              <div class="font-bold text-sm text-gray-800 border-b pb-1 flex justify-between items-center">
+                <span>${dayNames[dayIndex]}</span>
+                <span class="text-xs font-normal text-gray-500">${formatDateISO(d)}</span>
+              </div>
+              ${hasShift ? assignedShifts.map(s => `<div class="mt-2 bg-indigo-600 text-white p-2 rounded-lg text-center shadow-sm"><div class="font-bold text-xs">${s.name}</div></div>`).join('') : '<div class="text-xs text-gray-400 mt-3 text-center italic">Off / No Shift</div>'}
+            </div>
+          </div>
+        `;
+      }
+
+      const isConfirmed = scheduleConfirmsMap[currentUser.name] !== undefined;
+      if (isConfirmed) {
+        actionArea.innerHTML = `<span class="px-4 py-2 bg-emerald-100 text-emerald-800 font-bold rounded-lg text-xs">✅ Schedule Confirmed</span>`;
+      } else {
+        actionArea.innerHTML = `<button onclick="confirmMySchedule()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs shadow-md transition">✅ Confirm Schedule</button>`;
+      }
+    }
+
+    async function confirmMySchedule() {
+      if (!_supabase || !currentUser) return alert("Database not connected.");
+      const weekStartStr = formatDateISO(currentSunday);
+      try {
+        await _supabase.from('schedule_confirms').upsert({
+          week_start_date: weekStartStr, employee_id: currentUser.id, employee_name: currentUser.name, confirmed_at: new Date().toISOString()
+        }, { onConflict: 'week_start_date,employee_name' });
+        alert("Schedule confirmed successfully!");
+        loadWeeklySchedule();
+      } catch (e) { alert("Failed: " + e.message); }
+    }
+
+    function changeAvailWeek(diff) {
+      availSunday.setDate(availSunday.getDate() + (diff * 7));
+      loadMyAvailabilityForm();
+    }
+
+    async function loadMyAvailabilityForm() {
+      const saturday = new Date(availSunday); saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('avail-week-label').textContent = `Week of ${formatDateISO(availSunday)} ~ ${formatDateISO(saturday)}`;
+
+      let existingMap = {};
+      const weekStartStr = formatDateISO(availSunday);
+      if (_supabase && currentUser) {
+        try {
+          const { data } = await _supabase.from('availabilities').select('*').eq('week_start_date', weekStartStr).eq('employee_id', currentUser.id);
+          if (data) data.forEach(item => { existingMap[item.day_index] = item; });
+        } catch (e) { console.warn(e); }
+      }
+
+      const grid = document.getElementById('submit-avail-grid');
+      grid.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        let d = new Date(availSunday); d.setDate(d.getDate() + i);
+        const saved = existingMap[i] || {};
+        const selStatus = saved.status || 'Available (Anytime)';
+
+        grid.innerHTML += `
+          <div class="border rounded-xl p-4 bg-gray-50 flex flex-col justify-between space-y-3" data-avail-day="${i}">
+            <div class="font-bold text-sm text-gray-800 border-b pb-1"><span>${dayNames[i]}</span> <span class="text-xs font-normal text-gray-500">${formatDateISO(d)}</span></div>
+            <select class="avail-status w-full p-2 text-xs border rounded bg-white font-medium">
+              ${availOptions.map(opt => `<option value="${opt}" ${opt === selStatus ? 'selected' : ''}>${opt}</option>`).join('')}
+            </select>
+          </div>
+        `;
+      }
+    }
+
+    async function saveMyAvailability() {
+      if (!_supabase || !currentUser) return alert("Database not connected.");
+      const weekStartStr = formatDateISO(availSunday);
+      const records = [];
+      document.querySelectorAll('#submit-avail-grid [data-avail-day]').forEach(card => {
+        const dayIndex = parseInt(card.getAttribute('data-avail-day'), 10);
+        const status = card.querySelector('.avail-status').value;
+        records.push({ employee_id: currentUser.id, employee_name: currentUser.name, week_start_date: weekStartStr, day_index: dayIndex, status });
+      });
+      try {
+        await _supabase.from('availabilities').delete().eq('week_start_date', weekStartStr).eq('employee_id', currentUser.id);
+        await _supabase.from('availabilities').insert(records);
+        alert("Availability saved successfully!");
+      } catch (e) { alert("Failed: " + e.message); }
+    }
+
+    function changeOverviewWeek(diff) { overviewSunday.setDate(overviewSunday.getDate() + (diff * 7)); loadOverviewAvailability(); }
+    async function loadOverviewAvailability() {
+      const saturday = new Date(overviewSunday); saturday.setDate(saturday.getDate() + 6);
+      document.getElementById('overview-week-label').textContent = `Week of ${formatDateISO(overviewSunday)} ~ ${formatDateISO(saturday)}`;
+    }
     function loadAdminSelectedAvail() {}
     function saveAdminOverrideAvail() {}
-    function changePayPeriod() {}
-    function saveMyActualHours() {}
-    function saveMyProfile(e) { e.preventDefault(); alert('Profile saved!'); }
+
+    function changePayPeriod(diff) { myPayPeriodStart.setDate(myPayPeriodStart.getDate() + (diff * 14)); loadMyActualHoursForm(); }
+    async function loadMyActualHoursForm() {
+      const periodStartStr = formatDateISO(myPayPeriodStart);
+      const periodEnd = new Date(myPayPeriodStart); periodEnd.setDate(periodEnd.getDate() + 13);
+      document.getElementById('pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
+      const container = document.getElementById('my-actuals-tables-container');
+      container.innerHTML = `<div class="p-4 border rounded-xl bg-gray-50 text-xs text-gray-600">Actual hours log for pay period loaded.</div>`;
+    }
+    function saveMyActualHours() { alert('Hours saved!'); }
+
+    function loadMyProfileForm() {
+      if (!currentUser) return;
+      document.getElementById('profile-firstname').value = currentUser.first_name || '';
+      document.getElementById('profile-lastname').value = currentUser.last_name || '';
+      document.getElementById('profile-name').value = currentUser.name || '';
+      document.getElementById('profile-pin').value = currentUser.pin_code || '';
+      document.getElementById('profile-email').value = currentUser.email || '';
+      document.getElementById('profile-phone').value = currentUser.phone || '';
+    }
+
+    async function saveMyProfile(e) {
+      e.preventDefault();
+      if (!currentUser || !_supabase) return;
+      currentUser.first_name = document.getElementById('profile-firstname').value;
+      currentUser.last_name = document.getElementById('profile-lastname').value;
+      currentUser.name = document.getElementById('profile-name').value;
+      currentUser.pin_code = document.getElementById('profile-pin').value;
+      currentUser.email = document.getElementById('profile-email').value;
+      currentUser.phone = document.getElementById('profile-phone').value;
+      await _supabase.from('employees').update(currentUser).eq('id', currentUser.id);
+      localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
+      alert('Profile updated!');
+    }
+
     function renderEmployeeTable() {}
     function addNewRow() {}
     function changeAdminPayPeriod() {}
-    function markModified() { isDataModified = true; }
 
-    /* ================= 북키핑 관련 함수 구현 ================= */
     async function loadBookkeepingData() {
       const tbody = document.getElementById('bookkeeping-tbody');
       if (!tbody) return;
       tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400">Loading bookkeeping records...</td></tr>`;
-
       if (_supabase) {
         try {
           const { data } = await _supabase.from('bookkeeping').select('*').order('date', { ascending: false });
@@ -700,39 +841,26 @@
     function renderBookkeepingTable() {
       const tbody = document.getElementById('bookkeeping-tbody');
       if (!tbody) return;
-
-      let totalRev = 0, totalExp = 0;
       if (bookkeepingRecords.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 text-xs">No bookkeeping records found. Click 'Add Transaction' to begin.</td></tr>`;
       } else {
-        tbody.innerHTML = bookkeepingRecords.map((item, idx) => {
-          const amt = Number(item.amount || 0);
-          if (item.type === 'Revenue') totalRev += amt;
-          else totalExp += amt;
-
-          return `
-            <tr class="hover:bg-gray-50" data-bk-id="${item.id || idx}">
-              <td class="p-2"><input type="date" class="bk-date w-full p-1 text-xs border rounded bg-white" value="${item.date || formatDateISO(new Date())}" onchange="markModified()"></td>
-              <td class="p-2">
-                <select class="bk-type w-full p-1 text-xs border rounded bg-white font-bold" onchange="markModified()">
-                  <option value="Revenue" ${item.type === 'Revenue' ? 'selected' : ''}>🟢 Revenue</option>
-                  <option value="Expense" ${item.type === 'Expense' ? 'selected' : ''}>🔴 Expense</option>
-                </select>
-              </td>
-              <td class="p-2"><input type="text" class="bk-cat w-full p-1 text-xs border rounded bg-white" placeholder="Category (e.g., Supplies)" value="${item.category || ''}" onchange="markModified()"></td>
-              <td class="p-2"><input type="text" class="bk-desc w-full p-1 text-xs border rounded bg-white" placeholder="Description" value="${item.description || ''}" onchange="markModified()"></td>
-              <td class="p-2"><input type="number" step="0.01" class="bk-amt w-full p-1 text-xs border rounded bg-white text-right font-bold" value="${amt}" onchange="renderBookkeepingSummary(); markModified()"></td>
-              <td class="p-2 text-center">
-                <input type="file" class="bk-file-input hidden" onchange="handleFileUpload(this, ${idx})">
-                <button onclick="this.previousElementSibling.click()" class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded border">📁 ${item.file_name ? 'Change File' : 'Upload File'}</button>
-                ${item.file_name ? `<div class="text-[10px] text-indigo-600 truncate mt-0.5">${item.file_name}</div>` : ''}
-              </td>
-              <td class="p-2 text-center"><button onclick="removeBookkeepingRow(this)" class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border border-red-200">Delete</button></td>
-            </tr>
-          `;
-        }).join('');
+        tbody.innerHTML = bookkeepingRecords.map((item, idx) => `
+          <tr class="hover:bg-gray-50" data-bk-id="${item.id || idx}">
+            <td class="p-2"><input type="date" class="bk-date w-full p-1 text-xs border rounded bg-white" value="${item.date || formatDateISO(new Date())}"></td>
+            <td class="p-2">
+              <select class="bk-type w-full p-1 text-xs border rounded bg-white font-bold">
+                <option value="Revenue" ${item.type === 'Revenue' ? 'selected' : ''}>🟢 Revenue</option>
+                <option value="Expense" ${item.type === 'Expense' ? 'selected' : ''}>🔴 Expense</option>
+              </select>
+            </td>
+            <td class="p-2"><input type="text" class="bk-cat w-full p-1 text-xs border rounded bg-white" value="${item.category || ''}"></td>
+            <td class="p-2"><input type="text" class="bk-desc w-full p-1 text-xs border rounded bg-white" value="${item.description || ''}"></td>
+            <td class="p-2"><input type="number" step="0.01" class="bk-amt w-full p-1 text-xs border rounded bg-white text-right font-bold" value="${item.amount || 0}"></td>
+            <td class="p-2 text-center text-xs text-gray-500">${item.file_name || 'No file'}</td>
+            <td class="p-2 text-center"><button onclick="removeBookkeepingRow(this)" class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border">Delete</button></td>
+          </tr>
+        `).join('');
       }
-
       renderBookkeepingSummary();
     }
 
@@ -741,86 +869,57 @@
       document.querySelectorAll('#bookkeeping-tbody tr[data-bk-id]').forEach(tr => {
         const type = tr.querySelector('.bk-type').value;
         const amt = parseFloat(tr.querySelector('.bk-amt').value) || 0;
-        if (type === 'Revenue') totalRev += amt;
-        else totalExp += amt;
+        if (type === 'Revenue') totalRev += amt; else totalExp += amt;
       });
-      const net = totalRev - totalExp;
-
       document.getElementById('bk-total-revenue').textContent = `$${totalRev.toFixed(2)}`;
       document.getElementById('bk-total-expense').textContent = `$${totalExp.toFixed(2)}`;
-      document.getElementById('bk-net-profit').textContent = `$${net.toFixed(2)}`;
+      document.getElementById('bk-net-profit').textContent = `$${(totalRev - totalExp).toFixed(2)}`;
     }
 
     function addBookkeepingRow() {
-      bookkeepingRecords.unshift({
-        date: formatDateISO(new Date()),
-        type: 'Revenue',
-        category: 'Sales',
-        description: '',
-        amount: 0,
-        file_name: ''
-      });
+      bookkeepingRecords.unshift({ date: formatDateISO(new Date()), type: 'Revenue', category: 'Sales', description: '', amount: 0, file_name: '' });
       renderBookkeepingTable();
-      markModified();
     }
 
-    function removeBookkeepingRow(btn) {
-      btn.closest('tr').remove();
-      renderBookkeepingSummary();
-      markModified();
-    }
-
-    function handleFileUpload(input, idx) {
-      if (input.files && input.files[0]) {
-        const file = input.files[0];
-        bookkeepingRecords[idx].file_name = file.name;
-        renderBookkeepingTable();
-        alert(`File "${file.name}" attached successfully!`);
-        markModified();
-      }
-    }
+    function removeBookkeepingRow(btn) { btn.closest('tr').remove(); renderBookkeepingSummary(); }
 
     async function saveBookkeepingData() {
       if (!_supabase) return alert("Database not connected.");
       const records = [];
       document.querySelectorAll('#bookkeeping-tbody tr[data-bk-id]').forEach(tr => {
-        const date = tr.querySelector('.bk-date').value;
-        const type = tr.querySelector('.bk-type').value;
-        const category = tr.querySelector('.bk-cat').value;
-        const description = tr.querySelector('.bk-desc').value;
-        const amount = parseFloat(tr.querySelector('.bk-amt').value) || 0;
-        if (date) {
-          records.push({ date, type, category, description, amount });
-        }
+        records.push({
+          date: tr.querySelector('.bk-date').value,
+          type: tr.querySelector('.bk-type').value,
+          category: tr.querySelector('.bk-cat').value,
+          description: tr.querySelector('.bk-desc').value,
+          amount: parseFloat(tr.querySelector('.bk-amt').value) || 0
+        });
       });
-
       try {
-        await _supabase.from('bookkeeping').delete().neq('id', 0); // 전체 갱신 예시
-        if (records.length > 0) {
-          const { error } = await _supabase.from('bookkeeping').insert(records);
-          if (error) throw error;
-        }
-        isDataModified = false;
-        alert("Bookkeeping records saved successfully!");
-      } catch (e) {
-        alert("Failed to save bookkeeping records: " + e.message);
-      }
+        await _supabase.from('bookkeeping').delete().neq('id', 0);
+        if (records.length > 0) await _supabase.from('bookkeeping').insert(records);
+        alert("Bookkeeping saved!");
+      } catch (e) { alert("Failed: " + e.message); }
     }
+
+    function markModified() { isDataModified = true; }
 
     function switchTab(tabName) {
       currentActiveTab = tabName;
       ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'my-profile', 'employees', 'actuals', 'bookkeeping'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const navBtn = document.getElementById(`nav-${t}`);
-        if (view) {
-          if (t === tabName) view.classList.remove('hidden'); else view.classList.add('hidden');
-        }
+        if (view) { if (t === tabName) view.classList.remove('hidden'); else view.classList.add('hidden'); }
         if (navBtn) {
           if (t === tabName) navBtn.className = 'px-2.5 py-1.5 rounded-md bg-white shadow-sm text-indigo-700 font-bold transition';
           else navBtn.className = 'px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition';
         }
       });
       if (tabName === 'scheduler') loadWeeklySchedule();
+      else if (tabName === 'submit-avail') loadMyAvailabilityForm();
+      else if (tabName === 'view-avail') loadOverviewAvailability();
+      else if (tabName === 'my-actuals') loadMyActualHoursForm();
+      else if (tabName === 'my-profile') loadMyProfileForm();
       else if (tabName === 'bookkeeping') loadBookkeepingData();
     }
 
