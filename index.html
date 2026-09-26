@@ -47,7 +47,6 @@
 
   <!-- ================= 2. Main Dashboard ================= -->
   <div id="app" class="hidden max-w-7xl mx-auto p-4 md:p-6 space-y-6">
-    <!-- Header with Dynamic Role-based Navigation Tabs -->
     <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5 bg-purple-900 text-white px-3 py-1.5 rounded-lg shadow-sm">
@@ -63,10 +62,8 @@
         </div>
       </div>
 
-      <!-- Quick Jump Navigation Bar -->
       <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"></nav>
 
-      <!-- 우측 상단 영역 (모드 토글 + 로그아웃) -->
       <div class="flex items-center gap-2">
         <div id="admin-mode-toggle-container" class="hidden flex items-center bg-gray-100 p-1 rounded-lg text-xs font-bold">
           <button onclick="setSchedulerMode('manage')" id="mode-btn-manage" class="px-3 py-1.5 rounded-md bg-white text-indigo-700 shadow-sm transition">🛠️ Manage</button>
@@ -96,10 +93,10 @@
           <button onclick="changeWeek(1)" class="px-3 py-1.5 border rounded-lg hover:bg-gray-50 text-sm font-medium">Next Week &gt;</button>
         </div>
         <div id="admin-action-buttons" class="hidden flex items-center gap-2 flex-wrap">
-          <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">💾 Save (Draft)</button>
-          <button onclick="publishCurrentSchedule()" id="btn-publish-schedule" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">🚀 Publish & Lock</button>
-          <button onclick="unlockSchedule()" id="btn-unlock-schedule" class="hidden px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">🔓 Unlock to Edit</button>
-          <button onclick="generateSmsText()" id="btn-copy-sms" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-xs items-center gap-1">💬 Copy Text</button>
+          <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm text-xs">💾 Save (Draft)</button>
+          <button onclick="publishCurrentSchedule()" id="btn-publish-schedule" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-xs">🚀 Publish & Lock</button>
+          <button onclick="unlockSchedule()" id="btn-unlock-schedule" class="hidden px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow-sm text-xs">🔓 Unlock to Edit</button>
+          <button onclick="generateSmsText()" id="btn-copy-sms" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-xs">💬 Copy Text</button>
         </div>
       </div>
 
@@ -143,7 +140,7 @@
             <h2 class="text-lg font-bold">Submit Your Availability</h2>
             <p class="text-xs text-gray-500 mt-0.5">Select availability preference and set custom hours. Submissions close every Thursday at 11:59 PM.</p>
           </div>
-          <button id="btn-save-avail" onclick="saveMyAvailability()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm transition">💾 Save Availability</button>
+          <button id="btn-save-avail" onclick="saveMyAvailability()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-sm">💾 Save Availability</button>
         </div>
         <div id="deadline-warning-box" class="mb-4 p-3 rounded-lg text-xs font-semibold">⚠️ <span id="deadline-warning-text"></span></div>
         <div class="flex items-center gap-3 mb-4 bg-gray-50 p-3 rounded-lg border">
@@ -204,7 +201,7 @@
             <h2 class="text-lg font-bold text-gray-900">Log Hours (2-Week Payroll Entry)</h2>
             <p class="text-xs text-gray-500 mt-0.5">Enter your actual start and end times for the 14-day pay period.</p>
           </div>
-          <button onclick="saveMyActualHours()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-sm transition">💾 Save Logged Hours</button>
+          <button onclick="saveMyActualHours()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-sm">💾 Save Logged Hours</button>
         </div>
         <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border">
           <button onclick="changePayPeriod(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev 2 Weeks</button>
@@ -214,10 +211,8 @@
         <div id="my-actuals-tables-container" class="space-y-6"></div>
         <div class="pt-6 border-t space-y-4">
           <div class="flex justify-between items-center">
-            <div>
-              <h3 class="font-bold text-sm text-gray-900">⚠️ Missing Hours from Previous Payroll Period</h3>
-            </div>
-            <button onclick="addMissingHourRow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow-xs">➕ Add Missing Hour</button>
+            <h3 class="font-bold text-sm text-gray-900">⚠️ Missing Hours from Previous Payroll Period</h3>
+            <button onclick="addMissingHourRow()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs">➕ Add Missing Hour</button>
           </div>
           <div class="overflow-x-auto border rounded-xl shadow-xs">
             <table class="w-full text-left border-collapse">
@@ -272,7 +267,7 @@
             <label class="block text-xs font-semibold text-gray-600 mb-1">Phone</label>
             <input type="tel" id="profile-phone" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50">
           </div>
-          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-md transition">💾 Save My Profile</button>
+          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-md">💾 Save My Profile</button>
         </form>
       </div>
     </main>
@@ -285,7 +280,7 @@
             <h2 class="text-lg font-bold">Team Directory & Permissions</h2>
             <p id="employee-tab-desc" class="text-xs text-gray-500 mt-0.5"></p>
           </div>
-          <button id="add-emp-btn" onclick="addNewRow()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm shadow-sm items-center gap-1">➕ Add New Staff</button>
+          <button id="add-emp-btn" onclick="addNewRow()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm">➕ Add New Staff</button>
         </div>
         <div class="overflow-x-auto border rounded-lg">
           <table class="w-full text-left border-collapse">
@@ -345,10 +340,30 @@
             </table>
           </div>
         </div>
+        <div class="space-y-6 pt-4 border-t">
+          <div class="space-y-2">
+            <h3 class="font-bold text-sm text-gray-800">📅 Week 1 Detailed Daily Table (Sun ~ Sat)</h3>
+            <div class="overflow-x-auto border rounded-xl shadow-sm bg-white">
+              <table class="w-full text-left border-collapse min-w-[1000px]">
+                <thead><tr id="admin-week1-header" class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center"></tr></thead>
+                <tbody id="admin-week1-tbody" class="text-xs divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="space-y-2 pt-2">
+            <h3 class="font-bold text-sm text-gray-800">📅 Week 2 Detailed Daily Table (Sun ~ Sat)</h3>
+            <div class="overflow-x-auto border rounded-xl shadow-sm bg-white">
+              <table class="w-full text-left border-collapse min-w-[1000px]">
+                <thead><tr id="admin-week2-header" class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center"></tr></thead>
+                <tbody id="admin-week2-tbody" class="text-xs divide-y"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
-    <!-- 6. Daily Sales History Tab (Updated with Detailed Breakdown & Role Enforcement) -->
+    <!-- 6. Daily Sales History Tab -->
     <main id="view-sales-history" class="hidden space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
@@ -555,7 +570,7 @@
               last_name: e.last_name || e.name.split(' ')[1] || 'Staff'
             }));
           }
-        } catch (e) { console.warn("Using fallback admin due to fetch error:", e); }
+        } catch (e) { console.warn("Using fallback admin:", e); }
       }
 
       if (!dbEmployees.some(e => e.role === 'admin' && e.status !== 'inactive')) {
@@ -713,7 +728,6 @@
         actionButtons.classList.add('hidden');
       }
 
-      // Sales History 권한 제어 (관리자: 업로드 가능, 매니저: 조회만 가능, 스태프: 진입 차단)
       const uploadSection = document.getElementById('sales-upload-section');
       if (uploadSection) {
         if (isAdmin) uploadSection.classList.remove('hidden');
@@ -953,8 +967,6 @@
 
         for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
           const savedItem = currentScheduleData[`${shift.key}_${dayIndex}`] || {};
-          const selectedEmp = savedItem.employee_name || '';
-
           html += `
             <td class="p-2 border-r" data-day="${dayIndex}" data-shift-key="${shift.key}">
               <div class="space-y-1">
@@ -1045,7 +1057,6 @@
     function updateDropdownsWithOptions(selectEl, dayIndex, isOpen) {
       const activeEmployees = dbEmployees.filter(e => e.status !== 'inactive');
       const currentCell = selectEl.closest('td');
-      const shiftKey = currentCell.getAttribute('data-shift-key');
       const currentVal = selectEl.value;
 
       if (!isOpen) { updateSelectDisplayAndColor(selectEl, currentVal); return; }
@@ -1254,25 +1265,207 @@
       const periodStartStr = formatDateISO(myPayPeriodStart);
       const periodEnd = new Date(myPayPeriodStart); periodEnd.setDate(periodEnd.getDate() + 13);
       document.getElementById('pay-period-label').textContent = `Pay Period: ${periodStartStr} ~ ${formatDateISO(periodEnd)}`;
-      renderMyActualsGrid({}, {}, {});
+
+      let savedActualsMap = {}, week1Schedules = {}, week2Schedules = {}, missingHoursList = [];
+      if (_supabase && currentUser) {
+        try {
+          const { data: actData } = await _supabase.from('actual_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+          if (actData) actData.forEach(item => { savedActualsMap[item.day_offset] = item; });
+
+          const w1DateStr = formatDateISO(myPayPeriodStart);
+          const w2Start = new Date(myPayPeriodStart); w2Start.setDate(w2Start.getDate() + 7);
+          const w2DateStr = formatDateISO(w2Start);
+
+          const { data: sched1 } = await _supabase.from('schedules').select('*').eq('week_start_date', w1DateStr).eq('employee_name', currentUser.name);
+          if (sched1) sched1.forEach(s => { week1Schedules[s.day_index] = true; });
+
+          const { data: sched2 } = await _supabase.from('schedules').select('*').eq('week_start_date', w2DateStr).eq('employee_name', currentUser.name);
+          if (sched2) sched2.forEach(s => { week2Schedules[s.day_index] = true; });
+
+          const { data: missData } = await _supabase.from('missing_hours').select('*').eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+          if (missData) missingHoursList = missData;
+        } catch (e) { console.error(e); }
+      }
+      renderMyActualsGrid(savedActualsMap, week1Schedules, week2Schedules);
+      renderMissingHoursTable(missingHoursList);
     }
 
     function renderMyActualsGrid(savedMap, w1Sched, w2Sched) {
       const container = document.getElementById('my-actuals-tables-container');
-      container.innerHTML = `<div class="border rounded-xl p-4 text-center text-xs text-gray-500">Payroll actual hours entry grid ready.</div>`;
+      let html = '';
+      ['Week 1 (Sun ~ Sat)', 'Week 2 (Sun ~ Sat)'].forEach((weekTitle, wIdx) => {
+        const startIdx = wIdx * 7;
+        const schedMap = wIdx === 0 ? w1Sched : w2Sched;
+        html += `
+          <div class="border rounded-xl overflow-hidden shadow-sm">
+            <div class="bg-indigo-50 px-4 py-2 font-bold text-xs text-indigo-950 border-b">${weekTitle}</div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse min-w-[900px]">
+                <thead>
+                  <tr class="bg-gray-100 border-b text-xs font-semibold text-gray-700 uppercase text-center">
+                    <th class="p-2 border-r w-32">Day</th>
+        `;
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(myPayPeriodStart); d.setDate(d.getDate() + startIdx + i);
+          const hasScheduledShift = schedMap[i] === true;
+          const badge = hasScheduledShift ? `<span class="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded ml-1">Scheduled</span>` : `<span class="text-[10px] bg-gray-200 text-gray-600 px-1 rounded ml-1">No Shift</span>`;
+          html += `<th class="p-2 border-r text-center text-xs">${dayNames[d.getDay()]}<br>${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}${badge}</th>`;
+        }
+        html += `<th class="p-2 text-center bg-gray-200 w-28">Weekly Total</th></tr></thead><tbody class="text-sm"><tr>`;
+        html += `<td class="p-3 font-semibold border-r bg-gray-50 text-xs">Actual Hours</td>`;
+
+        let weekTotal = 0;
+        for (let i = 0; i < 7; i++) {
+          const globalDayIdx = startIdx + i;
+          const item = savedMap[globalDayIdx] || {};
+          const hoursVal = item.hours || 0;
+          weekTotal += Number(hoursVal);
+          const isScheduled = schedMap[i] === true;
+
+          html += `
+            <td class="p-2 border-r text-center align-middle ${!isScheduled ? 'bg-amber-50/40' : ''}" data-day-offset="${globalDayIdx}" data-scheduled="${isScheduled}">
+              <div class="space-y-1">
+                <select class="my-start w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(item.start_time)}</select>
+                <select class="my-end w-full p-1 text-xs border rounded bg-white" onchange="calcMyHours(${globalDayIdx})">${generateTimeOptionsSelected(item.end_time)}</select>
+                <div class="text-xs font-bold text-indigo-700"><span id="my-hrs-display-${globalDayIdx}">${Number(hoursVal).toFixed(2)}</span>h</div>
+              </div>
+            </td>
+          `;
+        }
+        html += `<td class="p-3 text-center font-bold bg-gray-100 text-indigo-900 text-base" id="week-${wIdx}-total">${weekTotal.toFixed(2)}h</td>`;
+        html += `</tr></tbody></table></div></div>`;
+      });
+      container.innerHTML = html;
     }
 
-    function addMissingHourRow() {}
-    async function saveMyActualHours() { alert("Saved actual hours!"); }
+    function calcMyHours(dayOffset) {
+      const cell = document.querySelector(`td[data-day-offset="${dayOffset}"]`);
+      if (!cell) return;
+      const start = cell.querySelector('.my-start').value;
+      const end = cell.querySelector('.my-end').value;
+      let hours = 0;
+
+      if (start && end) {
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        let diff = (eh * 60 + em) - (sh * 60 + sm);
+        if (diff < 0) diff += 24 * 60;
+        hours = diff / 60;
+      }
+
+      document.getElementById(`my-hrs-display-${dayOffset}`).textContent = hours.toFixed(2);
+      let w0Tot = 0, w1Tot = 0;
+      for (let i = 0; i < 7; i++) {
+        w0Tot += Number(document.getElementById(`my-hrs-display-${i}`).textContent);
+        w1Tot += Number(document.getElementById(`my-hrs-display-${i+7}`).textContent);
+      }
+      document.getElementById('week-0-total').textContent = w0Tot.toFixed(2) + 'h';
+      document.getElementById('week-1-total').textContent = w1Tot.toFixed(2) + 'h';
+      markModified();
+    }
+
+    function renderMissingHoursTable(list) {
+      const tbody = document.getElementById('missing-hours-tbody');
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-400 text-xs">No missing hours recorded for this period.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = list.map((item, idx) => `
+        <tr class="missing-row hover:bg-gray-50">
+          <td class="p-2"><input type="date" class="miss-date w-full p-1 text-xs border rounded bg-white" value="${item.date || ''}" onchange="calcMissingRowHours(this)"></td>
+          <td class="p-2 miss-day font-semibold text-gray-600 text-xs">${item.date ? dayNames[new Date(item.date + 'T00:00:00').getDay()] : '-'}</td>
+          <td class="p-2"><select class="miss-start w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected(item.start_time)}</select></td>
+          <td class="p-2"><select class="miss-end w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected(item.end_time)}</select></td>
+          <td class="p-2 text-center font-bold text-indigo-700 miss-hrs">${Number(item.hours || 0).toFixed(2)}h</td>
+          <td class="p-2"><input type="text" class="miss-reason w-full p-1 text-xs border rounded bg-white" value="${item.reason || ''}"></td>
+          <td class="p-2 text-center"><button onclick="removeMissingRow(this)" class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border border-red-200">Delete</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function addMissingHourRow() {
+      const tbody = document.getElementById('missing-hours-tbody');
+      if (tbody.querySelector('.text-gray-400')) tbody.innerHTML = '';
+      const tr = document.createElement('tr');
+      tr.className = "missing-row hover:bg-gray-50";
+      tr.innerHTML = `
+        <td class="p-2"><input type="date" class="miss-date w-full p-1 text-xs border rounded bg-white" value="${formatDateISO(new Date())}" onchange="calcMissingRowHours(this)"></td>
+        <td class="p-2 miss-day font-semibold text-gray-600 text-xs">${dayNames[new Date().getDay()]}</td>
+        <td class="p-2"><select class="miss-start w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected('09:00')}</select></td>
+        <td class="p-2"><select class="miss-end w-full p-1 text-xs border rounded bg-white" onchange="calcMissingRowHours(this)">${generateTimeOptionsSelected('17:00')}</select></td>
+        <td class="p-2 text-center font-bold text-indigo-700 miss-hrs">8.00h</td>
+        <td class="p-2"><input type="text" class="miss-reason w-full p-1 text-xs border rounded bg-white" placeholder="Enter reason"></td>
+        <td class="p-2 text-center"><button onclick="removeMissingRow(this)" class="px-2 py-1 bg-red-50 text-red-600 text-xs rounded border border-red-200">Delete</button></td>
+      `;
+      tbody.appendChild(tr);
+      markModified();
+    }
+
+    function calcMissingRowHours(el) {
+      const tr = el.closest('tr');
+      const start = tr.querySelector('.miss-start').value;
+      const end = tr.querySelector('.miss-end').value;
+      let hours = 0;
+      if (start && end) {
+        const [sh, sm] = start.split(':').map(Number);
+        const [eh, em] = end.split(':').map(Number);
+        let diff = (eh * 60 + em) - (sh * 60 + sm);
+        if (diff < 0) diff += 24 * 60;
+        hours = diff / 60;
+      }
+      tr.querySelector('.miss-hrs').textContent = hours.toFixed(2) + 'h';
+      markModified();
+    }
+
+    function removeMissingRow(btn) { btn.closest('tr').remove(); markModified(); }
+
+    async function saveMyActualHours() {
+      if (!_supabase || !currentUser) return alert("Database not connected.");
+      const periodStartStr = formatDateISO(myPayPeriodStart);
+      const records = [];
+      for (let i = 0; i < 14; i++) {
+        const cell = document.querySelector(`td[data-day-offset="${i}"]`);
+        if (!cell) continue;
+        const start_time = cell.querySelector('.my-start').value;
+        const end_time = cell.querySelector('.my-end').value;
+        const hours = parseFloat(document.getElementById(`my-hrs-display-${i}`).textContent) || 0;
+        if (start_time || end_time || hours > 0) {
+          records.push({ employee_id: currentUser.id, employee_name: currentUser.name, period_start_date: periodStartStr, day_offset: i, start_time: start_time || null, end_time: end_time || null, hours });
+        }
+      }
+      await _supabase.from('actual_hours').delete().eq('employee_id', currentUser.id).eq('period_start_date', periodStartStr);
+      if (records.length > 0) await _supabase.from('actual_hours').insert(records);
+      isDataModified = false;
+      alert("Actual hours saved successfully!");
+    }
+
     function loadMyProfileForm() {
       if (!currentUser) return;
       document.getElementById('profile-firstname').value = currentUser.first_name || '';
       document.getElementById('profile-lastname').value = currentUser.last_name || '';
       document.getElementById('profile-name').value = currentUser.name || '';
       document.getElementById('profile-pin').value = currentUser.pin_code || '';
+      document.getElementById('profile-email').value = currentUser.email || '';
+      document.getElementById('profile-phone').value = currentUser.phone || '';
     }
-    async function saveMyProfile(e) { e.preventDefault(); alert("Profile saved!"); }
-    function changeAdminPayPeriod(offset) {}
+
+    async function saveMyProfile(e) {
+      e.preventDefault();
+      if (!currentUser || !_supabase) return;
+      const first_name = document.getElementById('profile-firstname').value.trim();
+      const last_name = document.getElementById('profile-lastname').value.trim();
+      const name = document.getElementById('profile-name').value.trim() || `${first_name} ${last_name}`;
+      const pin_code = document.getElementById('profile-pin').value.trim();
+      const email = document.getElementById('profile-email').value.trim();
+      const phone = document.getElementById('profile-phone').value.trim();
+
+      await _supabase.from('employees').update({ first_name, last_name, name, pin_code, email, phone }).eq('id', currentUser.id);
+      currentUser.first_name = first_name; currentUser.last_name = last_name; currentUser.name = name; currentUser.pin_code = pin_code;
+      localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
+      alert("Profile updated successfully!");
+    }
+
+    function changeAdminPayPeriod(offset) { adminPayPeriodStart.setDate(adminPayPeriodStart.getDate() + (offset * 14)); loadAdminActualHoursMaster(); }
     async function loadAdminActualHoursMaster() {}
 
     function renderEmployeeTable() {
@@ -1289,16 +1482,16 @@
           <td class="p-3">${emp.email || '-'}</td>
           <td class="p-3">${emp.phone || '-'}</td>
           <td class="p-3 text-center">${emp.status || 'active'}</td>
-          ${isAdmin ? `<td class="p-3 text-center">Edit</td>` : ''}
+          ${isAdmin ? `<td class="p-3 text-center"><button onclick="enableEdit('${emp.id}')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>` : ''}
         </tr>
       `).join('');
     }
 
     function addNewRow() {}
+    function enableEdit(id) {}
     function markModified() { isDataModified = true; }
 
     function switchTab(tabName) {
-      // 일반 직원이 Sales History에 접근하려고 할 때 차단
       if (tabName === 'sales-history' && currentUser && currentUser.role === 'employee') {
         alert("Access Denied. Sales History is restricted to Managers and Administrators.");
         return;
@@ -1330,9 +1523,9 @@
       return `${h}:${mStr} ${period}`;
     }
 
-    function generateSmsText() { alert("SMS text copied."); }
+    function generateSmsText() { alert("Schedule text copied."); }
 
-    // --- SALES HISTORY MODULE LOGIC (With Detailed Breakdowns & Permissions) ---
+    // --- SALES HISTORY MODULE LOGIC ---
     const dropZone = document.getElementById('drop-zone');
     if (dropZone) {
       dropZone.addEventListener('click', () => document.getElementById('file-input').click());
@@ -1357,10 +1550,9 @@
           const parsedData = await parseSalesPdfFile(files[i]);
           await saveSalesParsedDataToSupabase(parsedData);
           successCount++;
-        } catch (err) { console.error("Error processing file:", files[i].name, err); }
+        } catch (err) { console.error(err); }
       }
-
-      statusEl.textContent = `Successfully processed and saved ${successCount} of ${files.length} file(s)!`;
+      statusEl.textContent = `Successfully processed and saved ${successCount} file(s)!`;
       statusEl.className = 'text-xs font-semibold text-center text-emerald-600';
       loadSalesHistoryData();
     }
@@ -1393,7 +1585,6 @@
       const netSales = extractVal(/Net Sales.*?\$([0-9,]+\.[0-9]{2})/);
       const totalCash = extractVal(/= Total Cash.*?\$([0-9,]+\.[0-9]{2})/);
 
-      // 세부 항목 파싱 정규식 (PDF 내부 키워드 대응)
       const visa = extractVal(/Visa.*?\$([0-9,]+\.[0-9]{2})/);
       const master = extractVal(/Mastercard.*?\$([0-9,]+\.[0-9]{2})/);
       const amex = extractVal(/Amex.*?\$([0-9,]+\.[0-9]{2})/);
@@ -1480,7 +1671,7 @@
         const door = Number(row.door_dash || 0);
         const skip = Number(row.skip_the_dishes || 0);
         const onlineSubRaw = uber + door + skip;
-        const onlineNet = onlineSubRaw * 0.70; // 30% 차감 금액
+        const onlineNet = onlineSubRaw * 0.70;
 
         const cash = Number(row.total_cash || 0);
         const other = Number(row.other_amount || 0);
