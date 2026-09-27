@@ -2095,47 +2095,78 @@
         businessDateStr = new Date().toISOString().split('T')[0];
       }
 
+      // 단일 값 추출 (Gross Sales, Net Sales 등 고정 항목용)
       const extractValFlexible = (keywords) => {
         if (!Array.isArray(keywords)) keywords = [keywords];
-        
         for (let kw of keywords) {
           const escapedKw = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
           const regex = new RegExp(escapedKw + `[\\s\\S]*?\\$([0-9,]+\\.[0-9]{2})`, 'i');
           const m = fullText.match(regex);
           if (m) return parseFloat(m[1].replace(/,/g, ''));
         }
+        return 0.0;
+      };
 
-        for (let i = 0; i < textItems.length; i++) {
-          const item = textItems[i];
-          for (let kw of keywords) {
-            if (new RegExp(kw, 'i').test(item)) {
-              for (let j = i + 1; j < Math.min(i + 6, textItems.length); j++) {
+      // 핵심 개선: 특정 키워드와 관련된 모든 항목(Manual-, SSF- 포함)을 찾아 전부 합산하는 함수
+      const extractSumFlexible = (baseKeywords) => {
+        if (!Array.isArray(baseKeywords)) baseKeywords = [baseKeywords];
+        let totalSum = 0;
+        let matchedFound = false;
+
+        // PDF textItems 혹은 줄 단위 텍스트에서 해당 키워드가 포함된 모든 라인/항목 탐색
+        for (let kw of baseKeywords) {
+          // 정규식을 이용해 기본 키워드 또는 Manual-{키워드}, SSF-{키워드} 형태가 포함된 패턴 모두 매칭
+          // 예: UberEats -> UberEats, Manual-UberEats 등 모두 포착
+          const escapedKw = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          const pattern = new RegExp(`(?:Manual-|SSF-)?(?:\\d+-)?` + escapedKw, 'i');
+
+          for (let i = 0; i < textItems.length; i++) {
+            if (pattern.test(textItems[i])) {
+              // 해당 항목 이름 바로 뒤쪽에서 가격 형식($XX.XX)을 탐색
+              for (let j = i + 1; j < Math.min(i + 5, textItems.length); j++) {
                 const valClean = textItems[j].replace(/[\$,]/g, '');
                 if (/^[0-9]+\.[0-9]{2}$/.test(valClean)) {
-                  return parseFloat(valClean);
+                  totalSum += parseFloat(valClean);
+                  matchedFound = true;
+                  break; // 하나의 항목당 하나의 금액 매칭 후 다음으로
                 }
               }
             }
           }
         }
-        return 0.0;
+
+        // 만약 textItems 배열 탐색에서 못 찾았다면 fullText 전역 정규식으로 재시도 합산
+        if (!matchedFound) {
+          for (let kw of baseKeywords) {
+            const escapedKw = kw.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const globalRegex = new RegExp(`(?:Manual-|SSF-)?(?:\\d+-)?` + escapedKw + `[\\s\\S]*?\\$([0-9,]+\\.[0-9]{2})`, 'ig');
+            let match;
+            while ((match = globalRegex.exec(fullText)) !== null) {
+              totalSum += parseFloat(match[1].replace(/,/g, ''));
+            }
+          }
+        }
+
+        return totalSum;
       };
 
-      const amexVal = extractValFlexible(['3-American Express', 'American Express', 'Amex']);
-      const visaVal = extractValFlexible(['1-Visa', 'Visa']);
-      const masterVal = extractValFlexible(['2-MasterCard', 'MasterCard', 'Master']);
-      const debitVal = extractValFlexible(['Debit']);
-      const menuappVal = extractValFlexible(['Menu App', 'Menuapp']);
-      const gcVal = extractValFlexible(['Gift Card']);
+      // 각 결제 수단별로 Manual-, SSF- 및 번호 접두사까지 모두 포괄하여 자동 합산
+      const visaVal = extractSumFlexible(['Visa']);
+      const masterVal = extractSumFlexible(['MasterCard', 'Master']);
+      const amexVal = extractSumFlexible(['American Express', 'Amex']);
+      const debitVal = extractSumFlexible(['Debit']);
+      const menuappVal = extractSumFlexible(['Menu App', 'Menuapp']);
+      const gcVal = extractSumFlexible(['Gift Card']);
       
-      const uberRegular = extractValFlexible(['UberEats', 'Uber Eats']);
-      const uberManual = extractValFlexible(['Manual-UberEats', 'Manual-Uber Eats']);
-      const totalUber = uberRegular + uberManual;
-
-      const doorVal = extractValFlexible(['DoorDash', 'Doordash']);
-      const skipVal = extractValFlexible(['Skip the Dishes', 'SkipTheDishes', 'Skip']);
+      // UberEats (일반 UberEats + Manual-UberEats 등 모두 자동 합산)
+      const totalUber = extractSumFlexible(['UberEats', 'Uber Eats']);
+      
+      // DoorDash 및 Skip 도 동일하게 예외 접두사 포함 자동 합산
+      const doorVal = extractSumFlexible(['DoorDash', 'Doordash']);
+      const skipVal = extractSumFlexible(['Skip the Dishes', 'SkipTheDishes', 'Skip']);
+      
       const cashVal = extractValFlexible(['Total Cash', 'Cash']);
-      const gcTopupVal = extractValFlexible(['Gift Card Top-up', 'Gift Card Top Up', 'Gift Card Topup']);
+      const gcTopupVal = extractSumFlexible(['Gift Card Top-up', 'Gift Card Top Up', 'Gift Card Topup']);
 
       return {
         store_id: 'CHA0053',
