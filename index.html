@@ -1860,7 +1860,7 @@
 
     function generateSmsText() { alert("Schedule text copied."); }
 
-    // --- SALES HISTORY MODULE (Robust Flexible Parser & Re-upload Fix) ---
+    // --- SALES HISTORY MODULE (Robust Multi-token Flexible Parser & Re-upload Fix) ---
     const dropZone = document.getElementById('drop-zone');
     if (dropZone) {
       dropZone.addEventListener('click', () => document.getElementById('file-input').click());
@@ -1896,9 +1896,11 @@
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
+      let textItems = [];
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
+        textItems.push(...textContent.items.map(item => item.str.trim()));
         fullText += textContent.items.map(item => item.str).join(' ') + '\n';
       }
 
@@ -1912,28 +1914,50 @@
         businessDateStr = new Date().toISOString().split('T')[0];
       }
 
-      // Robust Flexible Regex Helper for PARPOS PDF layout
-      const extractValFlexible = (keyword) => {
-        const regex = new RegExp(keyword + `[\\s\\S]*?\\$([0-9,]+\\.[0-9]{2})`, 'i');
-        const m = fullText.match(regex);
-        return m ? parseFloat(m[1].replace(/,/g, '')) : 0.0;
+      // Ultra-robust flexible extractor checking both fullText regex and token array proximity
+      const extractValFlexible = (keywords) => {
+        if (!Array.isArray(keywords)) keywords = [keywords];
+        
+        // Method 1: Regex on full text
+        for (let kw of keywords) {
+          const regex = new RegExp(kw + `[\\s\\S]*?\\$([0-9,]+\\.[0-9]{2})`, 'i');
+          const m = fullText.match(regex);
+          if (m) return parseFloat(m[1].replace(/,/g, ''));
+        }
+
+        // Method 2: Scan token items for keyword match and look ahead for currency format
+        for (let i = 0; i < textItems.length; i++) {
+          const item = textItems[i];
+          for (let kw of keywords) {
+            if (new RegExp('^' + kw + '$', 'i').test(item)) {
+              // Look ahead up to 5 items for a monetary amount ($XX.XX or XX.XX)
+              for (let j = i + 1; j < Math.min(i + 6, textItems.length); j++) {
+                const valClean = textItems[j].replace(/[\$,]/g, '');
+                if (/^[0-9]+\.[0-9]{2}$/.test(valClean)) {
+                  return parseFloat(valClean);
+                }
+              }
+            }
+          }
+        }
+        return 0.0;
       };
 
       const grossSales = extractValFlexible('Gross Sales');
       const netSales = extractValFlexible('Net Sales');
-      const totalCash = extractValFlexible('Total Cash');
+      const totalCash = extractValFlexible(['Total Cash', 'Cash']);
 
       const visa = extractValFlexible('Visa');
-      const master = extractValFlexible('Mastercard|Master');
+      const master = extractValFlexible(['Mastercard', 'Master']);
       const amex = extractValFlexible('Amex');
       const debit = extractValFlexible('Debit');
       const menuapp = extractValFlexible('Menuapp');
-      const gc = extractValFlexible('Gift Card');
-      const gcTopup = extractValFlexible('Gift Card Top[- ]?up');
+      const gc = extractValFlexible(['Gift Card', 'GC']);
+      const gcTopup = extractValFlexible(['Gift Card Top-up', 'Gift Card Top Up', 'Gift Card Topup']);
 
-      const uber = extractValFlexible('UberEats|Uber Eats');
+      const uber = extractValFlexible(['UberEats', 'Uber Eats']);
       const door = extractValFlexible('DoorDash');
-      const skip = extractValFlexible('SkipTheDishes|Skip The Dishes');
+      const skip = extractValFlexible(['SkipTheDishes', 'Skip The Dishes']);
 
       return {
         store_id: 'CHA0053',
