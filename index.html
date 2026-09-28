@@ -2104,11 +2104,10 @@
         return 0.0;
       };
 
-      // Tenders 섹션 내부에서 중복 카운트 없이 고유 값만 정확히 합산하는 함수 (Set으로 중복 가격 캐싱 방지)
       const extractSumFlexible = (baseKeywords) => {
         if (!Array.isArray(baseKeywords)) baseKeywords = [baseKeywords];
         let totalSum = 0;
-        let matchedValues = new Set(); // 동일 금액 중복 합산 방지
+        let matchedValues = new Set();
 
         let targetText = fullText;
         const tendersIdx = fullText.search(/Tenders?/i);
@@ -2128,7 +2127,6 @@
           let match;
           while ((match = regex.exec(targetText)) !== null) {
             const val = parseFloat(match[1].replace(/,/g, ''));
-            // 고유 식별을 위해 index와 매칭 값을 조합하여 중복 방지 (또는 같은 줄 복사 방지)
             const uniqueKey = `${match.index}:${val}`;
             if (!matchedValues.has(uniqueKey) && val > 0) {
               matchedValues.add(uniqueKey);
@@ -2250,13 +2248,14 @@
         const door = Number(row.door_dash || 0);
         const skip = Number(row.skip_the_dishes || 0);
         const onlineSubRaw = uber + door + skip;
-        const onlineNet = onlineSubRaw * 0.70;
+        const onlineNet = onlineSubRaw * 0.70; // 온라인 플랫폼은 Net (-30%) 값 적용
 
         const cash = Number(row.total_cash || 0);
         const other = Number(row.other_amount || 0);
         const gcTopup = Number(row.gc_topup || 0);
 
-        const totalGrossSum = merchantSub + onlineSubRaw + cash + other - gcTopup;
+        // 총합 계산 시 온라인 플랫폼은 원본이 아닌 Net (-30%) 값을 합산
+        const totalGrossSum = merchantSub + onlineNet + cash + other - gcTopup;
         const gstTax = totalGrossSum / 105 * 5;
         const finalNet = totalGrossSum - gstTax;
 
