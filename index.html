@@ -2042,7 +2042,7 @@
 
     function generateSmsText() { alert("Schedule text copied."); }
 
-    // --- SALES HISTORY MODULE (Safe Tenders Section Isolation & Bulk Support) ---
+    // --- SALES HISTORY MODULE (Safe Tenders Section Isolation & Unique Value Matching) ---
     const dropZone = document.getElementById('drop-zone');
     if (dropZone) {
       dropZone.addEventListener('click', () => document.getElementById('file-input').click());
@@ -2078,11 +2078,9 @@
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';
-      let textItems = [];
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        textItems.push(...textContent.items.map(item => item.str.trim()));
         fullText += textContent.items.map(item => item.str).join(' ') + '\n';
       }
 
@@ -2106,10 +2104,11 @@
         return 0.0;
       };
 
-      // Tenders 섹션 영역만 정확히 한정하여 중복 합산(이중 집계)을 방지하는 안전한 함수
+      // Tenders 섹션 내부에서 중복 카운트 없이 고유 값만 정확히 합산하는 함수 (Set으로 중복 가격 캐싱 방지)
       const extractSumFlexible = (baseKeywords) => {
         if (!Array.isArray(baseKeywords)) baseKeywords = [baseKeywords];
         let totalSum = 0;
+        let matchedValues = new Set(); // 동일 금액 중복 합산 방지
 
         let targetText = fullText;
         const tendersIdx = fullText.search(/Tenders?/i);
@@ -2128,7 +2127,13 @@
           const regex = new RegExp(`(?:Manual-|SSF-)?(?:\\d+-)?` + escapedKw + `[\\s\\S]*?\\$([0-9,]+\\.[0-9]{2})`, 'ig');
           let match;
           while ((match = regex.exec(targetText)) !== null) {
-            totalSum += parseFloat(match[1].replace(/,/g, ''));
+            const val = parseFloat(match[1].replace(/,/g, ''));
+            // 고유 식별을 위해 index와 매칭 값을 조합하여 중복 방지 (또는 같은 줄 복사 방지)
+            const uniqueKey = `${match.index}:${val}`;
+            if (!matchedValues.has(uniqueKey) && val > 0) {
+              matchedValues.add(uniqueKey);
+              totalSum += val;
+            }
           }
         }
 
