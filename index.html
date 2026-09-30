@@ -761,20 +761,29 @@
 
       populateLoginSelect();
 
-      // [수정 완료] 브라우저 종료 시 자동 로그인 방지를 위해 sessionStorage 사용
-      const savedUserStr = sessionStorage.getItem('chatime_session_user');
-      if (savedUserStr) {
-        try {
-          const savedUser = JSON.parse(savedUserStr);
-          const match = dbEmployees.find(e => e.id === savedUser.id) || (savedUser.id === defaultAdmin.id ? defaultAdmin : null);
-          if (match) {
-            currentUser = match;
-            showMainDashboard();
-            return;
-          }
-        } catch (e) { sessionStorage.removeItem('chatime_session_user'); }
-      }
-    }
+      // 앱 시작 시 강제로 기존 폼 및 입력값 초기화
+document.getElementById('login-pin').value = '';
+
+const savedUserStr = sessionStorage.getItem('chatime_session_user');
+if (!savedUserStr) {
+  // 세션 정보가 없으면 확실하게 로그인 화면 노출
+  currentUser = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+  return;
+}
+
+try {
+  const savedUser = JSON.parse(savedUserStr);
+  const match = dbEmployees.find(e => e.id === savedUser.id) || (savedUser.id === defaultAdmin.id ? defaultAdmin : null);
+  if (match) {
+    currentUser = match;
+    showMainDashboard();
+    return;
+  }
+} catch (e) { 
+  sessionStorage.removeItem('chatime_session_user'); 
+}
 
     function populateLoginSelect() {
       const select = document.getElementById('login-user');
@@ -819,17 +828,19 @@
     }
 
     function handleLogout() {
-      if (isDataModified) {
-        if (!confirm("You have unsaved changes. Do you want to leave without saving?")) return;
-      }
-      currentUser = null;
-      isDataModified = false;
-      // [수정 완료] 로그아웃 시 sessionStorage 제거
-      sessionStorage.removeItem('chatime_session_user');
-      document.getElementById('app').classList.add('hidden');
-      document.getElementById('login-screen').classList.remove('hidden');
-      document.getElementById('login-pin').value = '';
-    }
+  if (isDataModified) {
+    if (!confirm("You have unsaved changes. Do you want to leave without saving?")) return;
+  }
+  currentUser = null;
+  isDataModified = false;
+
+  // 세션 스토리지 완전 삭제
+  sessionStorage.removeItem('chatime_session_user');
+  sessionStorage.clear();
+
+  // 화면을 완전히 새로고침하여 브라우저 메모리/캐시의 자동 로그인 상태를 초기화
+  window.location.replace(window.location.pathname);
+}
 
     function goHome() { switchTab('hub'); }
 
