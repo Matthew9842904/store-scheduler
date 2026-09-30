@@ -761,7 +761,8 @@
 
       populateLoginSelect();
 
-      const savedUserStr = localStorage.getItem('chatime_session_user');
+      // [수정 완료] 브라우저 종료 시 자동 로그인 방지를 위해 sessionStorage 사용
+      const savedUserStr = sessionStorage.getItem('chatime_session_user');
       if (savedUserStr) {
         try {
           const savedUser = JSON.parse(savedUserStr);
@@ -771,7 +772,7 @@
             showMainDashboard();
             return;
           }
-        } catch (e) { localStorage.removeItem('chatime_session_user'); }
+        } catch (e) { sessionStorage.removeItem('chatime_session_user'); }
       }
     }
 
@@ -799,7 +800,8 @@
       if (user.pin_code !== pin) return alert('Incorrect PIN/Password.');
 
       currentUser = user;
-      localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
+      // [수정 완료] sessionStorage에 저장하여 브라우저 종료 시 세션 만료
+      sessionStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
       showMainDashboard();
     }
 
@@ -822,7 +824,8 @@
       }
       currentUser = null;
       isDataModified = false;
-      localStorage.removeItem('chatime_session_user');
+      // [수정 완료] 로그아웃 시 sessionStorage 제거
+      sessionStorage.removeItem('chatime_session_user');
       document.getElementById('app').classList.add('hidden');
       document.getElementById('login-screen').classList.remove('hidden');
       document.getElementById('login-pin').value = '';
@@ -1805,7 +1808,7 @@
 
       await _supabase.from('employees').update({ first_name, last_name, name, pin_code, email, phone }).eq('id', currentUser.id);
       currentUser.first_name = first_name; currentUser.last_name = last_name; currentUser.name = name; currentUser.pin_code = pin_code;
-      localStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
+      sessionStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
       alert("Profile updated successfully!");
     }
 
