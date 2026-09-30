@@ -1,17 +1,18 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chatime Store Hub - Complete Integrated System</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- PDF.js for parsing PDF files directly in the browser -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
     if (typeof pdfjsLib !== 'undefined') {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
   </script>
-<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.mb-3{margin-bottom:0.75rem}.mb-4{margin-bottom:1rem}.mb-6{margin-bottom:1.5rem}.mb-8{margin-bottom:2rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.block{display:block}.flex{display:flex}.grid{display:grid}.hidden{display:none}.h-10{height:2.5rem}.min-h-screen{min-height:100vh}.w-16{width:4rem}.w-20{width:5rem}.w-24{width:6rem}.w-28{width:7rem}.w-32{width:8rem}.w-36{width:9rem}.w-full{width:100%}.w-10{width:2.5rem}.min-w-\[1000px\]{min-width:1000px}.min-w-\[1100px\]{min-width:1100px}.min-w-\[1600px\]{min-width:1600px}.max-w-4xl{max-width:56rem}.max-w-7xl{max-width:80rem}.max-w-md{max-width:28rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.border-collapse{border-collapse:collapse}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.items-stretch{align-items:stretch}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.divide-y > :not([hidden]) ~ :not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px * calc(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px * var(--tw-divide-y-reverse))}.overflow-x-auto{overflow-x:auto}.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-t{border-top-width:1px}.border-r{border-right-width:1px}.border-dashed{border-style:dashed}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.border-indigo-200{--tw-border-opacity:1;border-color:rgb(199 210 254 / var(--tw-border-opacity, 1))}.border-indigo-300{--tw-border-opacity:1;border-color:rgb(165 180 252 / var(--tw-border-opacity, 1))}.border-blue-300{--tw-border-opacity:1;border-color:rgb(147 197 253 / var(--tw-border-opacity, 1))}.border-cyan-300{--tw-border-opacity:1;border-color:rgb(103 232 249 / var(--tw-border-opacity, 1))}.border-emerald-300{--tw-border-opacity:1;border-color:rgb(110 231 183 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-pink-300{--tw-border-opacity:1;border-color:rgb(249 168 212 / var(--tw-border-opacity, 1))}.border-purple-300{--tw-border-opacity:1;border-color:rgb(216 180 254 / var(--tw-border-opacity, 1))}.border-rose-300{--tw-border-opacity:1;border-color:rgb(253 164 175 / var(--tw-border-opacity, 1))}.border-teal-300{--tw-border-opacity:1;border-color:rgb(94 234 212 / var(--tw-border-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.bg-amber-600{--tw-bg-opacity:1;background-color:rgb(217 119 6 / var(--tw-bg-opacity, 1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-gray-100{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.bg-gray-600{--tw-bg-opacity:1;background-color:rgb(75 85 99 / var(--tw-bg-opacity, 1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.bg-purple-900{--tw-bg-opacity:1;background-color:rgb(88 28 135 / var(--tw-bg-opacity, 1))}.bg-red-50{--tw-bg-opacity:1;background-color:rgb(254 242 242 / var(--tw-bg-opacity, 1))}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-blue-50{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.bg-gray-200{--tw-bg-opacity:1;background-color:rgb(229 231 235 / var(--tw-bg-opacity, 1))}.bg-indigo-50\/50{background-color:rgb(238 242 255 / 0.5)}.bg-indigo-900{--tw-bg-opacity:1;background-color:rgb(49 46 129 / var(--tw-bg-opacity, 1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.bg-teal-50{--tw-bg-opacity:1;background-color:rgb(240 253 250 / var(--tw-bg-opacity, 1))}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199 / var(--tw-bg-opacity, 1))}.bg-blue-100{--tw-bg-opacity:1;background-color:rgb(219 234 254 / var(--tw-bg-opacity, 1))}.bg-cyan-100{--tw-bg-opacity:1;background-color:rgb(207 250 254 / var(--tw-bg-opacity, 1))}.bg-orange-100{--tw-bg-opacity:1;background-color:rgb(255 237 213 / var(--tw-bg-opacity, 1))}.bg-pink-100{--tw-bg-opacity:1;background-color:rgb(252 231 243 / var(--tw-bg-opacity, 1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255 / var(--tw-bg-opacity, 1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230 / var(--tw-bg-opacity, 1))}.bg-teal-100{--tw-bg-opacity:1;background-color:rgb(204 251 241 / var(--tw-bg-opacity, 1))}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-6{padding:1.5rem}.p-8{padding:2rem}.p-1\.5{padding:0.375rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.pb-4{padding-bottom:1rem}.pl-3{padding-left:0.75rem}.pl-6{padding-left:1.5rem}.pt-3{padding-top:0.75rem}.pt-4{padding-top:1rem}.pt-6{padding-top:1.5rem}.pt-2{padding-top:0.5rem}.text-left{text-align:left}.text-center{text-align:center}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-\[11px\]{font-size:11px}.font-black{font-weight:900}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.italic{font-style:italic}.tracking-tight{letter-spacing:-0.025em}.tracking-wide{letter-spacing:0.025em}.tracking-wider{letter-spacing:0.05em}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15 / var(--tw-text-opacity, 1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87 / var(--tw-text-opacity, 1))}.text-gray-500{--tw-text-opacity:1;color:rgb(107 114 128 / var(--tw-text-opacity, 1))}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-900{--tw-text-opacity:1;color:rgb(17 24 39 / var(--tw-text-opacity, 1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202 / var(--tw-text-opacity, 1))}.text-indigo-800{--tw-text-opacity:1;color:rgb(55 48 163 / var(--tw-text-opacity, 1))}.text-indigo-900{--tw-text-opacity:1;color:rgb(49 46 129 / var(--tw-text-opacity, 1))}.text-red-600{--tw-text-opacity:1;color:rgb(220 38 38 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-blue-900{--tw-text-opacity:1;color:rgb(30 58 138 / var(--tw-text-opacity, 1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59 / var(--tw-text-opacity, 1))}.text-gray-400{--tw-text-opacity:1;color:rgb(156 163 175 / var(--tw-text-opacity, 1))}.text-purple-900{--tw-text-opacity:1;color:rgb(88 28 135 / var(--tw-text-opacity, 1))}.text-teal-900{--tw-text-opacity:1;color:rgb(19 78 74 / var(--tw-text-opacity, 1))}.text-amber-600{--tw-text-opacity:1;color:rgb(217 119 6 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-cyan-600{--tw-text-opacity:1;color:rgb(8 145 178 / var(--tw-text-opacity, 1))}.text-cyan-900{--tw-text-opacity:1;color:rgb(22 78 99 / var(--tw-text-opacity, 1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105 / var(--tw-text-opacity, 1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229 / var(--tw-text-opacity, 1))}.text-orange-600{--tw-text-opacity:1;color:rgb(234 88 12 / var(--tw-text-opacity, 1))}.text-pink-900{--tw-text-opacity:1;color:rgb(131 24 67 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-rose-900{--tw-text-opacity:1;color:rgb(136 19 55 / var(--tw-text-opacity, 1))}.underline{-webkit-text-decoration-line:underline;text-decoration-line:underline}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:border-amber-300:hover{--tw-border-opacity:1;border-color:rgb(252 211 77 / var(--tw-border-opacity, 1))}.hover\:border-blue-300:hover{--tw-border-opacity:1;border-color:rgb(147 197 253 / var(--tw-border-opacity, 1))}.hover\:border-cyan-300:hover{--tw-border-opacity:1;border-color:rgb(103 232 249 / var(--tw-border-opacity, 1))}.hover\:border-emerald-300:hover{--tw-border-opacity:1;border-color:rgb(110 231 183 / var(--tw-border-opacity, 1))}.hover\:border-indigo-300:hover{--tw-border-opacity:1;border-color:rgb(165 180 252 / var(--tw-border-opacity, 1))}.hover\:border-orange-300:hover{--tw-border-opacity:1;border-color:rgb(253 186 116 / var(--tw-border-opacity, 1))}.hover\:border-purple-300:hover{--tw-border-opacity:1;border-color:rgb(216 180 254 / var(--tw-border-opacity, 1))}.hover\:bg-amber-700:hover{--tw-bg-opacity:1;background-color:rgb(180 83 9 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-100:hover{--tw-bg-opacity:1;background-color:rgb(209 250 229 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-700:hover{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-50:hover{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-700:hover{--tw-bg-opacity:1;background-color:rgb(55 65 81 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202 / var(--tw-bg-opacity, 1))}.hover\:bg-red-100:hover{--tw-bg-opacity:1;background-color:rgb(254 226 226 / var(--tw-bg-opacity, 1))}.hover\:bg-white:hover{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.hover\:bg-indigo-50:hover{--tw-bg-opacity:1;background-color:rgb(238 242 255 / var(--tw-bg-opacity, 1))}.hover\:bg-amber-50:hover{--tw-bg-opacity:1;background-color:rgb(255 251 235 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-50:hover{--tw-bg-opacity:1;background-color:rgb(239 246 255 / var(--tw-bg-opacity, 1))}.hover\:bg-cyan-50:hover{--tw-bg-opacity:1;background-color:rgb(236 254 255 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-50:hover{--tw-bg-opacity:1;background-color:rgb(236 253 245 / var(--tw-bg-opacity, 1))}.hover\:bg-orange-50:hover{--tw-bg-opacity:1;background-color:rgb(255 247 237 / var(--tw-bg-opacity, 1))}.hover\:bg-purple-50:hover{--tw-bg-opacity:1;background-color:rgb(250 245 255 / var(--tw-bg-opacity, 1))}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.focus\:bg-white:focus{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-amber-600{--tw-bg-opacity:1;background-color:rgb(217 119 6 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-cyan-600{--tw-bg-opacity:1;background-color:rgb(8 145 178 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-orange-600{--tw-bg-opacity:1;background-color:rgb(234 88 12 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234 / var(--tw-bg-opacity, 1))}.group:hover .group-hover\:text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}@media (min-width: 640px){.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-center{align-items:center}}@media (min-width: 768px){.md\:grid-cols-3{grid-template-columns:repeat(3, minmax(0, 1fr))}.md\:grid-cols-7{grid-template-columns:repeat(7, minmax(0, 1fr))}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}.md\:p-6{padding:1.5rem}.md\:text-lg{font-size:1.125rem;line-height:1.75rem}}@media (min-width: 1024px){.lg\:flex-row{flex-direction:row}}</style></head>
+</head>
 <body class="bg-gray-50 min-h-screen text-gray-800">
 
   <!-- ================= 1. Login Screen ================= -->
@@ -28,11 +29,13 @@
       <form onsubmit="handleLogin(event)" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Select Staff</label>
-          <select id="login-user" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white" required=""><option value="">Select your name</option><option value="a55b96d1-fa1f-4e4e-ae25-0a20b155d99e">Tammy (Master)</option><option value="bb8e63ee-a2d0-4b52-8dbf-d0748ff6dd08">Matthew (Master)</option><option value="f0187938-3e62-468f-9593-ffcd6a1d4b21">Vicki (Staff)</option><option value="4ca3f572-8adb-4bb9-b873-2d89933895ca">Emma (Staff)</option><option value="b4a41522-6789-4ff5-83d3-4ffff9a7438a">Charis (Staff)</option><option value="10d4a241-a508-47ea-85c9-764ddd3bf80b">Stella (Staff)</option><option value="bbd022ff-8c37-48e6-9b47-db16dd29b89e">Heiley (Staff)</option><option value="f1fb859e-9989-456f-9e49-d31613b24209">Kelsey (Staff)</option><option value="7b05f685-d4bf-4401-98de-d6ed68a83229">Samantha (Staff)</option><option value="4c190460-4dc7-4c5e-8f33-507f09021d1f">Ellie (Staff)</option><option value="79f71055-b101-4557-a078-1b5a346739b1">Hannah (Manager)</option><option value="f1386cf6-9bc2-441e-8b37-701349726098">Master Admin (Master)</option></select>
+          <select id="login-user" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white" required>
+            <option value="">Select your name</option>
+          </select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">PIN / Password</label>
-          <input type="password" id="login-pin" placeholder="Enter PIN" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white" required="">
+          <input type="password" id="login-pin" placeholder="Enter PIN" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white" required>
         </div>
         <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-sm shadow-md transition">
           Log In
@@ -42,7 +45,7 @@
   </div>
 
   <!-- ================= 2. Main Dashboard ================= -->
-  <div id="app" class="max-w-7xl mx-auto p-4 md:p-6 space-y-6">
+  <div id="app" class="max-w-7xl mx-auto p-4 md:p-6 space-y-6 hidden">
     <header class="flex flex-col lg:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm border gap-4">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5 bg-purple-900 text-white px-3 py-1.5 rounded-lg shadow-sm">
@@ -52,13 +55,13 @@
         <div>
           <h1 class="text-base font-extrabold text-gray-900 tracking-tight">Chatime Hub</h1>
           <div class="flex items-center gap-2 mt-0.5">
-            <span id="current-user-name" class="text-xs font-bold text-gray-800">Matthew</span>
-            <span id="current-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-800">Master</span>
+            <span id="current-user-name" class="text-xs font-bold text-gray-800"></span>
+            <span id="current-user-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-indigo-100 text-indigo-800"></span>
           </div>
         </div>
       </div>
 
-      <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"><button onclick="goHome()" id="nav-hub" class="px-2.5 py-1.5 rounded-md bg-white shadow-sm text-indigo-700 font-bold transition">🏠 Menu</button><button onclick="switchTab('scheduler')" id="nav-scheduler" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Scheduler</button><button onclick="switchTab('submit-avail')" id="nav-submit-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">My Availability</button><button onclick="switchTab('view-avail')" id="nav-view-avail" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Team Availability</button><button onclick="switchTab('employees')" id="nav-employees" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Team Directory</button><button onclick="switchTab('actuals')" id="nav-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">ADP Payroll</button><button onclick="switchTab('sales-history')" id="nav-sales-history" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Sales History</button><button onclick="switchTab('my-actuals')" id="nav-my-actuals" class="px-2.5 py-1.5 rounded-md hover:bg-white text-gray-700 transition">Log Hours</button></nav>
+      <nav id="top-nav-bar" class="flex flex-wrap bg-gray-100 p-1 rounded-lg text-xs font-medium items-center gap-1 justify-center"></nav>
 
       <div class="flex items-center gap-2">
         <div id="admin-mode-toggle-container" class="flex items-center bg-gray-100 p-1 rounded-lg text-xs font-bold">
@@ -78,37 +81,7 @@
         <h2 class="text-2xl font-extrabold text-gray-800">Main Menu</h2>
         <p class="text-xs text-gray-500 mt-1">Select a module below or use the top navigation bar anytime.</p>
       </div>
-      <div id="hub-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <button onclick="switchTab('scheduler')" class="p-6 bg-white hover:bg-indigo-50 border border-gray-200 hover:border-indigo-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">🗓️</div>
-          <div><h3 class="font-bold text-gray-900 text-base">Scheduler</h3><p class="text-xs text-gray-500 mt-1">View schedule &amp; confirm shifts.</p></div>
-        </button>
-        <button onclick="switchTab('submit-avail')" class="p-6 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">⏰</div>
-          <div><h3 class="font-bold text-gray-900 text-base">My Availability</h3><p class="text-xs text-gray-500 mt-1">Submit your weekly availability preferences.</p></div>
-        </button>
-        <button onclick="switchTab('my-actuals')" class="p-6 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-          <div class="w-10 h-10 rounded-xl bg-cyan-100 text-cyan-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-cyan-600 group-hover:text-white transition">⏱️</div>
-          <div><h3 class="font-bold text-gray-900 text-base">Log Hours</h3><p class="text-xs text-gray-500 mt-1">Log your 2-week actual working hours for payroll.</p></div>
-        </button>
-      
-          <button onclick="switchTab('view-avail')" class="p-6 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-            <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-purple-600 group-hover:text-white transition">👥</div>
-            <div><h3 class="font-bold text-gray-900 text-base">Team Availability</h3><p class="text-xs text-gray-500 mt-1">Review team availability &amp; overview.</p></div>
-          </button>
-          <button onclick="switchTab('employees')" class="p-6 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-blue-600 group-hover:text-white transition">⚙️</div>
-            <div><h3 class="font-bold text-gray-900 text-base">Team Directory</h3><p class="text-xs text-gray-500 mt-1">Staff roster, First/Last Name, PIN codes.</p></div>
-          </button>
-          <button onclick="switchTab('actuals')" class="p-6 bg-white hover:bg-amber-50 border border-gray-200 hover:border-amber-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-amber-600 group-hover:text-white transition">📊</div>
-            <div><h3 class="font-bold text-gray-900 text-base">ADP Payroll</h3><p class="text-xs text-gray-500 mt-1">Summary table &amp; weekly detailed tables.</p></div>
-          </button>
-          <button onclick="switchTab('sales-history')" class="p-6 bg-white hover:bg-orange-50 border border-gray-200 hover:border-orange-300 rounded-2xl shadow-sm hover:shadow-md transition text-left flex flex-col justify-between group">
-            <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-orange-600 group-hover:text-white transition">📊</div>
-            <div><h3 class="font-bold text-gray-900 text-base">Sales History</h3><p class="text-xs text-gray-500 mt-1">Upload PARPOS sales PDF &amp; view net sales analytics.</p></div>
-          </button>
-        </div>
+      <div id="hub-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
     </div>
 
     <!-- 1. Weekly Scheduler Tab -->
@@ -121,7 +94,7 @@
         </div>
         <div id="admin-action-buttons" class="flex items-center gap-2 flex-wrap">
           <button onclick="saveCurrentSchedule()" id="btn-save-schedule" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg shadow-sm text-xs">💾 Save (Draft)</button>
-          <button onclick="publishCurrentSchedule()" id="btn-publish-schedule" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-xs">🚀 Publish &amp; Lock</button>
+          <button onclick="publishCurrentSchedule()" id="btn-publish-schedule" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg shadow-sm text-xs">🚀 Publish & Lock</button>
           <button onclick="unlockSchedule()" id="btn-unlock-schedule" class="hidden px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-lg shadow-sm text-xs">🔓 Unlock to Edit</button>
           <button onclick="generateSmsText()" id="btn-copy-sms" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg shadow-sm text-xs">💬 Copy Text</button>
         </div>
@@ -184,7 +157,7 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border space-y-6">
         <div>
           <h2 class="text-lg font-bold">Team Availability Overview</h2>
-          <p id="avail-overview-desc" class="text-xs text-gray-500 mt-0.5">Review all staff availabilities. As Admin, you can select any staff member below to modify their availability for this week.</p>
+          <p id="avail-overview-desc" class="text-xs text-gray-500 mt-0.5"></p>
         </div>
         <div class="flex items-center gap-3 bg-gray-50 p-3 rounded-lg border">
           <button onclick="changeOverviewWeek(-1)" class="px-3 py-1 border rounded bg-white hover:bg-gray-100 text-xs font-medium">&lt; Prev Week</button>
@@ -271,20 +244,20 @@
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">First Name</label>
-              <input type="text" id="profile-firstname" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required="">
+              <input type="text" id="profile-firstname" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required>
             </div>
             <div>
               <label class="block text-xs font-semibold text-gray-600 mb-1">Last Name</label>
-              <input type="text" id="profile-lastname" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required="">
+              <input type="text" id="profile-lastname" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required>
             </div>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">Display Name (ENG Name)</label>
-            <input type="text" id="profile-name" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required="">
+            <input type="text" id="profile-name" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50" required>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">PIN / Password</label>
-            <input type="text" id="profile-pin" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 font-mono" required="">
+            <input type="text" id="profile-pin" class="w-full p-2.5 border rounded-lg text-sm bg-gray-50 font-mono" required>
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
@@ -304,7 +277,7 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border">
         <div class="flex justify-between items-center mb-4">
           <div>
-            <h2 class="text-lg font-bold">Team Directory &amp; Permissions</h2>
+            <h2 class="text-lg font-bold">Team Directory & Permissions</h2>
             <p id="employee-tab-desc" class="text-xs text-gray-500 mt-0.5"></p>
           </div>
           <button id="add-emp-btn" onclick="addNewRow()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-sm">➕ Add New Staff</button>
@@ -325,163 +298,7 @@
                 <th class="p-3 role-admin-only w-28 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody id="employee-table-body" class="divide-y text-sm">
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">28</td>
-          <td class="p-3 font-semibold">Tammy</td>
-          <td class="p-3 font-semibold">Kim</td>
-          <td class="p-3 bg-rose-100 text-rose-900 border-rose-300 font-bold">Tammy</td>
-          <td class="p-3">Master</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">vr.cambie@chatime.ca</td>
-          <td class="p-3">6046559117</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('a55b96d1-fa1f-4e4e-ae25-0a20b155d99e')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">29</td>
-          <td class="p-3 font-semibold">Matthew</td>
-          <td class="p-3 font-semibold">Kim</td>
-          <td class="p-3 bg-amber-100 text-amber-900 border-amber-300 font-bold">Matthew</td>
-          <td class="p-3">Master</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">vr.cambie@chatime.ca</td>
-          <td class="p-3">6046551342</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('bb8e63ee-a2d0-4b52-8dbf-d0748ff6dd08')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">40</td>
-          <td class="p-3 font-semibold">Vicki</td>
-          <td class="p-3 font-semibold">Tran</td>
-          <td class="p-3 bg-emerald-100 text-emerald-900 border-emerald-300 font-bold">Vicki</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">vicki.tran14@hotmail.com</td>
-          <td class="p-3">7786818376</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('f0187938-3e62-468f-9593-ffcd6a1d4b21')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">48</td>
-          <td class="p-3 font-semibold">Emma shu wen</td>
-          <td class="p-3 font-semibold">Xuan</td>
-          <td class="p-3 bg-amber-100 text-amber-900 border-amber-300 font-bold">Emma</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">exuan7764@gmail.com</td>
-          <td class="p-3">6047158626</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('4ca3f572-8adb-4bb9-b873-2d89933895ca')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">51</td>
-          <td class="p-3 font-semibold">Charis</td>
-          <td class="p-3 font-semibold">Wang</td>
-          <td class="p-3 bg-emerald-100 text-emerald-900 border-emerald-300 font-bold">Charis</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">charis.wang@hotmail.com</td>
-          <td class="p-3">6044451916</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('b4a41522-6789-4ff5-83d3-4ffff9a7438a')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">52</td>
-          <td class="p-3 font-semibold">Kyung Jung</td>
-          <td class="p-3 font-semibold">Heo</td>
-          <td class="p-3 bg-purple-100 text-purple-900 border-purple-300 font-bold">Stella</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">stellaheo@hotmail.com</td>
-          <td class="p-3">7783230686</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('10d4a241-a508-47ea-85c9-764ddd3bf80b')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">54</td>
-          <td class="p-3 font-semibold">Thi Thuy Hang</td>
-          <td class="p-3 font-semibold">Nguyen</td>
-          <td class="p-3 bg-teal-100 text-teal-900 border-teal-300 font-bold">Heiley</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">hangnguyen210297@gmail.com</td>
-          <td class="p-3">2368866088</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('bbd022ff-8c37-48e6-9b47-db16dd29b89e')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">55</td>
-          <td class="p-3 font-semibold">Kelsey</td>
-          <td class="p-3 font-semibold">Lauric</td>
-          <td class="p-3 bg-cyan-100 text-cyan-900 border-cyan-300 font-bold">Kelsey</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">laurickelsey@gmail.com</td>
-          <td class="p-3">2368680831</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('f1fb859e-9989-456f-9e49-d31613b24209')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">58</td>
-          <td class="p-3 font-semibold">Samantha</td>
-          <td class="p-3 font-semibold">Lee</td>
-          <td class="p-3 bg-cyan-100 text-cyan-900 border-cyan-300 font-bold">Samantha</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">samanthaonyunlee@gmail.com</td>
-          <td class="p-3">2365133986</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('7b05f685-d4bf-4401-98de-d6ed68a83229')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">59</td>
-          <td class="p-3 font-semibold">Hyunji</td>
-          <td class="p-3 font-semibold">Youn</td>
-          <td class="p-3 bg-blue-100 text-blue-900 border-blue-300 font-bold">Ellie</td>
-          <td class="p-3">Staff</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">dbsguswl1009@naver.com</td>
-          <td class="p-3">7789547120</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('4c190460-4dc7-4c5e-8f33-507f09021d1f')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">7</td>
-          <td class="p-3 font-semibold">Xuan Hoang</td>
-          <td class="p-3 font-semibold">Nguyen</td>
-          <td class="p-3 bg-pink-100 text-pink-900 border-pink-300 font-bold">Hannah</td>
-          <td class="p-3">Manager</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">xuanhoang1702@gmail.com</td>
-          <td class="p-3">6044048750</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('79f71055-b101-4557-a078-1b5a346739b1')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      
-        <tr class="hover:bg-gray-50">
-          <td class="p-3 text-center font-mono font-bold text-indigo-700">99</td>
-          <td class="p-3 font-semibold">Master</td>
-          <td class="p-3 font-semibold">Admin</td>
-          <td class="p-3 bg-blue-100 text-blue-900 border-blue-300 font-bold">Master Admin</td>
-          <td class="p-3">Master</td>
-          <td class="p-3 font-mono text-xs">••••</td>
-          <td class="p-3">-</td>
-          <td class="p-3">-</td>
-          <td class="p-3 text-center">active</td>
-          <td class="p-3 text-center"><button onclick="enableEdit('f1386cf6-9bc2-441e-8b37-701349726098')" class="px-2 py-1 text-xs bg-gray-100 rounded">Edit</button></td>
-        </tr>
-      </tbody>
+            <tbody id="employee-table-body" class="divide-y text-sm"></tbody>
           </table>
         </div>
       </div>
@@ -502,7 +319,7 @@
           </div>
         </div>
         <div id="schedule-discrepancy-container" class="hidden bg-amber-50 border border-amber-300 p-4 rounded-xl shadow-xs space-y-3">
-          <div class="flex items-center gap-2 font-bold text-amber-900 text-sm"><span>⚠️</span><span>Payroll Discrepancy &amp; Missing Hours Alerts:</span></div>
+          <div class="flex items-center gap-2 font-bold text-amber-900 text-sm"><span>⚠️</span><span>Payroll Discrepancy & Missing Hours Alerts:</span></div>
           <div id="schedule-discrepancy-list" class="space-y-1.5 pl-6 text-xs text-amber-800"></div>
         </div>
         <div class="space-y-2">
@@ -559,11 +376,11 @@
 
         <!-- Upload Section (Admin Only) -->
         <div id="sales-upload-section" class="space-y-3">
-          <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide">📁 Upload Sales Summary PDF Reports (Multi-file &amp; Bulk Supported)</h3>
+          <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide">📁 Upload Sales Summary PDF Reports (Multi-file & Bulk Supported)</h3>
           <div id="drop-zone" class="border-2 border-dashed border-indigo-300 bg-indigo-50/50 hover:bg-indigo-50 rounded-xl p-6 text-center cursor-pointer transition flex flex-col items-center justify-center space-y-2">
             <span class="text-2xl">📥</span>
-            <p class="text-xs font-bold text-indigo-900">Drag &amp; Drop PDF files here, or click to browse</p>
-            <input type="file" id="file-input" multiple="" accept=".pdf" class="hidden" onchange="handleSalesFilesSelect(this.files)">
+            <p class="text-xs font-bold text-indigo-900">Drag & Drop PDF files here, or click to browse</p>
+            <input type="file" id="file-input" multiple accept=".pdf" class="hidden" onchange="handleSalesFilesSelect(this.files)">
           </div>
           <div id="upload-status" class="text-xs font-semibold text-center text-gray-600"></div>
         </div>
@@ -581,7 +398,6 @@
             </div>
           </div>
 
-          <!-- Extended Excel-like Grid Table with Simplified Group Headers -->
           <div class="overflow-x-auto border rounded-xl shadow-sm">
             <table class="w-full text-left border-collapse min-w-[1600px]">
               <thead>
@@ -733,7 +549,7 @@
       if (code === 0) return '☀️';
       if (code >= 1 && code <= 3) return '⛅';
       if (code >= 45 && code <= 48) return '🌫️';
-      if (code >= 51 && code <= 67) return '🌧️';
+      if (code >= 51 && code <= 67) return '🌧️️';
       if (code >= 71 && code <= 77) return '❄️';
       if (code >= 80 && code <= 82) return '🌧️';
       if (code >= 95) return '⛈️';
@@ -761,29 +577,29 @@
 
       populateLoginSelect();
 
-      // 앱 시작 시 강제로 기존 폼 및 입력값 초기화
-document.getElementById('login-pin').value = '';
+      // [핵심] sessionStorage를 체크하여 세션이 없으면 로그인 화면을 강제로 띄움
+      const savedUserStr = sessionStorage.getItem('chatime_session_user');
+      if (!savedUserStr) {
+        currentUser = null;
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+        return;
+      }
 
-const savedUserStr = sessionStorage.getItem('chatime_session_user');
-if (!savedUserStr) {
-  // 세션 정보가 없으면 확실하게 로그인 화면 노출
-  currentUser = null;
-  document.getElementById('app').classList.add('hidden');
-  document.getElementById('login-screen').classList.remove('hidden');
-  return;
-}
-
-try {
-  const savedUser = JSON.parse(savedUserStr);
-  const match = dbEmployees.find(e => e.id === savedUser.id) || (savedUser.id === defaultAdmin.id ? defaultAdmin : null);
-  if (match) {
-    currentUser = match;
-    showMainDashboard();
-    return;
-  }
-} catch (e) { 
-  sessionStorage.removeItem('chatime_session_user'); 
-}
+      try {
+        const savedUser = JSON.parse(savedUserStr);
+        const match = dbEmployees.find(e => e.id === savedUser.id) || (savedUser.id === defaultAdmin.id ? defaultAdmin : null);
+        if (match) {
+          currentUser = match;
+          showMainDashboard();
+          return;
+        }
+      } catch (e) {
+        sessionStorage.removeItem('chatime_session_user');
+        document.getElementById('app').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+      }
+    }
 
     function populateLoginSelect() {
       const select = document.getElementById('login-user');
@@ -809,7 +625,6 @@ try {
       if (user.pin_code !== pin) return alert('Incorrect PIN/Password.');
 
       currentUser = user;
-      // [수정 완료] sessionStorage에 저장하여 브라우저 종료 시 세션 만료
       sessionStorage.setItem('chatime_session_user', JSON.stringify(currentUser));
       showMainDashboard();
     }
@@ -827,20 +642,17 @@ try {
       renderEmployeeTable();
     }
 
+    // [핵심] 로그아웃 버튼 함수 - 세션/로컬 스토리지 비우고 강제 페이지 새로고침
     function handleLogout() {
-  if (isDataModified) {
-    if (!confirm("You have unsaved changes. Do you want to leave without saving?")) return;
-  }
-  currentUser = null;
-  isDataModified = false;
-  
-  // sessionStorage 및 혹시 남아있을 수 있는 localStorage 모두 강제 삭제
-  sessionStorage.clear();
-  localStorage.clear();
-  
-  // 브라우저 캐시를 무시하고 페이지를 완전히 새로고침하여 로그인 화면으로 강제 이동
-  window.location.href = window.location.pathname + '?logout=' + new Date().getTime();
-}
+      if (isDataModified) {
+        if (!confirm("You have unsaved changes. Do you want to leave without saving?")) return;
+      }
+      currentUser = null;
+      isDataModified = false;
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = window.location.pathname + '?logout=' + new Date().getTime();
+    }
 
     function goHome() { switchTab('hub'); }
 
@@ -2026,7 +1838,6 @@ try {
         alert("Access Denied. Sales History is restricted to Managers and Administrators.");
         return;
       }
-      currentActiveTab = tabName;
       ['hub', 'scheduler', 'submit-avail', 'view-avail', 'my-actuals', 'my-profile', 'employees', 'actuals', 'sales-history'].forEach(t => {
         const view = document.getElementById(`view-${t}`);
         const navBtn = document.getElementById(`nav-${t}`);
@@ -2056,7 +1867,7 @@ try {
 
     function generateSmsText() { alert("Schedule text copied."); }
 
-    // --- SALES HISTORY MODULE (Safe Tenders Section Isolation & Unique Value Matching) ---
+    // --- SALES HISTORY MODULE ---
     const dropZone = document.getElementById('drop-zone');
     if (dropZone) {
       dropZone.addEventListener('click', () => document.getElementById('file-input').click());
@@ -2262,13 +2073,12 @@ try {
         const door = Number(row.door_dash || 0);
         const skip = Number(row.skip_the_dishes || 0);
         const onlineSubRaw = uber + door + skip;
-        const onlineNet = onlineSubRaw * 0.70; // 온라인 플랫폼은 Net (-30%) 값 적용
+        const onlineNet = onlineSubRaw * 0.70;
 
         const cash = Number(row.total_cash || 0);
         const other = Number(row.other_amount || 0);
         const gcTopup = Number(row.gc_topup || 0);
 
-        // 총합 계산 시 온라인 플랫폼은 원본이 아닌 Net (-30%) 값을 합산
         const totalGrossSum = merchantSub + onlineNet + cash + other - gcTopup;
         const gstTax = totalGrossSum / 105 * 5;
         const finalNet = totalGrossSum - gstTax;
@@ -2313,6 +2123,5 @@ try {
 
     window.addEventListener('DOMContentLoaded', initApp);
   </script>
-
-
-</body></html>
+</body>
+</html>
