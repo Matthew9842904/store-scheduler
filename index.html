@@ -1831,8 +1831,156 @@
       `).join('');
     }
 
-    function addNewRow() {}
-    function enableEdit(id) {}
+    function addNewRow() {
+      const tbody = document.getElementById('employee-table-body');
+      if (document.getElementById('new-emp-row')) return; // 중복 생성 방지
+
+      const tr = document.createElement('tr');
+      tr.id = 'new-emp-row';
+      tr.className = 'bg-indigo-50 border-b-2 border-indigo-200 shadow-inner';
+      
+      tr.innerHTML = `
+        <td class="p-2"><input type="text" id="new-emp-no" class="w-full p-1.5 text-xs border rounded bg-white text-center font-bold" placeholder="No."></td>
+        <td class="p-2"><input type="text" id="new-emp-fname" class="w-full p-1.5 text-xs border rounded bg-white" placeholder="First"></td>
+        <td class="p-2"><input type="text" id="new-emp-lname" class="w-full p-1.5 text-xs border rounded bg-white" placeholder="Last"></td>
+        <td class="p-2"><input type="text" id="new-emp-engname" class="w-full p-1.5 text-xs border rounded bg-white font-bold text-indigo-900" placeholder="ENG"></td>
+        <td class="p-2">
+          <select id="new-emp-role" class="w-full p-1.5 text-xs border rounded bg-white">
+            <option value="employee">Staff</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Master</option>
+          </select>
+        </td>
+        <td class="p-2"><input type="text" id="new-emp-pin" class="w-full p-1.5 text-xs border rounded bg-white font-mono text-center" placeholder="PIN" value="0000"></td>
+        <td class="p-2"><input type="email" id="new-emp-email" class="w-full p-1.5 text-xs border rounded bg-white" placeholder="Email"></td>
+        <td class="p-2"><input type="tel" id="new-emp-phone" class="w-full p-1.5 text-xs border rounded bg-white" placeholder="Phone"></td>
+        <td class="p-2">
+          <select id="new-emp-status" class="w-full p-1.5 text-xs border rounded bg-white text-center">
+            <option value="active">active</option>
+            <option value="inactive">inactive</option>
+          </select>
+        </td>
+        <td class="p-2 text-center whitespace-nowrap">
+          <button onclick="saveNewEmployee()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded shadow-sm transition">Save</button>
+          <button onclick="cancelNewRow()" class="px-2 py-1.5 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold text-xs rounded shadow-sm transition ml-1">X</button>
+        </td>
+      `;
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    function cancelNewRow() {
+      const row = document.getElementById('new-emp-row');
+      if (row) row.remove();
+    }
+
+    async function saveNewEmployee() {
+      if (!_supabase) return alert("Database is not connected.");
+      
+      const staff_no = document.getElementById('new-emp-no').value.trim();
+      const first_name = document.getElementById('new-emp-fname').value.trim();
+      const last_name = document.getElementById('new-emp-lname').value.trim();
+      const name = document.getElementById('new-emp-engname').value.trim();
+      const role = document.getElementById('new-emp-role').value;
+      const pin_code = document.getElementById('new-emp-pin').value.trim() || '0000';
+      const email = document.getElementById('new-emp-email').value.trim();
+      const phone = document.getElementById('new-emp-phone').value.trim();
+      const status = document.getElementById('new-emp-status').value;
+
+      if (!name || !first_name || !last_name) return alert("First Name, Last Name, and ENG Name are required.");
+
+      const newEmpId = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'temp_' + Date.now();
+      const newEmp = { id: newEmpId, staff_no, first_name, last_name, name, role, pin_code, email, phone, status };
+
+      try {
+        const { error } = await _supabase.from('employees').insert([newEmp]);
+        if (error) throw error;
+        
+        dbEmployees.push(newEmp);
+        alert(`New staff '${name}' added successfully!`);
+        cancelNewRow();
+        renderEmployeeTable();
+        populateLoginSelect();
+      } catch (e) {
+        alert("Failed to add new staff: " + e.message);
+      }
+    }
+
+    function enableEdit(id) {
+      const emp = dbEmployees.find(e => e.id === id);
+      if (!emp) return;
+      
+      const buttons = document.querySelectorAll('#employee-table-body button');
+      let targetRow = null;
+      for(let btn of buttons) {
+        if(btn.getAttribute('onclick') === `enableEdit('${id}')`) {
+          targetRow = btn.closest('tr');
+          break;
+        }
+      }
+      if (!targetRow) return;
+
+      targetRow.className = 'bg-amber-50 border-y-2 border-amber-200';
+      targetRow.innerHTML = `
+        <td class="p-2"><input type="text" id="edit-emp-no-${id}" class="w-full p-1.5 text-xs border rounded bg-white text-center font-bold" value="${emp.staff_no || ''}"></td>
+        <td class="p-2"><input type="text" id="edit-emp-fname-${id}" class="w-full p-1.5 text-xs border rounded bg-white" value="${emp.first_name || ''}"></td>
+        <td class="p-2"><input type="text" id="edit-emp-lname-${id}" class="w-full p-1.5 text-xs border rounded bg-white" value="${emp.last_name || ''}"></td>
+        <td class="p-2"><input type="text" id="edit-emp-engname-${id}" class="w-full p-1.5 text-xs border rounded bg-white font-bold text-indigo-900" value="${emp.name || ''}"></td>
+        <td class="p-2">
+          <select id="edit-emp-role-${id}" class="w-full p-1.5 text-xs border rounded bg-white">
+            <option value="employee" ${emp.role === 'employee' ? 'selected' : ''}>Staff</option>
+            <option value="manager" ${emp.role === 'manager' ? 'selected' : ''}>Manager</option>
+            <option value="admin" ${emp.role === 'admin' ? 'selected' : ''}>Master</option>
+          </select>
+        </td>
+        <td class="p-2"><input type="text" id="edit-emp-pin-${id}" class="w-full p-1.5 text-xs border rounded bg-white font-mono text-center" value="${emp.pin_code || ''}"></td>
+        <td class="p-2"><input type="email" id="edit-emp-email-${id}" class="w-full p-1.5 text-xs border rounded bg-white" value="${emp.email || ''}"></td>
+        <td class="p-2"><input type="tel" id="edit-emp-phone-${id}" class="w-full p-1.5 text-xs border rounded bg-white" value="${emp.phone || ''}"></td>
+        <td class="p-2">
+          <select id="edit-emp-status-${id}" class="w-full p-1.5 text-xs border rounded bg-white text-center">
+            <option value="active" ${emp.status === 'active' ? 'selected' : ''}>active</option>
+            <option value="inactive" ${emp.status === 'inactive' ? 'selected' : ''}>inactive</option>
+          </select>
+        </td>
+        <td class="p-2 text-center whitespace-nowrap">
+          <button onclick="saveEditEmployee('${id}')" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded shadow-sm transition">Save</button>
+          <button onclick="renderEmployeeTable()" class="px-2 py-1.5 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold text-xs rounded shadow-sm transition ml-1">Cancel</button>
+        </td>
+      `;
+    }
+
+    async function saveEditEmployee(id) {
+      if (!_supabase) return alert("Database is not connected.");
+      
+      const empIndex = dbEmployees.findIndex(e => e.id === id);
+      if (empIndex === -1) return;
+
+      const staff_no = document.getElementById(`edit-emp-no-${id}`).value.trim();
+      const first_name = document.getElementById(`edit-emp-fname-${id}`).value.trim();
+      const last_name = document.getElementById(`edit-emp-lname-${id}`).value.trim();
+      const name = document.getElementById(`edit-emp-engname-${id}`).value.trim();
+      const role = document.getElementById(`edit-emp-role-${id}`).value;
+      const pin_code = document.getElementById(`edit-emp-pin-${id}`).value.trim();
+      const email = document.getElementById(`edit-emp-email-${id}`).value.trim();
+      const phone = document.getElementById(`edit-emp-phone-${id}`).value.trim();
+      const status = document.getElementById(`edit-emp-status-${id}`).value;
+
+      if (!name || !first_name || !last_name) return alert("First Name, Last Name, and ENG Name are required.");
+
+      const updatedEmp = { ...dbEmployees[empIndex], staff_no, first_name, last_name, name, role, pin_code, email, phone, status };
+
+      try {
+        const { error } = await _supabase.from('employees').update(updatedEmp).eq('id', id);
+        if (error) throw error;
+        
+        dbEmployees[empIndex] = updatedEmp;
+        alert(`Staff '${name}' updated successfully!`);
+        renderEmployeeTable();
+        populateLoginSelect(); // 로그인 화면의 직원 목록도 즉시 업데이트
+      } catch (e) {
+        alert("Failed to update staff: " + e.message);
+      }
+    }
+
     function markModified() { isDataModified = true; }
 
     function switchTab(tabName) {
